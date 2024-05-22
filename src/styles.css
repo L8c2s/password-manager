@@ -14,24 +14,40 @@
   -webkit-text-size-adjust: 100%;
 }
 
+/* ids */
+
+#options {
+  text-align: center;
+  margin-top: 50px;
+  /* background-color: black; */
+}
+
+#password-length {
+  width: 20%;
+}
+
+#show-length {
+  display: inline-block;
+  vertical-align: top;
+  margin-left: 5px;
+}
+
+#create-account-title {
+  text-align: center;
+}
+
+#not-safe-password {
+  color: red;
+}
+
+/* classes */
+
 .container {
   margin: 0;
   padding-top: 10vh;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: center;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
-}
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
 }
 
 .row {
@@ -39,15 +55,15 @@
   justify-content: center;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+.display {
+  display: block;
+  /* background-color: black; */
+  width: 500px;
+  height: 500px;
+  margin: 10px;
 }
 
-a:hover {
-  color: #535bf2;
-}
+/* tags */
 
 h1 {
   text-align: center;
@@ -65,6 +81,7 @@ button {
   background-color: #ffffff;
   transition: border-color 0.25s;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  margin: 5px;
 }
 
 button {
@@ -84,18 +101,10 @@ button {
   outline: none;
 }
 
-#greet-input {
-  margin-right: 5px;
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
     color: #f6f6f6;
     background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
   }
 
   input,
