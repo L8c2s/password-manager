@@ -32,12 +32,14 @@
   margin-left: 5px;
 }
 
-#create-account-title {
-  text-align: center;
-}
-
 #not-safe-password {
   color: red;
+}
+
+#list {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* classes */
@@ -57,10 +59,57 @@
 
 .display {
   display: block;
-  /* background-color: black; */
   width: 500px;
   height: 500px;
   margin: 10px;
+}
+
+.title {
+  text-align: center;
+}
+
+.service,
+.username {
+  margin: 1px;
+}
+
+.service {
+  font-size: large;
+  font-weight: bold;
+}
+
+.accounts-list-item {
+  height: auto;
+  width: 80%;
+  /* background-color: black; */
+  padding: 5px 10px 3px 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: border-color 0.25s;
+  display: flex;
+  align-items: center;
+}
+
+.accounts-list-item:hover {
+  border-color: #396cd8;
+}
+
+.account-info {
+  width: 100%;
+}
+
+.icon-container {
+  display: flex;
+  align-items: center;
+  float: right;
+}
+
+.icon-button {
+  height: 30px;
+  width: 30px;
+  border: 1px solid transparent;
+  transition: border-color 0.25s;
+  text-align: center;
 }
 
 /* tags */
