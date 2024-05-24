@@ -6,40 +6,19 @@
 use std::collections::HashMap;
 
 #[tauri::command]
-fn serialize(service: String, username: String, password: String, notes: String) -> String {
-    let mut accounts: HashMap<String, Vec<HashMap<String, String>>> = HashMap::new();
-    let mut new_account: HashMap<String, String> = HashMap::new();
-
-    new_account.insert(
-        "service".to_string(),
-        service.to_string()
-    );
-    new_account.insert(
-        "username".to_string(),
-        username.to_string()
-    );
-    new_account.insert(
-        "password".to_string(),
-        password.to_string()
-    );
-    new_account.insert(
-        "notes".to_string(),
-        notes.to_string()
-    );
-
-    accounts.insert(
-        "Google".to_string(),
-        vec![new_account]
-    );
-
+fn serialize(accounts: String) -> String {
+    println!("Received accounts: {}", accounts);
+    // convert the argument to a HashMap
+    let hash_accounts: HashMap<String, Vec<HashMap<String, String>>> = serde_json::from_str(&accounts.to_string()).unwrap();
     // convert the Account to a JSON string
-    let serialized: String = serde_json::to_string(&accounts).unwrap();
+    let serialized: String = serde_json::to_string(&hash_accounts).unwrap();
     serialized
 }
 
 #[tauri::command]
 fn deserialize(accounts: String) -> HashMap<String, Vec<HashMap<String, String>>> {
-    let deserialized: HashMap<String, Vec<HashMap<String, String>>> = serde_json::from_str(&accounts).unwrap();
+    // println!("{}", accounts);
+    let deserialized: HashMap<String, Vec<HashMap<String, String>>> = serde_json::from_str(&accounts.to_string()).unwrap();
     deserialized
 }
 

@@ -32,10 +32,6 @@
   margin-left: 5px;
 }
 
-#not-safe-password {
-  color: red;
-}
-
 #list {
   display: flex;
   justify-content: center;
@@ -88,6 +84,7 @@
   transition: border-color 0.25s;
   display: flex;
   align-items: center;
+  margin: 5px auto 5px auto;
 }
 
 .accounts-list-item:hover {
@@ -110,6 +107,12 @@
   border: 1px solid transparent;
   transition: border-color 0.25s;
   text-align: center;
+  cursor: pointer;
+}
+
+.error-message {
+  color: red;
+  margin: 0 auto;
 }
 
 /* tags */
@@ -148,6 +151,11 @@ button:active {
 input,
 button {
   outline: none;
+}
+
+ul {
+  display: flex;
+  flex-direction: column;
 }
 
 @media (prefers-color-scheme: dark) {

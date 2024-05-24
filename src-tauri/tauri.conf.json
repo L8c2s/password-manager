@@ -22,7 +22,8 @@
         "writeFile": true,
         "scope": [
           "C:/Users/luhlu/Documents/passwords/tests/accounts.json",
-          "C:/Users/luhlu/Documents/passwords/tests/accounts.txt"
+          "C:/Users/luhlu/Documents/passwords/tests/accounts.txt",
+          "C:/Users/luhlu/Documents/passwords/ids.json"
         ]
       }
     },
