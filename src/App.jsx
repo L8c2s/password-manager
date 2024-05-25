@@ -4,6 +4,8 @@ import { writeTextFile, readTextFile } from "@tauri-apps/api/fs";
 import "./App.css";
 
 
+let accountsListed = [];
+
 // check account info
 
 const isPasswordSafe = (password) => {
@@ -119,7 +121,7 @@ const saveAccount = async () => {
   let json_string = JSON.stringify(accounts);
   // json_string = await invoke("serialize", { accounts: json_string })
   await writeTextFile("C:/Users/luhlu/Documents/passwords/tests/accounts.json", json_string);
-  createItem(new_account);
+  await updateAccountsList();
   usedIds(new_account["id"]);
 
   document.getElementById("create-account-title").innerHTML = "New Account";
@@ -223,9 +225,6 @@ const generatePassword = (length=0) => {
     }
   }
 
-  console.log(password);
-  console.log(lower, upper, number, symbol)
-
   if (lower && upper && number && symbol) {
     return password;
   }
@@ -258,6 +257,7 @@ const clear = () => {
   document.getElementById("not-safe-password").innerHTML = "";
   document.getElementById("edit").setAttribute("hidden", "true")
   document.getElementById("delete").setAttribute("hidden", "true")
+  document.getElementById("save").removeAttribute("hidden")
 }
 
 // accounts list
@@ -358,6 +358,39 @@ const createItem = (accountInfo) => {
   // </div>
 }
 
+const getFilter = () => {
+  let filter = document.getElementById("filter").value;
+  if (filter == "") {
+    filter = null
+  }
+  updateAccountsList(filter);
+}
+
+const updateAccountsList = async (filter=null) => {
+  let accounts = await readAccounts();
+
+  let list = document.getElementById("list");
+  let list_length = list.children.length
+
+  for (let i = 0; i < list_length; i++) {
+    list.removeChild(list.children[0]);
+  }
+
+  while (accountsListed.length > 0) {
+    accountsListed.pop();
+  }
+
+  Object.entries(accounts).forEach(([service, accountList]) => {
+    accountList.forEach((account) => {
+      if (filter != null && !service.toLowerCase().includes(filter.toLowerCase())) return;
+      if (!accountsListed.includes(account["id"])) {
+        createItem(account);
+        accountsListed.push(account["id"]);
+      }
+    });
+  });
+}
+
 // list item functions
 
 const copyOnMouseOver = () => {
@@ -432,8 +465,8 @@ const copy = async (itemId) => {
   let accounts = await readAccounts();
   let currentAccount;
 
-  for (let [service, accountList] of Object.entries(accounts)) {
-    for (let [index, account] of accountList.entries()) {
+  for (let [_, accountList] of Object.entries(accounts)) {
+    for (let [_, account] of accountList.entries()) {
       if (account["id"] == itemId) {
         currentAccount = account;
       }
@@ -443,6 +476,10 @@ const copy = async (itemId) => {
   let password = currentAccount["password"];
   navigator.clipboard.writeText(password);
 }
+
+window.addEventListener("load", () => {
+  updateAccountsList();
+})
 
 function App() {
   return (
@@ -464,6 +501,11 @@ function App() {
 
       <div className="display" id="accounts-list">
         <h3 className="title" id="accounts-list-title">Accounts List</h3>
+
+        <div id="test">
+          <input type="text" placeholder="Type a service to filter" id="filter" onChange={getFilter} />
+        </div>
+
         <ul id="list"></ul>
       </div>
 
@@ -494,9 +536,9 @@ function App() {
 
         <div id="options">
           <button id="save" onClick={saveAccount}>Save</button>
-          <button id="cancel" onClick={clear}>Cancel</button>
           <button id="edit" onClick={enableEditAccount} hidden>Edit</button>
           <button id="delete" onClick={deleteAccount} hidden>Delete</button>
+          <button id="cancel" onClick={clear}>Cancel</button>
         </div>
       </div>
     </div>

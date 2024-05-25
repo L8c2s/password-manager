@@ -38,6 +38,10 @@
   align-items: center;
 }
 
+#test {
+  text-align: center;
+}
+
 /* classes */
 
 .container {
