@@ -25,6 +25,14 @@
           "C:/Users/luhlu/Documents/passwords/tests/accounts.txt",
           "C:/Users/luhlu/Documents/passwords/ids.json"
         ]
+      },
+      "dialog": {
+        "all": true,
+        "ask": true,
+        "confirm": true,
+        "message": true,
+        "open": true,
+        "save": true
       }
     },
     "windows": [

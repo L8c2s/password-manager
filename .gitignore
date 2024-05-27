@@ -26,3 +26,6 @@ dist-ssr
 # personal files
 *.txt
 tests/*
+src/AccountInfo.jsx
+src/AccountsList.jsx
+src/CreateAccount.jsx

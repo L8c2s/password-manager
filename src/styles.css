@@ -69,7 +69,8 @@
 }
 
 .service,
-.username {
+.username,
+.notes {
   margin: 1px;
 }
 

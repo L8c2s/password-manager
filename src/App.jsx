@@ -4,49 +4,71 @@ import { writeTextFile, readTextFile } from "@tauri-apps/api/fs";
 import "./App.css";
 
 
-let accountsListed = [];
+let lastClickedId;
 
 // check account info
 
-// optimized
+// optimized with windows copilot
 const isPasswordSafe = (password) => {
-  if (password.length < 8) return false;
-  if (!/\d/.test(password)) return false;
-  if (!/[a-z]/.test(password)) {
-    if (!/[A-Z]/.test(password)) return false;
-  };
-  
-  const specialChars = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-  if (!new RegExp(`[${specialChars}]`).test(password)) return false;
+  const hasMinimumLength = password.length >= 8;
+  const hasDigit = /\d/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasUppercase = /[A-Z]/.test(password);
+  const symbols = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+  const hasSpecialChar = new RegExp(`[${symbols}]`).test(password);
 
-  return true;
-}
+  console.log("hasMinimumLength ", hasMinimumLength)
+  console.log("hasDigit ", hasDigit)
+  console.log("hasLowercase ", hasLowercase)
+  console.log("hasUppercase ", hasUppercase)
+  console.log("hasSpecialChar ", hasSpecialChar)
 
-// optimized
+  return hasMinimumLength && hasDigit && (hasLowercase || hasUppercase) && hasSpecialChar;
+};
+
+// optimized with windows copilot
 const checkInfo = (service, username, password) => {
-  if (service.length == 0) return false
-  if (username.length == 0) return false
-  if (password.length == 0) return false
+  if (!service || !username || !password) return false;
 
   if (!isPasswordSafe(password)) {
-    document.getElementById("not-safe-password").innerHTML = "The password may not be safe enough."
+    innerHTML("not-safe-password", "The password may not be safe enough.");
   }
   return true
 }
 
 // file functions
 
-const editAccount = () => {
-  document.getElementById("create-account-title").innerHTML = "New Account";
-  document.getElementById("save").removeAttribute("hidden");
+// optimized with windows copilot
+const deleteAccount = async () => {
+  const del = await window.confirm("Are you sure you want to delete this account?");
+  if (!del) return false;
+
+  const id = lastClickedId;
+  const accounts = await readAccounts();
+
+  for (const accountList of Object.values(accounts)) {
+    const index = accountList.findIndex(account => account.id === id);
+    if (index !== -1) {
+      accountList.splice(index, 1);
+      break;
+    }
+  }
+
+  removeIds(id)
+  await writeTextFile("C:/Users/luhlu/Documents/passwords/tests/accounts.json", JSON.stringify(accounts));
+  updateAccountsList();
+
+  document.querySelectorAll("#create-account input").forEach(input => input.value = "");
+
+  innerHTML("create-account-title", "New Account");
+  hideComponent("save", false);
+  hideComponent("delete", true);
+  hideComponent("edit", true);
+  lastClickedId = "";
 }
 
-const deleteAccount = () => {
-  document.getElementById("create-account-title").innerHTML = "New Account";
-}
-
-// optimized
-const saveAccount = async () => {
+// idea and optimization by windows copilot 
+const updateAccount = async (isNewAccount) => {
   const service = document.getElementById("service").value;
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
@@ -54,61 +76,66 @@ const saveAccount = async () => {
 
   if (!checkInfo(service, username, password)) return false;
 
-  let accounts = await readAccounts();
-  if (!accounts.hasOwnProperty(service)) {
-    accounts[service] = []
-  }
+  const accounts = await readAccounts();
+  accounts[service] ??= [];
 
   const existingAccount = accounts[service].find(account => account.username === username);
-  if (existingAccount) {
-    document.getElementById("account-already-exists").innerHTML = "The account already exists.";
+  if (existingAccount && isNewAccount) {
+    innerHTML("account-already-exists", "The account already exists.");
     return;
   }
 
-  let newId = generatePassword(6);
-  let new_account = {
-    "service": service,
-    "username": username,
-    "password": password,
-    "notes": notes,
-    "password-history": [password],
-    "favorite": false,
-    "id": newId
-  }
-  accounts[service].push(new_account);
+  const id = isNewAccount ? generatePassword(6) : lastClickedId;
+  const edited_account = {
+    service,
+    username,
+    password,
+    notes,
+    "password-history": isNewAccount ? [password] : [...existingAccount["password-history"], password],
+    favorite: isNewAccount ? false : existingAccount.favorite,
+    id
+  };
 
-  let json_string = JSON.stringify(accounts);
-  await writeTextFile("C:/Users/luhlu/Documents/passwords/tests/accounts.json", json_string);
-  await updateAccountsList();
-  usedIds(new_account["id"]);
+  accounts[service] = accounts[service].filter(acc => acc.id !== id);
+  accounts[service].push(edited_account);
 
-  document.getElementById("create-account-title").innerHTML = "New Account";
-  document.getElementById("account-already-exists").innerHTML = "";
-  document.getElementById("edit").setAttribute("hidden", "true")
-  document.getElementById("delete").setAttribute("hidden", "true")
+  await writeTextFile("C:/Users/luhlu/Documents/passwords/tests/accounts.json", JSON.stringify(accounts));
+  updateAccountsList();
+
+  document.querySelectorAll("#create-account input").forEach(input => input.value = "");
+
+  innerHTML("create-account-title", "New Account");
+  hideComponent("delete", true);
+  hideComponent("edit", true);
+  hideComponent("save", false);
+  lastClickedId = "";
 }
 
-const checkId = async (id) => {
-  let allIds = await readTextFile("C:/Users/luhlu/Documents/passwords/ids.json");
-  allIds = JSON.parse(allIds);
+// optimized with windows copilot
+const editAccount = async () => {
+  if (!lastClickedId || lastClickedId === "") return false;
 
-  for (let i = 0; i < allIds.length; i++) {
-    if (allIds[i] == id) {
-      return true;
-    }
-  }
-  return false;
+  innerHTML("create-account-title", "Edit Account");
+
+  const edit = await window.confirm("Are you sure you want to edit this account?");
+  if (!edit) return false;
+
+  await updateAccount(false);
 }
 
-// optimized
-const usedIds = async (id) => {
-  const idsFilePath = "C:/Users/luhlu/Documents/passwords/ids.json"
+// optimized with windows copilot
+const saveAccount = async () => {
+  await updateAccount(true);
+}
 
-  let allIds = JSON.parse(await readTextFile(idsFilePath));
-  allIds.push(id);
-  
-  allIds = JSON.stringify(allIds);
-  await writeTextFile(idsFilePath, allIds);
+// optimized with windows copilot
+const removeIds = async (id) => {
+  const idsFilePath = "C:/Users/luhlu/Documents/passwords/ids.json";
+
+  const allIds = JSON.parse(await readTextFile(idsFilePath));
+  const updatedIds = allIds.filter(existingId => existingId !== id);
+
+  await writeTextFile(idsFilePath, JSON.stringify(updatedIds));
 }
 
 // optimized
@@ -117,20 +144,34 @@ const readAccounts = async () => {
   return JSON.parse(await readTextFile(accountsPath));
 }
 
+// other
+
+// optimized with windows copilot
+const hideComponent = (id, hide = true) => {
+  const component = document.getElementById(id);
+  component.hidden = hide;
+};
+
+// optimized with windows copilot
+const innerHTML = (id, text = "") => {
+  document.getElementById(id).innerHTML = text;
+};
+
 // input functions
 
-// optimized
+// optimized with windows copilot
 const getPassword = () => {
-  document.getElementById("password").value = generatePassword();
-  document.getElementById("not-safe-password").innerHTML = "";
-}
+  const newPassword = generatePassword();
+  document.getElementById("password").value = newPassword;
+  innerHTML("not-safe-password");
+};
 
 // optimized
 const generatePassword = (length=0) => {
   const chars = "abcdefghijklmnopqrstuvwxyz" +
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
     "0123456789" +
-    "/* !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ */"
+    "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
 
   if (length == 0) {
     length = document.getElementById("password-length").value;
@@ -178,12 +219,13 @@ const clear = () => {
   const inputs = document.getElementById("create-account").querySelectorAll("input");
   inputs.forEach(input => input.value = "");
   
-  document.getElementById("create-account-title").innerHTML = "New Account";
   document.getElementById("password-length").value = length;
-  document.getElementById("not-safe-password").innerHTML = "";
-  document.getElementById("edit").setAttribute("hidden", "true")
-  document.getElementById("delete").setAttribute("hidden", "true")
-  document.getElementById("save").removeAttribute("hidden")
+  innerHTML("create-account-title", "New Account");
+  innerHTML("not-safe-password");
+  hideComponent("edit", true);
+  hideComponent("delete", true)
+  hideComponent("save", false);
+  lastClickedId = "";
 }
 
 // accounts list
@@ -205,6 +247,10 @@ const createItem = (accountInfo) => {
   let p_username = document.createElement("p");
   p_username.setAttribute("class", "username");
   p_username.innerHTML = accountInfo["username"]
+
+  let p_notes = document.createElement("p");
+  p_notes.setAttribute("class", "notes");
+  p_notes.innerHTML = accountInfo["notes"];
 
   let div_icon_container = document.createElement("div");
   div_icon_container.setAttribute("class", "icon-container");
@@ -252,36 +298,56 @@ const createItem = (accountInfo) => {
   div_icon_container.appendChild(div_icon_button);
   div_account_info.appendChild(p_service);
   div_account_info.appendChild(p_username);
+  div_account_info.appendChild(p_notes);
   div_accounts_list_item.appendChild(div_account_info);
   div_accounts_list_item.appendChild(div_icon_container);
   list.appendChild(div_accounts_list_item);
 }
 
-const getFilter = () => {
+const getFilter = async () => {
   let filter = document.getElementById("filter").value;
   if (filter === "") {
     filter = null
   }
-  updateAccountsList(filter);
+  await updateAccountsList(filter);
 }
 
 const updateAccountsList = async (filter=null) => {
-  let accounts = await readAccounts();
-
-  let list = document.getElementById("list");
+  const accounts = await readAccounts();
+  const list = document.getElementById("list");
   list.innerHTML = "";
 
-  const accountsListed = [];
+  const accountsListed = new Set();
+  const accountsToList = [];
+  let favorites = 0;
 
-  Object.entries(accounts).forEach(([service, accountList]) => {
-    accountList.forEach((account) => {
-      if (filter != null && !service.toLowerCase().includes(filter.toLowerCase())) return;
-      if (!accountsListed.includes(account["id"])) {
-        createItem(account);
-        accountsListed.push(account["id"]);
+  Object.entries(accounts).forEach(([service, accountsList]) => {
+    accountsList.forEach((account) => {
+      if (!filter || service.toLowerCase().includes(filter.toLowerCase())) {
+        if (!accountsListed.has(account.id)) {
+          if (account.favorite) {
+            accountsToList.unshift(account);
+            favorites += 1;
+          } else {
+            accountsToList.push(account);
+          }
+          accountsListed.add(account.id);
+        }
       }
     });
   });
+
+  for (let i = 0; i < accountsToList.length; i++) {
+    createItem(accountsToList[i]);
+    if (i < favorites) {
+      setFavorite(accountsToList[i].id);
+    }
+  }
+}
+
+const setFavorite = async (id) => {
+  document.getElementById(id+"_svg").setAttribute("class", "favorite");
+  document.getElementById(id+"_path").setAttribute("fill", "#ffff00");
 }
 
 // list item functions
@@ -337,11 +403,15 @@ const favOnClick = async (id) => {
 
   let json_string = JSON.stringify(accounts);
   await writeTextFile("C:/Users/luhlu/Documents/passwords/tests/accounts.json", json_string);
+
+  updateAccountsList();
 }
 
 const itemOnClick = async (service, itemId) => {
-  document.getElementById("create-account-title").innerHTML = "Edit Account";
-  document.getElementById("save").setAttribute("hidden", "true");
+  innerHTML("create-account-title", "Edit Account");
+  hideComponent("save", true);
+
+  lastClickedId = itemId;
 
   let accounts = await readAccounts();
   let currentService = "";
@@ -366,8 +436,8 @@ const itemOnClick = async (service, itemId) => {
   document.getElementById("password").value = accounts[currentService][currentIndex]["password"]
   document.getElementById("notes").value = accounts[currentService][currentIndex]["notes"]
 
-  document.getElementById("edit").removeAttribute("hidden")
-  document.getElementById("delete").removeAttribute("hidden")
+  hideComponent("edit", false);
+  hideComponent("delete", false);
 }
 
 const copy = async (itemId) => {
@@ -418,7 +488,7 @@ function App() {
           <input type="text" placeholder="Service" id="service" />
 
           <p id="get-username">Username/Email</p>
-          <input onChange={() => { document.getElementById("account-already-exists").innerHTML = "" }}
+          <input onChange={() => { innerHTML("account-already-exists") }}
            type="text" placeholder="example@abc.com" id="username" />
           <p id="account-already-exists" className="error-message"></p>
 
@@ -440,6 +510,7 @@ function App() {
           <button id="edit" onClick={editAccount} hidden>Edit</button>
           <button id="delete" onClick={deleteAccount} hidden>Delete</button>
           <button id="cancel" onClick={clear}>Cancel</button>
+          <p id="edit-confirmation-warning"></p>
         </div>
       </div>
     </div>
