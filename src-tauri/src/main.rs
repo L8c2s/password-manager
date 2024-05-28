@@ -42,7 +42,7 @@ fn backup() {
         println!("copy: {}", copy_output.to_string());
         println!("text copy: {}", copy_text_output.to_string());
     } else {
-        println!("Cannot create and save the backup: not in Windows.");
+        println!("Cannot create and save the backup: not using Windows.");
     }
 }
 
