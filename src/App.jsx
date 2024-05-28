@@ -66,8 +66,9 @@ const deleteAccount = async () => {
   await writeTextFile(testJsonAccountsPath, JSON.stringify(accounts));
   updateAccountsList();
 
-  document.querySelectorAll("#create-account input").forEach(input => input.value = "");
-  document.querySelectorAll("#account-info input").forEach(input => input.value = "");
+  const inputSelectors = "#create-account input[type='text'], #account-info input[type='text']"
+
+  document.querySelectorAll(inputSelectors).forEach(input => input.value = "");
 
   innerHTML("create-account-title", "New Account");
   hideComponent("save", false);
@@ -111,8 +112,9 @@ const updateAccount = async (isNewAccount) => {
   await writeTextFile(testJsonAccountsPath, JSON.stringify(accounts));
   updateAccountsList();
 
-  document.querySelectorAll("#create-account input").forEach(input => input.value = "");
-  document.querySelectorAll("#account-info input").forEach(input => input.value = "");
+  const inputSelectors = "#create-account input[type='text'], #account-info input[type='text']"
+
+  document.querySelectorAll(inputSelectors).forEach(input => input.value = "");
 
   innerHTML("create-account-title", "New Account");
   hideComponent("delete", true);
@@ -152,8 +154,7 @@ const removeIds = async (id) => {
 
 // optimized
 const readAccounts = async () => {
-  const accountsPath = testJsonAccountsPath;
-  return JSON.parse(await readTextFile(accountsPath));
+  return JSON.parse(await readTextFile(testJsonAccountsPath));
 }
 
 // other
@@ -225,11 +226,11 @@ const updateSafePassErr = () => {
     "The password may not be safe enough.";
 }
 
-// optimized
+// optimized with windows copilot
 const clear = () => {
   const length = document.getElementById("password-length").value;
-  document.querySelectorAll("#create-account input").forEach(input => input.value = "");
-  document.querySelectorAll("#account-info input").forEach(input => input.value = "");
+  const inputSelectors = "#create-account input[type='text'], #account-info input[type='text']";
+  document.querySelectorAll(inputSelectors).forEach(input => input.value = "");
   
   document.getElementById("password-length").value = length;
   innerHTML("create-account-title", "New Account");
@@ -250,7 +251,7 @@ const createItem = (accountInfo) => {
   
   let div_account_info = document.createElement("div");
   div_account_info.setAttribute("class", "account-info");
-  div_account_info.addEventListener("click", () => itemOnClick(accountInfo["service"], accountInfo["id"]));
+  div_account_info.addEventListener("click", () => itemOnClick(accountInfo["id"]));
 
   let p_service = document.createElement("p");
   p_service.setAttribute("class", "service");
@@ -302,25 +303,19 @@ const createItem = (accountInfo) => {
   favPath.setAttribute("d", "M802.4 967.2c-7.2 0-15.2-1.6-21.6-4.8l-258.4-128.8-252.8 140c-18.4 10.4-41.6 5.6-56-9.6-8.8-9.6-12.8-23.2-11.2-36.8l43.2-285.6L33.6 444C20.8 432 16 414.4 21.6 397.6c4.8-16.8 18.4-28.8 36-31.2l285.6-48L464.8 56c7.2-15.2 22.4-25.6 39.2-26.4 17.6-0.8 33.6 8.8 41.6 24l133.6 256.8 287.2 35.2c17.6 2.4 31.2 13.6 36.8 30.4 5.6 16 1.6 34.4-10.4 46.4L790.4 629.6l55.2 284c2.4 12.8-0.8 26.4-8.8 36.8-8.8 10.4-21.6 16.8-34.4 16.8zM520.8 784.8c7.2 0 15.2 1.6 21.6 4.8l255.2 127.2-54.4-280c-3.2-14.4 1.6-29.6 12-40l200-203.2L672 358.4c-14.4-1.6-28-11.2-34.4-24L506.4 81.6 385.6 340c-6.4 13.6-19.2 23.2-33.6 25.6L70.4 412l208 194.4c11.2 10.4 16 24.8 13.6 40L249.6 928l249.6-137.6c7.2-3.2 14.4-4.8 21.6-5.6z")
   favPath.setAttribute("fill", "#000000")
   
-  svg_fav_icon.appendChild(g_SVGRepo_bgCarrier);
-  svg_fav_icon.appendChild(g_SVGRepo_tracerCarrier);
+  svg_fav_icon.append(g_SVGRepo_bgCarrier, g_SVGRepo_tracerCarrier);
   SVGRepo_iconCarrier.appendChild(favPath);
   svg_fav_icon.appendChild(SVGRepo_iconCarrier);
   div_icon_button.appendChild(svg_fav_icon);
   div_icon_container.appendChild(div_icon_button);
-  div_account_info.appendChild(p_service);
-  div_account_info.appendChild(p_username);
-  div_account_info.appendChild(p_notes);
-  div_accounts_list_item.appendChild(div_account_info);
-  div_accounts_list_item.appendChild(div_icon_container);
+  div_account_info.append(p_service, p_username, p_notes);
+  div_accounts_list_item.append(div_account_info, div_icon_container);
   list.appendChild(div_accounts_list_item);
 }
 
+// optimized with windows copilot
 const getFilter = async () => {
-  let filter = document.getElementById("filter").value;
-  if (filter === "") {
-    filter = null
-  }
+  const filter = document.getElementById("filter").value || null;
   await updateAccountsList(filter);
 }
 
@@ -349,12 +344,13 @@ const updateAccountsList = async (filter=null) => {
     });
   });
 
-  for (let i = 0; i < accountsToList.length; i++) {
-    createItem(accountsToList[i]);
-    if (i < favorites) {
-      setFavorite(accountsToList[i].id);
+  accountsToList.forEach((account) => {
+    createItem(account);
+    if (favorites > 0) {
+      setFavorite(account.id);
+      favorites -= 1;
     }
-  }
+  });
 }
 
 const setFavorite = async (id) => {
@@ -364,52 +360,58 @@ const setFavorite = async (id) => {
 
 // list item functions
 
-const copyOnMouseOver = () => {
-  document.getElementById("cpy-icon").setAttribute("fill", "#396cd8");
+const copyOnMouseOver = (id) => {
+  document.getElementById(id).setAttribute("fill", "#396cd8");
 }
 
-const copyOnMouseOut = () => {
-  document.getElementById("cpy-icon").setAttribute("fill", "#000000");
+const copyOnMouseOut = (id) => {
+  document.getElementById(id).setAttribute("fill", "#000000");
 }
 
 const favOnMouseOver = (id) => {
   document.getElementById(id).setAttribute("fill", "#ffff00");
 }
 
+// optimized with windows copilot
 const favOnMouseOut = (id) => {
   let fav_icon = document.getElementById(id+"_svg");
-  if (fav_icon.getAttribute("class") == "favorite") return;
+  if (fav_icon.classList.contains("favorite")) return;
   document.getElementById(id+"_path").setAttribute("fill", "#000000");
 }
 
+// idea and optimization by windows copilot
+const findAccountInfo = (accounts, id) => {
+  for (const [services, accountsList] of Object.entries(accounts)) {
+    for (const [index, accountInfo] of accountsList.entries()) {
+
+      console.log(accountInfo.id === id)
+      console.log(accountInfo.id)
+      console.log(id)
+
+      if (accountInfo.id === id) {
+        return { serviceName: services, listIndex: index };
+      }
+    }
+  }
+  return { serviceName: "", listIndex: 0 }
+};
+
+// optimized with windows copilot
 const favOnClick = async (id) => {
   const fav_icon = document.getElementById(id+"_svg")
   const fav_path = document.getElementById(id+"_path")
 
   const accounts = await readAccounts();
-  let serviceName = "";
-  let listIndex = 0;
-
-  for (let [services, accountsList] of Object.entries(accounts)) {
-    for (let [index, accountInfo] of accountsList.entries()) {
-      if (accountInfo.id === id) {
-        serviceName = services;
-        listIndex = index;
-        break;
-      }
-    }
-  }
+  const { serviceName, listIndex } = findAccountInfo(accounts, id);
 
   let saved = fav_icon.getAttribute("class")
   if (saved == "favorite") {
     fav_path.setAttribute("fill", "#000000")
     fav_icon.setAttribute("class", "not-favorite")
-
     accounts[serviceName][listIndex]["favorite"] = false;
   } else if (saved == "not-favorite") {
     fav_path.setAttribute("fill", "#ffff00")
     fav_icon.setAttribute("class", "favorite")
-
     accounts[serviceName][listIndex]["favorite"] = true;
   }
 
@@ -419,65 +421,43 @@ const favOnClick = async (id) => {
   updateAccountsList();
 }
 
-const itemOnClick = async (service, itemId) => {
+const itemOnClick = async (itemId) => {
   innerHTML("create-account-title", "Edit Account");
   hideComponent("save", true);
-
   lastClickedId = itemId;
 
-  let accounts = await readAccounts();
-  let currentService = "";
-  let currentIndex = 0;
+  console.log(itemId)
 
-  for (let [svc, accountList] of Object.entries(accounts)) {
-    for (let [index, account] of accountList.entries()) {
-      if (svc == service && account["id"] == itemId) {
-        currentIndex = index;
-        currentService = service;
-        break;
-      }
-    }
-  }
+  const accounts = await readAccounts();
+  const { serviceName, listIndex } = findAccountInfo(accounts, itemId);
 
-  if (currentService === 0) {
+  if (!serviceName) {
     return false
   }
 
-  document.getElementById("service").value = accounts[currentService][currentIndex]["service"]
-  document.getElementById("service-info").value = accounts[currentService][currentIndex]["service"]
-
-  document.getElementById("username").value = accounts[currentService][currentIndex]["username"]
-  document.getElementById("username-info").value = accounts[currentService][currentIndex]["username"]
-
-  document.getElementById("password").value = accounts[currentService][currentIndex]["password"]
-  document.getElementById("password-info").value = accounts[currentService][currentIndex]["password"]
-
-  document.getElementById("notes").value = accounts[currentService][currentIndex]["notes"]
-  document.getElementById("notes-info").value = accounts[currentService][currentIndex]["notes"]
+  setValue("service", accounts[serviceName][listIndex]["service"]);
+  setValue("username", accounts[serviceName][listIndex]["username"]);
+  setValue("password", accounts[serviceName][listIndex]["password"]);
+  setValue("notes", accounts[serviceName][listIndex]["notes"]);
 
   hideComponent("edit", false);
   hideComponent("delete", false);
 }
 
+// idea and optimization by windows copilot
+const setValue = (id, value) => {
+  document.getElementById(id).value = value;
+  document.getElementById(id+"-info").value = value;
+}
+
 const copy = async (info) => {
   if (!lastClickedId) return false;
 
-  let accounts = await readAccounts();
-  let currentAccount;
-
-  for (let [_, accountList] of Object.entries(accounts)) {
-    for (let [_, account] of accountList.entries()) {
-      if (account["id"] == lastClickedId) {
-        currentAccount = account;
-        break;
-      }
-    }
-  }
+  const accounts = await readAccounts();
+  const currentAccount = accounts.flat().find(account => account.id === lastClickedId);
 
   if (!currentAccount) return false;
-
-  const password = currentAccount[info];
-  navigator.clipboard.writeText(password);
+  navigator.clipboard.writeText(currentAccount[info]);
 }
 
 window.addEventListener("load", () => {
@@ -499,13 +479,13 @@ function App() {
           <input type="text" id="username-info" readOnly />
 
           <div className="icon-button" id="copy-icon" onClick={ () => copy("username") }>
-            <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg onMouseOver={() => copyOnMouseOver("copy-username")} onMouseOut={() => copyOnMouseOut("copy-username")} width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g id="SVGRepo_bgCarrier" strokeWidth="0"/>
               <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"/>
               <g id="SVGRepo_iconCarrier"> 
                 <g clipPath="url(#a)"> 
-                  <path fillRule="evenodd" clipRule="evenodd" d="M8 5h7.795c1.115 0 1.519.116 1.926.334.407.218.727.538.945.945.218.407.334.811.334 1.926V16a1 1 0 1 0 2 0V8.128c0-1.783-.186-2.43-.534-3.082a3.635 3.635 0 0 0-1.512-1.512C18.302 3.186 17.655 3 15.872 3H8a1 1 0 0 0 0 2zm7.721 2.334C15.314 7.116 14.91 7 13.795 7h-7.59c-1.115 0-1.519.116-1.926.334a2.272 2.272 0 0 0-.945.945C3.116 8.686 3 9.09 3 10.205v7.59c0 1.114.116 1.519.334 1.926.218.407.538.727.945.945.407.218.811.334 1.926.334h7.59c1.114 0 1.519-.116 1.926-.334.407-.218.727-.538.945-.945.218-.407.334-.811.334-1.926v-7.59c0-1.115-.116-1.519-.334-1.926a2.272 2.272 0 0 0-.945-.945z" fill="#000000"/> 
-                </g> 
+                  <path fillRule="evenodd" clipRule="evenodd" id="copy-username" d="M8 5h7.795c1.115 0 1.519.116 1.926.334.407.218.727.538.945.945.218.407.334.811.334 1.926V16a1 1 0 1 0 2 0V8.128c0-1.783-.186-2.43-.534-3.082a3.635 3.635 0 0 0-1.512-1.512C18.302 3.186 17.655 3 15.872 3H8a1 1 0 0 0 0 2zm7.721 2.334C15.314 7.116 14.91 7 13.795 7h-7.59c-1.115 0-1.519.116-1.926.334a2.272 2.272 0 0 0-.945.945C3.116 8.686 3 9.09 3 10.205v7.59c0 1.114.116 1.519.334 1.926.218.407.538.727.945.945.407.218.811.334 1.926.334h7.59c1.114 0 1.519-.116 1.926-.334.407-.218.727-.538.945-.945.218-.407.334-.811.334-1.926v-7.59c0-1.115-.116-1.519-.334-1.926a2.272 2.272 0 0 0-.945-.945z" fill="#000000"/> 
+                </g>
                 <defs> 
                   <clipPath id="a"> 
                     <path fill="#000000" d="M0 0h24v24H0z"/> 
@@ -521,12 +501,12 @@ function App() {
           <input type="text" id="password-info" readOnly />
 
           <div className="icon-button" id="copy-icon" onClick={ () => copy("password") }>
-            <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg onMouseOver={() => copyOnMouseOver("copy-password")} onMouseOut={() => copyOnMouseOut("copy-password")} width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g id="SVGRepo_bgCarrier" strokeWidth="0"/>
               <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"/>
               <g id="SVGRepo_iconCarrier"> 
                 <g clipPath="url(#a)"> 
-                  <path fillRule="evenodd" clipRule="evenodd" d="M8 5h7.795c1.115 0 1.519.116 1.926.334.407.218.727.538.945.945.218.407.334.811.334 1.926V16a1 1 0 1 0 2 0V8.128c0-1.783-.186-2.43-.534-3.082a3.635 3.635 0 0 0-1.512-1.512C18.302 3.186 17.655 3 15.872 3H8a1 1 0 0 0 0 2zm7.721 2.334C15.314 7.116 14.91 7 13.795 7h-7.59c-1.115 0-1.519.116-1.926.334a2.272 2.272 0 0 0-.945.945C3.116 8.686 3 9.09 3 10.205v7.59c0 1.114.116 1.519.334 1.926.218.407.538.727.945.945.407.218.811.334 1.926.334h7.59c1.114 0 1.519-.116 1.926-.334.407-.218.727-.538.945-.945.218-.407.334-.811.334-1.926v-7.59c0-1.115-.116-1.519-.334-1.926a2.272 2.272 0 0 0-.945-.945z" fill="#000000"/> 
+                  <path fillRule="evenodd" clipRule="evenodd" id="copy-password" d="M8 5h7.795c1.115 0 1.519.116 1.926.334.407.218.727.538.945.945.218.407.334.811.334 1.926V16a1 1 0 1 0 2 0V8.128c0-1.783-.186-2.43-.534-3.082a3.635 3.635 0 0 0-1.512-1.512C18.302 3.186 17.655 3 15.872 3H8a1 1 0 0 0 0 2zm7.721 2.334C15.314 7.116 14.91 7 13.795 7h-7.59c-1.115 0-1.519.116-1.926.334a2.272 2.272 0 0 0-.945.945C3.116 8.686 3 9.09 3 10.205v7.59c0 1.114.116 1.519.334 1.926.218.407.538.727.945.945.407.218.811.334 1.926.334h7.59c1.114 0 1.519-.116 1.926-.334.407-.218.727-.538.945-.945.218-.407.334-.811.334-1.926v-7.59c0-1.115-.116-1.519-.334-1.926a2.272 2.272 0 0 0-.945-.945z" fill="#000000"/> 
                 </g> 
                 <defs> 
                   <clipPath id="a"> 
@@ -571,7 +551,7 @@ function App() {
           <button id="generate" onClick={getPassword}>Generate</button>
           <p id="not-safe-password" className="error-message"></p>
 
-          <input onChange={updateRange} type="range" name="Length" id="password-length" min={8} max={20} defaultValue={12} />
+          <input onChange={updateRange} type="range" name="Length" id="password-length" min={8} max={20}  defaultValue={12} />
           <p id="show-length">Length: 12</p>
 
           <p id="get-notes">Notes/Observations</p>
