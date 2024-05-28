@@ -3,16 +3,15 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { writeTextFile, readTextFile, createDir } from "@tauri-apps/api/fs";
 import "./App.css";
 
-
 let lastClickedId;
-const testJsonAccountsPath = "C:/Users/luhlu/Documents/passwords/tests/accounts.json";
-const testTextAccountsPath = "C:/Users/luhlu/Documents/passwords/tests/accounts.txt";
-const idsPath = "C:/Users/luhlu/Documents/passwords/ids.json";
+const testJsonAccountsPath = "C:\\Users\\luhlu\\Documents\\passwords\\tests\\accounts.json";
+const testTextAccountsPath = "C:\\Users\\luhlu\\Documents\\passwords\\tests\\accounts.txt";
+const idsPath = "C:\\Users\\luhlu\\Documents\\passwords\\ids.json";
 
-const jsonAccountsPath = "C:/Users/luhlu/Documents/passwords/accounts.json";
-const textAccountsPath = "C:/Users/luhlu/Documents/passwords/accounts.txt";
+const jsonAccountsPath = "C:\\Users\\luhlu\\Documents\\passwords\\accounts.json";
+const textAccountsPath = "C:\\Users\\luhlu\\Documents\\passwords\\accounts.txt";
 
-const backupJsonAccountsPath = "C:/Users/luhlu/Documents/passwords/backup"
+const backupAccountsPath = "C:\\Users\\luhlu\\Documents\\passwords\\backup"
 
 // check account info
 
@@ -77,6 +76,25 @@ const deleteAccount = async () => {
   lastClickedId = "";
 }
 
+// created using windows copilot
+const createTextFile = async () => {
+  const accounts = await readAccounts();
+
+  const formattedData = Object.entries(accounts).map(([service, accountsList]) => {
+    const accountInfo = accountsList.map((account) => {
+      const { service, username, password, notes, password_history, favorite, id } = account;
+      let infoString = `  username: ${username}\n  password: ${password}`;
+      if (notes) {
+        infoString += `\n  notes: ${notes}`
+      }
+      return infoString;
+    }).join("\n\n");
+    return `${service.toUpperCase()}\n${accountInfo}`;
+  }).join("\n\n")
+
+  await writeTextFile(testTextAccountsPath, formattedData);
+}
+
 // idea and optimization by windows copilot 
 const updateAccount = async (isNewAccount) => {
   const service = document.getElementById("service").value;
@@ -122,6 +140,7 @@ const updateAccount = async (isNewAccount) => {
   hideComponent("save", false);
   lastClickedId = "";
 
+  await createTextFile();
   await invoke("backup");
 }
 
