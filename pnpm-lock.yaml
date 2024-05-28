@@ -14,9 +14,6 @@ importers:
       chrono:
         specifier: ^1.0.5
         version: 1.0.5
-      date-fns:
-        specifier: ^3.6.0
-        version: 3.6.0
       json-stringify-pretty-compact:
         specifier: ^4.0.0
         version: 4.0.0

@@ -62,7 +62,7 @@ const deleteAccount = async () => {
   }
 
   removeIds(id)
-  await writeTextFile(testJsonAccountsPath, JSON.stringify(accounts));
+  await writeTextFile(jsonAccountsPath, JSON.stringify(accounts));
   updateAccountsList();
 
   const inputSelectors = "#create-account input[type='text'], #account-info input[type='text']"
@@ -92,7 +92,7 @@ const createTextFile = async () => {
     return `${service.toUpperCase()}\n${accountInfo}`;
   }).join("\n\n")
 
-  await writeTextFile(testTextAccountsPath, formattedData);
+  await writeTextFile(textAccountsPath, formattedData);
 }
 
 // idea and optimization by windows copilot 
@@ -127,7 +127,7 @@ const updateAccount = async (isNewAccount) => {
   accounts[service] = accounts[service].filter(acc => acc.id !== id);
   accounts[service].push(edited_account);
 
-  await writeTextFile(testJsonAccountsPath, JSON.stringify(accounts));
+  await writeTextFile(jsonAccountsPath, JSON.stringify(accounts));
   updateAccountsList();
 
   const inputSelectors = "#create-account input[type='text'], #account-info input[type='text']"
@@ -173,7 +173,7 @@ const removeIds = async (id) => {
 
 // optimized
 const readAccounts = async () => {
-  return JSON.parse(await readTextFile(testJsonAccountsPath));
+  return JSON.parse(await readTextFile(jsonAccountsPath));
 }
 
 // other
@@ -435,7 +435,7 @@ const favOnClick = async (id) => {
   }
 
   let json_string = JSON.stringify(accounts);
-  await writeTextFile(testJsonAccountsPath, json_string);
+  await writeTextFile(jsonAccountsPath, json_string);
 
   updateAccountsList();
 }
