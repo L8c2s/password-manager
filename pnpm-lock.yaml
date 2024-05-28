@@ -11,6 +11,9 @@ importers:
       '@tauri-apps/api':
         specifier: ^1
         version: 1.5.6
+      chrono:
+        specifier: ^1.0.5
+        version: 1.0.5
       json-stringify-pretty-compact:
         specifier: ^4.0.0
         version: 4.0.0
@@ -484,6 +487,9 @@ packages:
   chalk@2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
     engines: {node: '>=4'}
+
+  chrono@1.0.5:
+    resolution: {integrity: sha512-gjmpLxZa8iRaQXpV/sEV3ZkDuvwg0FqM1YrhaxdybN/DQJyfs1fG6UkJXkkOKLk/Hb712hsVV5EGR8f8A5sBdA==}
 
   color-convert@1.9.3:
     resolution: {integrity: sha512-QfAUtd+vFdAtFQcC8CCyYt1fYWxSqAiK2cSD6zDB8N3cpsEBAvRxp9zOGg6G/SHHJYAT88/az/IuDGALsNVbGg==}
@@ -1037,6 +1043,8 @@ snapshots:
       ansi-styles: 3.2.1
       escape-string-regexp: 1.0.5
       supports-color: 5.5.0
+
+  chrono@1.0.5: {}
 
   color-convert@1.9.3:
     dependencies:

@@ -1,10 +1,18 @@
 import React from "react";
 import { invoke } from "@tauri-apps/api/tauri";
-import { writeTextFile, readTextFile } from "@tauri-apps/api/fs";
+import { writeTextFile, readTextFile, createDir } from "@tauri-apps/api/fs";
 import "./App.css";
 
 
 let lastClickedId;
+const testJsonAccountsPath = "C:/Users/luhlu/Documents/passwords/tests/accounts.json";
+const testTextAccountsPath = "C:/Users/luhlu/Documents/passwords/tests/accounts.txt";
+const idsPath = "C:/Users/luhlu/Documents/passwords/ids.json";
+
+const jsonAccountsPath = "C:/Users/luhlu/Documents/passwords/accounts.json";
+const textAccountsPath = "C:/Users/luhlu/Documents/passwords/accounts.txt";
+
+const backupJsonAccountsPath = "C:/Users/luhlu/Documents/passwords/backup"
 
 // check account info
 
@@ -55,10 +63,11 @@ const deleteAccount = async () => {
   }
 
   removeIds(id)
-  await writeTextFile("C:/Users/luhlu/Documents/passwords/tests/accounts.json", JSON.stringify(accounts));
+  await writeTextFile(testJsonAccountsPath, JSON.stringify(accounts));
   updateAccountsList();
 
   document.querySelectorAll("#create-account input").forEach(input => input.value = "");
+  document.querySelectorAll("#account-info input").forEach(input => input.value = "");
 
   innerHTML("create-account-title", "New Account");
   hideComponent("save", false);
@@ -99,16 +108,19 @@ const updateAccount = async (isNewAccount) => {
   accounts[service] = accounts[service].filter(acc => acc.id !== id);
   accounts[service].push(edited_account);
 
-  await writeTextFile("C:/Users/luhlu/Documents/passwords/tests/accounts.json", JSON.stringify(accounts));
+  await writeTextFile(testJsonAccountsPath, JSON.stringify(accounts));
   updateAccountsList();
 
   document.querySelectorAll("#create-account input").forEach(input => input.value = "");
+  document.querySelectorAll("#account-info input").forEach(input => input.value = "");
 
   innerHTML("create-account-title", "New Account");
   hideComponent("delete", true);
   hideComponent("edit", true);
   hideComponent("save", false);
   lastClickedId = "";
+
+  await invoke("backup");
 }
 
 // optimized with windows copilot
@@ -130,7 +142,7 @@ const saveAccount = async () => {
 
 // optimized with windows copilot
 const removeIds = async (id) => {
-  const idsFilePath = "C:/Users/luhlu/Documents/passwords/ids.json";
+  const idsFilePath = idsPath;
 
   const allIds = JSON.parse(await readTextFile(idsFilePath));
   const updatedIds = allIds.filter(existingId => existingId !== id);
@@ -140,7 +152,7 @@ const removeIds = async (id) => {
 
 // optimized
 const readAccounts = async () => {
-  const accountsPath = "C:/Users/luhlu/Documents/passwords/tests/accounts.json";
+  const accountsPath = testJsonAccountsPath;
   return JSON.parse(await readTextFile(accountsPath));
 }
 
@@ -216,8 +228,8 @@ const updateSafePassErr = () => {
 // optimized
 const clear = () => {
   const length = document.getElementById("password-length").value;
-  const inputs = document.getElementById("create-account").querySelectorAll("input");
-  inputs.forEach(input => input.value = "");
+  document.querySelectorAll("#create-account input").forEach(input => input.value = "");
+  document.querySelectorAll("#account-info input").forEach(input => input.value = "");
   
   document.getElementById("password-length").value = length;
   innerHTML("create-account-title", "New Account");
@@ -402,7 +414,7 @@ const favOnClick = async (id) => {
   }
 
   let json_string = JSON.stringify(accounts);
-  await writeTextFile("C:/Users/luhlu/Documents/passwords/tests/accounts.json", json_string);
+  await writeTextFile(testJsonAccountsPath, json_string);
 
   updateAccountsList();
 }
@@ -432,21 +444,30 @@ const itemOnClick = async (service, itemId) => {
   }
 
   document.getElementById("service").value = accounts[currentService][currentIndex]["service"]
+  document.getElementById("service-info").value = accounts[currentService][currentIndex]["service"]
+
   document.getElementById("username").value = accounts[currentService][currentIndex]["username"]
+  document.getElementById("username-info").value = accounts[currentService][currentIndex]["username"]
+
   document.getElementById("password").value = accounts[currentService][currentIndex]["password"]
+  document.getElementById("password-info").value = accounts[currentService][currentIndex]["password"]
+
   document.getElementById("notes").value = accounts[currentService][currentIndex]["notes"]
+  document.getElementById("notes-info").value = accounts[currentService][currentIndex]["notes"]
 
   hideComponent("edit", false);
   hideComponent("delete", false);
 }
 
-const copy = async (itemId) => {
+const copy = async (info) => {
+  if (!lastClickedId) return false;
+
   let accounts = await readAccounts();
   let currentAccount;
 
   for (let [_, accountList] of Object.entries(accounts)) {
     for (let [_, account] of accountList.entries()) {
-      if (account["id"] == itemId) {
+      if (account["id"] == lastClickedId) {
         currentAccount = account;
         break;
       }
@@ -455,12 +476,13 @@ const copy = async (itemId) => {
 
   if (!currentAccount) return false;
 
-  const password = currentAccount["password"];
+  const password = currentAccount[info];
   navigator.clipboard.writeText(password);
 }
 
 window.addEventListener("load", () => {
   updateAccountsList();
+  // document.getElementById("password-length").value = 12;
 })
 
 function App() {
@@ -468,6 +490,57 @@ function App() {
     <div className="container">
       <div className="display" id="account-info">
         <h3 className="title" id="account-info-title">Account Info</h3>
+
+        <p id="account-info-service">Service</p>
+        <input type="text" id="service-info" readOnly />
+
+        <p id="account-info-username">Username</p>
+        <div className="info-copy">
+          <input type="text" id="username-info" readOnly />
+
+          <div className="icon-button" id="copy-icon" onClick={ () => copy("username") }>
+            <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g id="SVGRepo_bgCarrier" strokeWidth="0"/>
+              <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"/>
+              <g id="SVGRepo_iconCarrier"> 
+                <g clipPath="url(#a)"> 
+                  <path fillRule="evenodd" clipRule="evenodd" d="M8 5h7.795c1.115 0 1.519.116 1.926.334.407.218.727.538.945.945.218.407.334.811.334 1.926V16a1 1 0 1 0 2 0V8.128c0-1.783-.186-2.43-.534-3.082a3.635 3.635 0 0 0-1.512-1.512C18.302 3.186 17.655 3 15.872 3H8a1 1 0 0 0 0 2zm7.721 2.334C15.314 7.116 14.91 7 13.795 7h-7.59c-1.115 0-1.519.116-1.926.334a2.272 2.272 0 0 0-.945.945C3.116 8.686 3 9.09 3 10.205v7.59c0 1.114.116 1.519.334 1.926.218.407.538.727.945.945.407.218.811.334 1.926.334h7.59c1.114 0 1.519-.116 1.926-.334.407-.218.727-.538.945-.945.218-.407.334-.811.334-1.926v-7.59c0-1.115-.116-1.519-.334-1.926a2.272 2.272 0 0 0-.945-.945z" fill="#000000"/> 
+                </g> 
+                <defs> 
+                  <clipPath id="a"> 
+                    <path fill="#000000" d="M0 0h24v24H0z"/> 
+                  </clipPath> 
+                </defs> 
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <p id="account-info-password">Password</p>
+        <div className="info-copy">
+          <input type="text" id="password-info" readOnly />
+
+          <div className="icon-button" id="copy-icon" onClick={ () => copy("password") }>
+            <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g id="SVGRepo_bgCarrier" strokeWidth="0"/>
+              <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"/>
+              <g id="SVGRepo_iconCarrier"> 
+                <g clipPath="url(#a)"> 
+                  <path fillRule="evenodd" clipRule="evenodd" d="M8 5h7.795c1.115 0 1.519.116 1.926.334.407.218.727.538.945.945.218.407.334.811.334 1.926V16a1 1 0 1 0 2 0V8.128c0-1.783-.186-2.43-.534-3.082a3.635 3.635 0 0 0-1.512-1.512C18.302 3.186 17.655 3 15.872 3H8a1 1 0 0 0 0 2zm7.721 2.334C15.314 7.116 14.91 7 13.795 7h-7.59c-1.115 0-1.519.116-1.926.334a2.272 2.272 0 0 0-.945.945C3.116 8.686 3 9.09 3 10.205v7.59c0 1.114.116 1.519.334 1.926.218.407.538.727.945.945.407.218.811.334 1.926.334h7.59c1.114 0 1.519-.116 1.926-.334.407-.218.727-.538.945-.945.218-.407.334-.811.334-1.926v-7.59c0-1.115-.116-1.519-.334-1.926a2.272 2.272 0 0 0-.945-.945z" fill="#000000"/> 
+                </g> 
+                <defs> 
+                  <clipPath id="a"> 
+                    <path fill="#000000" d="M0 0h24v24H0z"/> 
+                  </clipPath> 
+                </defs> 
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <p id="account-info-notes">Notes</p>
+        <input type="text" id="notes-info" readOnly />
+
       </div>
 
       <div className="display" id="accounts-list">

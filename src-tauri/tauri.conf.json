@@ -20,10 +20,11 @@
         "all": false,
         "readFile": true,
         "writeFile": true,
+        "createDir": true,
         "scope": [
-          "C:/Users/luhlu/Documents/passwords/tests/accounts.json",
-          "C:/Users/luhlu/Documents/passwords/tests/accounts.txt",
-          "C:/Users/luhlu/Documents/passwords/ids.json"
+          "C:/Users/luhlu/Documents/passwords/tests/*",
+          "C:/Users/luhlu/Documents/passwords/*",
+          "C:/Users/luhlu/Documents/passwords/backups/*"
         ]
       },
       "dialog": {
