@@ -15,6 +15,12 @@ const backupAccountsPath = "C:\\Users\\luhlu\\Documents\\passwords\\backup"
 
 // check account info
 
+const addId = async (id) => {
+  const allIds = JSON.parse(await readTextFile(idsPath));
+  allIds.push(id);
+  await writeTextFile(idsPath, JSON.stringify(allIds));
+}
+
 // optimized with windows copilot
 const isPasswordSafe = (password) => {
   const hasMinimumLength = password.length >= 8;
@@ -107,10 +113,26 @@ const updateAccount = async (isNewAccount) => {
   const accounts = await readAccounts();
   accounts[service] ??= [];
 
-  const existingAccount = accounts[service].find(account => account.username === username);
+  let existingAccount = accounts[service].find(account => account.id === lastClickedId);
+
+  if (!existingAccount && !isNewAccount) {
+    Object.entries(accounts).forEach(([services, accountsList]) => {
+      accountsList.entries().forEach(([index, account]) => {        
+        if (account.id === lastClickedId) {
+          existingAccount = account;
+          accounts[services].splice(index, 1);
+          removeIds(account.id);
+          return;
+        }
+      })
+    })
+  }
+
   if (existingAccount && isNewAccount) {
     innerHTML("account-already-exists", "The account already exists.");
     return;
+  } else if (!existingAccount && !isNewAccount) {
+    isNewAccount = true;
   }
 
   const id = isNewAccount ? generatePassword(6) : lastClickedId;
@@ -126,6 +148,10 @@ const updateAccount = async (isNewAccount) => {
 
   accounts[service] = accounts[service].filter(acc => acc.id !== id);
   accounts[service].push(edited_account);
+
+  if (isNewAccount) {
+    addId(id);
+  }
 
   await writeTextFile(jsonAccountsPath, JSON.stringify(accounts));
   updateAccountsList();
@@ -402,11 +428,6 @@ const favOnMouseOut = (id) => {
 const findAccountInfo = (accounts, id) => {
   for (const [services, accountsList] of Object.entries(accounts)) {
     for (const [index, accountInfo] of accountsList.entries()) {
-
-      console.log(accountInfo.id === id)
-      console.log(accountInfo.id)
-      console.log(id)
-
       if (accountInfo.id === id) {
         return { serviceName: services, listIndex: index };
       }
@@ -444,8 +465,6 @@ const itemOnClick = async (itemId) => {
   innerHTML("create-account-title", "Edit Account");
   hideComponent("save", true);
   lastClickedId = itemId;
-
-  console.log(itemId)
 
   const accounts = await readAccounts();
   const { serviceName, listIndex } = findAccountInfo(accounts, itemId);
