@@ -491,8 +491,17 @@ const setValue = (id, value) => {
 const copy = async (info) => {
   if (!lastClickedId) return false;
 
+  let currentAccount = null;
   const accounts = await readAccounts();
-  const currentAccount = accounts.flat().find(account => account.id === lastClickedId);
+  for (const [_, accountsList] of Object.entries(accounts)) {
+    for (const [_, account] of accountsList.entries()) {
+      if (account.id === lastClickedId) {
+        currentAccount = account;
+      }
+    }
+  }
+
+  console.log(currentAccount[info])
 
   if (!currentAccount) return false;
   navigator.clipboard.writeText(currentAccount[info]);
