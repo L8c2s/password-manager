@@ -13,7 +13,28 @@ const textAccountsPath = "C:\\Users\\luhlu\\Documents\\passwords\\accounts.txt";
 
 const backupAccountsPath = "C:\\Users\\luhlu\\Documents\\passwords\\backup"
 
-// check account info
+// # file related
+
+// created using windows copilot
+const createTextFile = async () => {
+  const accounts = await readAccounts();
+
+  const formattedData = Object.entries(accounts).map(([service, accountsList]) => {
+    const accountInfo = accountsList.map((account) => {
+      const { service, username, password, notes, password_history, favorite, id } = account;
+      let infoString = `  username: ${username}\n  password: ${password}`;
+      if (notes) {
+        infoString += `\n  notes: ${notes}`
+      }
+      return infoString;
+    }).join("\n\n");
+    return `${service.toUpperCase()}\n${accountInfo}`;
+  }).join("\n\n")
+
+  await writeTextFile(textAccountsPath, formattedData);
+}
+
+// ## ids related
 
 const addId = async (id) => {
   const allIds = JSON.parse(await readTextFile(idsPath));
@@ -22,34 +43,16 @@ const addId = async (id) => {
 }
 
 // optimized with windows copilot
-const isPasswordSafe = (password) => {
-  const hasMinimumLength = password.length >= 8;
-  const hasDigit = /\d/.test(password);
-  const hasLowercase = /[a-z]/.test(password);
-  const hasUppercase = /[A-Z]/.test(password);
-  const symbols = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
-  const hasSpecialChar = new RegExp(`[${symbols}]`).test(password);
+const removeIds = async (id) => {
+  const idsFilePath = idsPath;
 
-  console.log("hasMinimumLength ", hasMinimumLength)
-  console.log("hasDigit ", hasDigit)
-  console.log("hasLowercase ", hasLowercase)
-  console.log("hasUppercase ", hasUppercase)
-  console.log("hasSpecialChar ", hasSpecialChar)
+  const allIds = JSON.parse(await readTextFile(idsFilePath));
+  const updatedIds = allIds.filter(existingId => existingId !== id);
 
-  return hasMinimumLength && hasDigit && (hasLowercase || hasUppercase) && hasSpecialChar;
-};
-
-// optimized with windows copilot
-const checkInfo = (service, username, password) => {
-  if (!service || !username || !password) return false;
-
-  if (!isPasswordSafe(password)) {
-    innerHTML("not-safe-password", "The password may not be safe enough.");
-  }
-  return true
+  await writeTextFile(idsFilePath, JSON.stringify(updatedIds));
 }
 
-// file functions
+// ## accounts related
 
 // optimized with windows copilot
 const deleteAccount = async () => {
@@ -80,25 +83,6 @@ const deleteAccount = async () => {
   hideComponent("delete", true);
   hideComponent("edit", true);
   lastClickedId = "";
-}
-
-// created using windows copilot
-const createTextFile = async () => {
-  const accounts = await readAccounts();
-
-  const formattedData = Object.entries(accounts).map(([service, accountsList]) => {
-    const accountInfo = accountsList.map((account) => {
-      const { service, username, password, notes, password_history, favorite, id } = account;
-      let infoString = `  username: ${username}\n  password: ${password}`;
-      if (notes) {
-        infoString += `\n  notes: ${notes}`
-      }
-      return infoString;
-    }).join("\n\n");
-    return `${service.toUpperCase()}\n${accountInfo}`;
-  }).join("\n\n")
-
-  await writeTextFile(textAccountsPath, formattedData);
 }
 
 // idea and optimization by windows copilot 
@@ -187,35 +171,54 @@ const saveAccount = async () => {
   await updateAccount(true);
 }
 
-// optimized with windows copilot
-const removeIds = async (id) => {
-  const idsFilePath = idsPath;
-
-  const allIds = JSON.parse(await readTextFile(idsFilePath));
-  const updatedIds = allIds.filter(existingId => existingId !== id);
-
-  await writeTextFile(idsFilePath, JSON.stringify(updatedIds));
-}
-
 // optimized
 const readAccounts = async () => {
   return JSON.parse(await readTextFile(jsonAccountsPath));
 }
 
-// other
+// # account info related
 
 // optimized with windows copilot
-const hideComponent = (id, hide = true) => {
-  const component = document.getElementById(id);
-  component.hidden = hide;
+const checkInfo = (service, username, password) => {
+  if (!service || !username || !password) return false;
+
+  if (!isPasswordSafe(password)) {
+    innerHTML("not-safe-password", "The password may not be safe enough.");
+  }
+  return true
+}
+
+// idea and optimization by windows copilot
+const findAccountInfo = (accounts, id) => {
+  for (const [services, accountsList] of Object.entries(accounts)) {
+    for (const [index, accountInfo] of accountsList.entries()) {
+      if (accountInfo.id === id) {
+        return { serviceName: services, listIndex: index };
+      }
+    }
+  }
+  return { serviceName: "", listIndex: 0 }
 };
+
+// ## passwords related
 
 // optimized with windows copilot
-const innerHTML = (id, text = "") => {
-  document.getElementById(id).innerHTML = text;
-};
+const isPasswordSafe = (password) => {
+  const hasMinimumLength = password.length >= 8;
+  const hasDigit = /\d/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasUppercase = /[A-Z]/.test(password);
+  const symbols = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+  const hasSpecialChar = new RegExp(`[${symbols}]`).test(password);
 
-// input functions
+  console.log("hasMinimumLength ", hasMinimumLength)
+  console.log("hasDigit ", hasDigit)
+  console.log("hasLowercase ", hasLowercase)
+  console.log("hasUppercase ", hasUppercase)
+  console.log("hasSpecialChar ", hasSpecialChar)
+
+  return hasMinimumLength && hasDigit && (hasLowercase || hasUppercase) && hasSpecialChar;
+};
 
 // optimized with windows copilot
 const getPassword = () => {
@@ -241,7 +244,7 @@ const generatePassword = (length=0) => {
     password += chars[index];
   }
 
-  let symbols = "!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~"
+  let symbols = "!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~" /* !"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ */
 
   let lower = /[a-z]/g.test(password);
   let upper = /[A-Z]/g.test(password);
@@ -255,7 +258,27 @@ const generatePassword = (length=0) => {
   return generatePassword(length);
 }
 
-/* !"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ */
+// # utilities
+
+// optimized with windows copilot
+const hideComponent = (id, hide = true) => {
+  const component = document.getElementById(id);
+  component.hidden = hide;
+};
+
+// optimized with windows copilot
+const innerHTML = (id, text = "") => {
+  document.getElementById(id).innerHTML = text;
+};
+
+// idea and optimization by windows copilot
+// itemOnClick
+const setValue = (id, value) => {
+  document.getElementById(id).value = value;
+  document.getElementById(id+"-info").value = value;
+}
+
+// # html related
 
 // optimized
 const updateRange = () => {
@@ -270,23 +293,6 @@ const updateSafePassErr = () => {
   document.getElementById("not-safe-password").textContent = isSafe ? "" : 
     "The password may not be safe enough.";
 }
-
-// optimized with windows copilot
-const clear = () => {
-  const length = document.getElementById("password-length").value;
-  const inputSelectors = "#create-account input[type='text'], #account-info input[type='text']";
-  document.querySelectorAll(inputSelectors).forEach(input => input.value = "");
-  
-  document.getElementById("password-length").value = length;
-  innerHTML("create-account-title", "New Account");
-  innerHTML("not-safe-password");
-  hideComponent("edit", true);
-  hideComponent("delete", true)
-  hideComponent("save", false);
-  lastClickedId = "";
-}
-
-// accounts list
 
 const createItem = (accountInfo) => {
   let list = document.getElementById("list");
@@ -403,6 +409,23 @@ const setFavorite = async (id) => {
   document.getElementById(id+"_path").setAttribute("fill", "#ffff00");
 }
 
+// ## events
+
+// optimized with windows copilot
+const clear = () => {
+  const length = document.getElementById("password-length").value;
+  const inputSelectors = "#create-account input[type='text'], #account-info input[type='text']";
+  document.querySelectorAll(inputSelectors).forEach(input => input.value = "");
+  
+  document.getElementById("password-length").value = length;
+  innerHTML("create-account-title", "New Account");
+  innerHTML("not-safe-password");
+  hideComponent("edit", true);
+  hideComponent("delete", true)
+  hideComponent("save", false);
+  lastClickedId = "";
+}
+
 // list item functions
 
 const copyOnMouseOver = (id) => {
@@ -423,18 +446,6 @@ const favOnMouseOut = (id) => {
   if (fav_icon.classList.contains("favorite")) return;
   document.getElementById(id+"_path").setAttribute("fill", "#000000");
 }
-
-// idea and optimization by windows copilot
-const findAccountInfo = (accounts, id) => {
-  for (const [services, accountsList] of Object.entries(accounts)) {
-    for (const [index, accountInfo] of accountsList.entries()) {
-      if (accountInfo.id === id) {
-        return { serviceName: services, listIndex: index };
-      }
-    }
-  }
-  return { serviceName: "", listIndex: 0 }
-};
 
 // optimized with windows copilot
 const favOnClick = async (id) => {
@@ -480,12 +491,6 @@ const itemOnClick = async (itemId) => {
 
   hideComponent("edit", false);
   hideComponent("delete", false);
-}
-
-// idea and optimization by windows copilot
-const setValue = (id, value) => {
-  document.getElementById(id).value = value;
-  document.getElementById(id+"-info").value = value;
 }
 
 const copy = async (info) => {
