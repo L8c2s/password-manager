@@ -7,7 +7,7 @@ import "./App.css";
 
 let lastClickedId;
 
-let mainPath;
+let mainPath = "";
 let jsonAccountsPath = "";
 let textAccountsPath = "";
 let idsPath = "";
@@ -78,7 +78,10 @@ const checkPath = async () => {
     await writeTextFile(idsPath, JSON.stringify([]));
   }
 
-  document.getElementById("show-current-path").value = mainPath;
+  let split_path = mainPath.split("\\");
+  let show_path = `${split_path.at(-2)}\\${split_path.at(-1)}`;
+
+  document.getElementById("show-current-path").value = show_path;
 }
 
 const changePath = async () => {
@@ -657,7 +660,7 @@ function App() {
         <p id="account-info-notes">Notes</p>
         <input type="text" id="notes-info" readOnly />
 
-        <p id="accounts-path">Current Path</p>
+        <p id="accounts-path">Current Directory</p>
         <input type="email" placeholder="No path was selected" readOnly id="show-current-path" />
         <button id="select-path" onClick={changePath}>Change</button>
       </div>
@@ -667,6 +670,7 @@ function App() {
 
         <div id="test">
           <input type="text" placeholder="Type a service to filter" id="filter" onChange={getFilter} />
+          <button onClick={getFilter}>Filter</button>
         </div>
 
         <ul id="list"></ul>
