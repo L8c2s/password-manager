@@ -16,16 +16,16 @@
         "all": false,
         "open": true
       },
+      "path": {
+        "all": true
+      },
       "fs": {
         "all": false,
         "readFile": true,
         "writeFile": true,
+        "exists": true,
         "createDir": true,
-        "scope": [
-          "C:/Users/luhlu/Documents/passwords/tests/*",
-          "C:/Users/luhlu/Documents/passwords/*",
-          "C:/Users/luhlu/Documents/passwords/backups/*"
-        ]
+        "scope": ["**"]
       },
       "dialog": {
         "all": true,

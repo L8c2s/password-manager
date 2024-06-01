@@ -1,21 +1,19 @@
 import React from "react";
 import { invoke } from "@tauri-apps/api/tauri";
-import { writeTextFile, readTextFile, createDir } from "@tauri-apps/api/fs";
+import { writeTextFile, readTextFile, exists, createDir } from "@tauri-apps/api/fs";
+import { open } from "@tauri-apps/api/dialog";
+import { appConfigDir } from "@tauri-apps/api/path";
 import "./App.css";
 
 let lastClickedId;
-const testJsonAccountsPath = "C:\\Users\\luhlu\\Documents\\passwords\\tests\\accounts.json";
-const testTextAccountsPath = "C:\\Users\\luhlu\\Documents\\passwords\\tests\\accounts.txt";
-const idsPath = "C:\\Users\\luhlu\\Documents\\passwords\\ids.json";
 
-const jsonAccountsPath = "C:\\Users\\luhlu\\Documents\\passwords\\accounts.json";
-const textAccountsPath = "C:\\Users\\luhlu\\Documents\\passwords\\accounts.txt";
-
-const backupAccountsPath = "C:\\Users\\luhlu\\Documents\\passwords\\backup"
+let mainPath;
+let jsonAccountsPath = "";
+let textAccountsPath = "";
+let idsPath = "";
 
 // # file related
 
-// created using windows copilot
 const createTextFile = async () => {
   const accounts = await readAccounts();
 
@@ -34,6 +32,98 @@ const createTextFile = async () => {
   await writeTextFile(textAccountsPath, formattedData);
 }
 
+const createFile = async (file) => {
+
+  let content = "";
+  let path = textAccountsPath;
+
+  if (file === "json") {
+    content = JSON.stringify({});
+    path = jsonAccountsPath;
+  } else if (file === "ids") {
+    content = JSON.stringify([]);
+    path = idsPath;
+  }
+
+  await writeTextFile(path, content);
+}
+
+const checkPath = async () => {
+  if (!jsonAccountsPath || !textAccountsPath || !idsPath) return false;
+
+  const json_exists = await exists(jsonAccountsPath);
+  const text_exists = await exists(textAccountsPath);
+  const ids_exists = await exists(idsPath);
+
+  if (!json_exists) {
+    createFile("json");
+  }
+
+  if (!text_exists) {
+    createFile("text");
+  }
+
+  if (!ids_exists) {
+    createFile("ids");
+  }
+
+  try {
+    await readAccounts();
+  } catch {
+    await writeTextFile(jsonAccountsPath, JSON.stringify({}));
+  }
+
+  const ids = await readTextFile(idsPath);
+  if (!(typeof ids === 'object' && !Array.isArray(ids) && ids !== null)) {
+    await writeTextFile(idsPath, JSON.stringify([]));
+  }
+
+  document.getElementById("show-current-path").value = mainPath;
+}
+
+const changePath = async () => {
+  const pathSelected = await open({
+    directory: true,
+    multiple: false,
+    defaultPath: await appConfigDir()
+  })
+
+  if (!pathSelected) {
+    return false;
+  }
+
+  console.log(`Path selected: ${pathSelected}`);
+  
+  if (!await exists(`${pathSelected}\\PasswordManager`)) {
+    await createDir(`${pathSelected}\\PasswordManager`);
+  }
+
+  mainPath = `${pathSelected}\\PasswordManager`;
+  jsonAccountsPath = `${mainPath}\\accounts.json`;
+  textAccountsPath = `${mainPath}\\accounts.txt`;
+  idsPath = `${mainPath}\\ids.json`;
+
+  checkPath();
+  savePath();
+}
+
+const savePath = async () => {
+  const content = `${mainPath}\n${jsonAccountsPath}\n${textAccountsPath}\n${idsPath}`;
+  await writeTextFile("paths.txt", content);
+}
+
+const loadPaths = async () => {
+  const paths = await readTextFile("paths.txt");
+  [mainPath, jsonAccountsPath, textAccountsPath, idsPath] = paths.split("\n");
+
+  console.log(mainPath);
+  console.log(jsonAccountsPath);
+  console.log(textAccountsPath);
+  console.log(idsPath);
+
+  checkPath();
+}
+
 // ## ids related
 
 const addId = async (id) => {
@@ -42,7 +132,6 @@ const addId = async (id) => {
   await writeTextFile(idsPath, JSON.stringify(allIds));
 }
 
-// optimized with windows copilot
 const removeIds = async (id) => {
   const idsFilePath = idsPath;
 
@@ -54,7 +143,6 @@ const removeIds = async (id) => {
 
 // ## accounts related
 
-// optimized with windows copilot
 const deleteAccount = async () => {
   const del = await window.confirm("Are you sure you want to delete this account?");
   if (!del) return false;
@@ -85,7 +173,6 @@ const deleteAccount = async () => {
   lastClickedId = "";
 }
 
-// idea and optimization by windows copilot 
 const updateAccount = async (isNewAccount) => {
   const service = document.getElementById("service").value;
   const username = document.getElementById("username").value;
@@ -154,7 +241,7 @@ const updateAccount = async (isNewAccount) => {
   await invoke("backup");
 }
 
-// optimized with windows copilot
+
 const editAccount = async () => {
   if (!lastClickedId || lastClickedId === "") return false;
 
@@ -166,19 +253,19 @@ const editAccount = async () => {
   await updateAccount(false);
 }
 
-// optimized with windows copilot
+
 const saveAccount = async () => {
   await updateAccount(true);
 }
 
-// optimized
 const readAccounts = async () => {
+  console.log("readAccounts: ", jsonAccountsPath);
+  if (!jsonAccountsPath) return false;
   return JSON.parse(await readTextFile(jsonAccountsPath));
 }
 
 // # account info related
 
-// optimized with windows copilot
 const checkInfo = (service, username, password) => {
   if (!service || !username || !password) return false;
 
@@ -188,7 +275,6 @@ const checkInfo = (service, username, password) => {
   return true
 }
 
-// idea and optimization by windows copilot
 const findAccountInfo = (accounts, id) => {
   for (const [services, accountsList] of Object.entries(accounts)) {
     for (const [index, accountInfo] of accountsList.entries()) {
@@ -202,7 +288,6 @@ const findAccountInfo = (accounts, id) => {
 
 // ## passwords related
 
-// optimized with windows copilot
 const isPasswordSafe = (password) => {
   const hasMinimumLength = password.length >= 8;
   const hasDigit = /\d/.test(password);
@@ -211,23 +296,22 @@ const isPasswordSafe = (password) => {
   const symbols = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
   const hasSpecialChar = new RegExp(`[${symbols}]`).test(password);
 
-  console.log("hasMinimumLength ", hasMinimumLength)
-  console.log("hasDigit ", hasDigit)
-  console.log("hasLowercase ", hasLowercase)
-  console.log("hasUppercase ", hasUppercase)
-  console.log("hasSpecialChar ", hasSpecialChar)
+  // console.log("hasMinimumLength ", hasMinimumLength)
+  // console.log("hasDigit ", hasDigit)
+  // console.log("hasLowercase ", hasLowercase)
+  // console.log("hasUppercase ", hasUppercase)
+  // console.log("hasSpecialChar ", hasSpecialChar)
 
   return hasMinimumLength && hasDigit && (hasLowercase || hasUppercase) && hasSpecialChar;
 };
 
-// optimized with windows copilot
+
 const getPassword = () => {
   const newPassword = generatePassword();
   document.getElementById("password").value = newPassword;
   innerHTML("not-safe-password");
 };
 
-// optimized
 const generatePassword = (length=0) => {
   const chars = "abcdefghijklmnopqrstuvwxyz" +
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
@@ -260,18 +344,16 @@ const generatePassword = (length=0) => {
 
 // # utilities
 
-// optimized with windows copilot
 const hideComponent = (id, hide = true) => {
   const component = document.getElementById(id);
   component.hidden = hide;
 };
 
-// optimized with windows copilot
+
 const innerHTML = (id, text = "") => {
   document.getElementById(id).innerHTML = text;
 };
 
-// idea and optimization by windows copilot
 // itemOnClick
 const setValue = (id, value) => {
   document.getElementById(id).value = value;
@@ -280,13 +362,11 @@ const setValue = (id, value) => {
 
 // # html related
 
-// optimized
 const updateRange = () => {
   let length = document.getElementById("password-length").value;
   document.getElementById("show-length").textContent = `Length ${length}`;
 }
 
-// optimized
 const updateSafePassErr = () => {
   const password = document.getElementById("password").value;
   const isSafe = isPasswordSafe(password);
@@ -334,7 +414,6 @@ const createItem = (accountInfo) => {
   svg_fav_icon.setAttribute("height", "23px");
   svg_fav_icon.setAttribute("viewBox", "0 -1 1024 1024");
   svg_fav_icon.setAttribute("version", "1.1");
-  // svg_fav_icon.setAttribute("xmlns", "http://www.w3.org/2000/svg");
   svg_fav_icon.setAttribute("fill", "#0000000")
 
   let g_SVGRepo_bgCarrier = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -364,7 +443,7 @@ const createItem = (accountInfo) => {
   list.appendChild(div_accounts_list_item);
 }
 
-// optimized with windows copilot
+
 const getFilter = async () => {
   const filter = document.getElementById("filter").value || null;
   await updateAccountsList(filter);
@@ -372,6 +451,11 @@ const getFilter = async () => {
 
 const updateAccountsList = async (filter=null) => {
   const accounts = await readAccounts();
+
+  console.log("updateAccountsList: ", accounts);
+
+  if (!accounts && accounts != {}) return false;
+
   const list = document.getElementById("list");
   list.innerHTML = "";
 
@@ -411,10 +495,9 @@ const setFavorite = async (id) => {
 
 // ## events
 
-// optimized with windows copilot
 const clear = () => {
   const length = document.getElementById("password-length").value;
-  const inputSelectors = "#create-account input[type='text'], #account-info input[type='text']";
+  const inputSelectors = "#create-account input[type='text'], #account-info input";
   document.querySelectorAll(inputSelectors).forEach(input => input.value = "");
   
   document.getElementById("password-length").value = length;
@@ -440,14 +523,14 @@ const favOnMouseOver = (id) => {
   document.getElementById(id).setAttribute("fill", "#ffff00");
 }
 
-// optimized with windows copilot
+
 const favOnMouseOut = (id) => {
   let fav_icon = document.getElementById(id+"_svg");
   if (fav_icon.classList.contains("favorite")) return;
   document.getElementById(id+"_path").setAttribute("fill", "#000000");
 }
 
-// optimized with windows copilot
+
 const favOnClick = async (id) => {
   const fav_icon = document.getElementById(id+"_svg")
   const fav_path = document.getElementById(id+"_path")
@@ -512,9 +595,10 @@ const copy = async (info) => {
   navigator.clipboard.writeText(currentAccount[info]);
 }
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
+  await loadPaths();
   updateAccountsList();
-  // document.getElementById("password-length").value = 12;
+  // document.addEventListener('contextmenu', event => event.preventDefault());
 })
 
 function App() {
@@ -573,6 +657,9 @@ function App() {
         <p id="account-info-notes">Notes</p>
         <input type="text" id="notes-info" readOnly />
 
+        <p id="accounts-path">Current Path</p>
+        <input type="email" placeholder="No path was selected" readOnly id="show-current-path" />
+        <button id="select-path" onClick={changePath}>Change</button>
       </div>
 
       <div className="display" id="accounts-list">
@@ -611,6 +698,7 @@ function App() {
         </div>
 
         <div id="options">
+          <p id="paths-error" className="error-message"></p>
           <button id="save" onClick={saveAccount}>Save</button>
           <button id="edit" onClick={editAccount} hidden>Edit</button>
           <button id="delete" onClick={deleteAccount} hidden>Delete</button>
