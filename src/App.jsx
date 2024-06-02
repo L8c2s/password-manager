@@ -1,6 +1,6 @@
 import React from "react";
 import { invoke } from "@tauri-apps/api/tauri";
-import { writeTextFile, readTextFile, exists, createDir } from "@tauri-apps/api/fs";
+import { writeTextFile, readTextFile, exists, createDir, copyFile } from "@tauri-apps/api/fs";
 import { open } from "@tauri-apps/api/dialog";
 import { appConfigDir } from "@tauri-apps/api/path";
 import "./App.css";
@@ -30,6 +30,37 @@ const createTextFile = async () => {
   }).join("\n\n")
 
   await writeTextFile(textAccountsPath, formattedData);
+}
+
+// ## paths related
+
+const createBackup = async () => {
+  if (!mainPath || !jsonAccountsPath || !textAccountsPath || !idsPath) return false;
+
+  let date = new Date();
+
+  let year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  let day = date.getDate();
+
+  if (month < 10) month = `0${month}`;
+  if (day < 10) day = `0${day}`;
+
+  let hour = date.getHours();
+  let minute = date.getMinutes();
+  let second = date.getSeconds();
+
+  if (hour < 10) hour = `0${hour}`;
+  if (minute < 10) minute = `0${minute}`;
+  if (second < 10) second = `0${second}`;
+
+  let dirName = `${year}${month}${day}-${hour}${minute}${second}`;
+  let backupPath = `${mainPath}\\backup\\${dirName}`;
+
+  await createDir(backupPath);
+  await copyFile(jsonAccountsPath, `${backupPath}\\accounts.json`);
+  await copyFile(textAccountsPath, `${backupPath}\\accounts.txt`);
+  await copyFile(idsPath, `${backupPath}\\ids.json`);
 }
 
 const createFile = async (file) => {
@@ -68,7 +99,11 @@ const checkPath = async () => {
   }
 
   try {
-    await readAccounts();
+    const accounts = await readAccounts();
+
+    if (!accounts) {
+      throw new Error("Setting accounts...");
+    }
   } catch {
     await writeTextFile(jsonAccountsPath, JSON.stringify({}));
   }
@@ -95,7 +130,7 @@ const changePath = async () => {
     return false;
   }
 
-  console.log(`Path selected: ${pathSelected}`);
+  // console.log(`Path selected: ${pathSelected}`);
   
   if (!await exists(`${pathSelected}\\PasswordManager`)) {
     await createDir(`${pathSelected}\\PasswordManager`);
@@ -108,6 +143,7 @@ const changePath = async () => {
 
   checkPath();
   savePath();
+  updateAccountsList();
 }
 
 const savePath = async () => {
@@ -119,29 +155,53 @@ const loadPaths = async () => {
   const paths = await readTextFile("paths.txt");
   [mainPath, jsonAccountsPath, textAccountsPath, idsPath] = paths.split("\n");
 
-  console.log(mainPath);
-  console.log(jsonAccountsPath);
-  console.log(textAccountsPath);
-  console.log(idsPath);
+  // console.log(mainPath);
+  // console.log(jsonAccountsPath);
+  // console.log(textAccountsPath);
+  // console.log(idsPath);
 
   checkPath();
 }
 
 // ## ids related
 
+const readIds = async () => {
+  if (!idsPath) return false;
+  return JSON.parse(await readTextFile(idsPath));
+}
+
+const saveIds = async (ids) => {
+  if (!idsPath) return false;
+  await writeTextFile(idsPath, JSON.stringify(ids));
+}
+
 const addId = async (id) => {
-  const allIds = JSON.parse(await readTextFile(idsPath));
+
+  if (!idsPath) return false;
+
+  const allIds = await readIds();
   allIds.push(id);
-  await writeTextFile(idsPath, JSON.stringify(allIds));
+  await saveIds(allIds);
 }
 
 const removeIds = async (id) => {
-  const idsFilePath = idsPath;
+  const allIds = await readIds();
+  await saveIds(allIds.filter(existingId => existingId !== id));
+}
 
-  const allIds = JSON.parse(await readTextFile(idsFilePath));
-  const updatedIds = allIds.filter(existingId => existingId !== id);
+const updateIds = async () => {
+  const accounts = await readAccounts();
+  let allIds = await readIds();
 
-  await writeTextFile(idsFilePath, JSON.stringify(updatedIds));
+  for (const accountsList of Object.values(accounts)) {
+    for (const [_, account] of accountsList.entries()) {
+      if (!allIds.includes(account.id)) {
+        allIds.push(account.id);
+      }
+    }
+  }
+
+  await saveIds(allIds);
 }
 
 // ## accounts related
@@ -153,10 +213,14 @@ const deleteAccount = async () => {
   const id = lastClickedId;
   const accounts = await readAccounts();
 
-  for (const accountList of Object.values(accounts)) {
+  for (const [service, accountList] of Object.entries(accounts)) {
     const index = accountList.findIndex(account => account.id === id);
     if (index !== -1) {
       accountList.splice(index, 1);
+      if (accounts[service].length === 0) {
+        delete accounts[service];
+      }
+
       break;
     }
   }
@@ -164,6 +228,8 @@ const deleteAccount = async () => {
   removeIds(id)
   await writeTextFile(jsonAccountsPath, JSON.stringify(accounts));
   updateAccountsList();
+  await createTextFile();
+  await createBackup();
 
   const inputSelectors = "#create-account input[type='text'], #account-info input[type='text']"
 
@@ -241,7 +307,7 @@ const updateAccount = async (isNewAccount) => {
   lastClickedId = "";
 
   await createTextFile();
-  await invoke("backup");
+  await createBackup();
 }
 
 
@@ -262,7 +328,7 @@ const saveAccount = async () => {
 }
 
 const readAccounts = async () => {
-  console.log("readAccounts: ", jsonAccountsPath);
+  // console.log("readAccounts: ", jsonAccountsPath);
   if (!jsonAccountsPath) return false;
   return JSON.parse(await readTextFile(jsonAccountsPath));
 }
@@ -455,7 +521,7 @@ const getFilter = async () => {
 const updateAccountsList = async (filter=null) => {
   const accounts = await readAccounts();
 
-  console.log("updateAccountsList: ", accounts);
+  // console.log("updateAccountsList: ", accounts);
 
   if (!accounts && accounts != {}) return false;
 
@@ -500,7 +566,7 @@ const setFavorite = async (id) => {
 
 const clear = () => {
   const length = document.getElementById("password-length").value;
-  const inputSelectors = "#create-account input[type='text'], #account-info input";
+  const inputSelectors = "#create-account input[type='text'], #account-info input[type='text']";
   document.querySelectorAll(inputSelectors).forEach(input => input.value = "");
   
   document.getElementById("password-length").value = length;
@@ -592,7 +658,7 @@ const copy = async (info) => {
     }
   }
 
-  console.log(currentAccount[info])
+  // console.log(currentAccount[info])
 
   if (!currentAccount) return false;
   navigator.clipboard.writeText(currentAccount[info]);
@@ -600,8 +666,9 @@ const copy = async (info) => {
 
 window.addEventListener("load", async () => {
   await loadPaths();
+  await updateIds();
   updateAccountsList();
-  // document.addEventListener('contextmenu', event => event.preventDefault());
+  document.addEventListener('contextmenu', event => event.preventDefault());
 })
 
 function App() {
