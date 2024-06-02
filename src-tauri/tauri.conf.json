@@ -6,7 +6,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "password-manager",
+    "productName": "Password Manager",
     "version": "0.5.7"
   },
   "tauri": {

@@ -3,7 +3,7 @@ name = "password-manager"
 version = "0.5.7"
 description = "An app to save accounts with secure passwords."
 authors = ["Lucas Ferreira"]
-edition = "2024"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -19,3 +19,4 @@ chrono = "0.4.38"
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
+ 
