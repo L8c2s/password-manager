@@ -57,6 +57,10 @@ const createBackup = async () => {
   let dirName = `${year}${month}${day}-${hour}${minute}${second}`;
   let backupPath = `${mainPath}\\backup\\${dirName}`;
 
+  if (!await exists(`${mainPath}\\backup`)) {
+    await createDir(`${mainPath}\\backup`);
+  }
+
   await createDir(backupPath);
   await copyFile(jsonAccountsPath, `${backupPath}\\accounts.json`);
   await copyFile(textAccountsPath, `${backupPath}\\accounts.txt`);
@@ -98,19 +102,14 @@ const checkPath = async () => {
     createFile("ids");
   }
 
-  try {
-    const accounts = await readAccounts();
-
-    if (!accounts) {
-      throw new Error("Setting accounts...");
-    }
-  } catch {
-    await writeTextFile(jsonAccountsPath, JSON.stringify({}));
+  const accounts = await readAccounts();
+  if (Object.prototype.toString.call(accounts) !== "[object Object]") {
+    await saveAccounts({});
   }
 
-  const ids = await readTextFile(idsPath);
-  if (!(typeof ids === 'object' && !Array.isArray(ids) && ids !== null)) {
-    await writeTextFile(idsPath, JSON.stringify([]));
+  const ids = await readIds(idsPath);
+  if (Object.prototype.toString.call(ids) !== "[object Array]") {
+    await saveIds([]);
   }
 
   let split_path = mainPath.split("\\");
@@ -331,6 +330,11 @@ const readAccounts = async () => {
   // console.log("readAccounts: ", jsonAccountsPath);
   if (!jsonAccountsPath) return false;
   return JSON.parse(await readTextFile(jsonAccountsPath));
+}
+
+const saveAccounts = async (accounts) => {
+  if (!jsonAccountsPath) return false;
+  await writeTextFile(jsonAccountsPath, JSON.stringify(accounts));
 }
 
 // # account info related
