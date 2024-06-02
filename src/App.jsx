@@ -231,9 +231,10 @@ const deleteAccount = async () => {
   await createBackup();
 
   const inputSelectors = "#create-account input[type='text'], #account-info input[type='text']"
-
   document.querySelectorAll(inputSelectors).forEach(input => input.value = "");
 
+  innerHTML("not-safe-password");
+  innerHTML("account-already-exists");
   innerHTML("create-account-title", "New Account");
   hideComponent("save", false);
   hideComponent("delete", true);
@@ -250,9 +251,14 @@ const updateAccount = async (isNewAccount) => {
   if (!checkInfo(service, username, password)) return false;
 
   const accounts = await readAccounts();
-  accounts[service] ??= [];
+  let existingAccount;
 
-  let existingAccount = accounts[service].find(account => account.id === lastClickedId);
+  if (!accounts[service]) {
+    accounts[service] = [];
+    existingAccount = false;
+  } else {
+    existingAccount = accounts[service].find(account => account.username === username);
+  }
 
   if (!existingAccount && !isNewAccount) {
     Object.entries(accounts).forEach(([services, accountsList]) => {
@@ -296,9 +302,10 @@ const updateAccount = async (isNewAccount) => {
   updateAccountsList();
 
   const inputSelectors = "#create-account input[type='text'], #account-info input[type='text']"
-
   document.querySelectorAll(inputSelectors).forEach(input => input.value = "");
 
+  innerHTML("not-safe-password");
+  innerHTML("account-already-exists");
   innerHTML("create-account-title", "New Account");
   hideComponent("delete", true);
   hideComponent("edit", true);
@@ -576,6 +583,7 @@ const clear = () => {
   document.getElementById("password-length").value = length;
   innerHTML("create-account-title", "New Account");
   innerHTML("not-safe-password");
+  innerHTML("account-already-exists");
   hideComponent("edit", true);
   hideComponent("delete", true)
   hideComponent("save", false);
