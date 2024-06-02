@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "password-manager",
-    "version": "1.0.0"
+    "version": "0.5.7"
   },
   "tauri": {
     "allowlist": {
