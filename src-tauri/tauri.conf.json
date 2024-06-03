@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "Password Manager",
-    "version": "0.5.7"
+    "version": "0.5.8"
   },
   "tauri": {
     "allowlist": {
@@ -41,7 +41,8 @@
       {
         "title": "Password Manager",
         "width": 1400,
-        "height": 800
+        "height": 800,
+        "center": true
       }
     ],
     "security": {

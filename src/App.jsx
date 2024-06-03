@@ -280,13 +280,18 @@ const updateAccount = async (isNewAccount) => {
     isNewAccount = true;
   }
 
+  let password_history = [password];
+  if (!isNewAccount && !existingAccount["password-history"].includes(password)) {
+    password_history = existingAccount["password-history"].push(password);
+  }
+
   const id = isNewAccount ? generatePassword(6) : lastClickedId;
   const edited_account = {
     service,
     username,
     password,
     notes,
-    "password-history": isNewAccount ? [password] : [...existingAccount["password-history"], password],
+    "password-history": password_history,
     favorite: isNewAccount ? false : existingAccount.favorite,
     id
   };
