@@ -122,7 +122,7 @@ const changePath = async () => {
   const pathSelected = await open({
     directory: true,
     multiple: false,
-    defaultPath: await appConfigDir()
+    defaultPath: "$DOCUMENT"
   })
 
   if (!pathSelected) {
@@ -685,115 +685,34 @@ window.addEventListener("load", async () => {
   await loadPaths();
   await updateIds();
   updateAccountsList();
+  console.log(window.innerWidth, window.innerHeight);
   document.addEventListener('contextmenu', event => event.preventDefault());
 })
 
 function App() {
   return (
     <div className="container">
-      <div className="display" id="account-info">
-        <h3 className="title" id="account-info-title">Account Info</h3>
 
-        <p id="account-info-service">Service</p>
-        <input type="text" id="service-info" readOnly />
-
-        <p id="account-info-username">Username</p>
-        <div className="info-copy">
-          <input type="text" id="username-info" readOnly />
-
-          <div className="icon-button" id="copy-icon" onClick={ () => copy("username") }>
-            <svg onMouseOver={() => copyOnMouseOver("copy-username")} onMouseOut={() => copyOnMouseOut("copy-username")} width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g id="SVGRepo_bgCarrier" strokeWidth="0"/>
-              <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"/>
-              <g id="SVGRepo_iconCarrier"> 
-                <g clipPath="url(#a)"> 
-                  <path fillRule="evenodd" clipRule="evenodd" id="copy-username" d="M8 5h7.795c1.115 0 1.519.116 1.926.334.407.218.727.538.945.945.218.407.334.811.334 1.926V16a1 1 0 1 0 2 0V8.128c0-1.783-.186-2.43-.534-3.082a3.635 3.635 0 0 0-1.512-1.512C18.302 3.186 17.655 3 15.872 3H8a1 1 0 0 0 0 2zm7.721 2.334C15.314 7.116 14.91 7 13.795 7h-7.59c-1.115 0-1.519.116-1.926.334a2.272 2.272 0 0 0-.945.945C3.116 8.686 3 9.09 3 10.205v7.59c0 1.114.116 1.519.334 1.926.218.407.538.727.945.945.407.218.811.334 1.926.334h7.59c1.114 0 1.519-.116 1.926-.334.407-.218.727-.538.945-.945.218-.407.334-.811.334-1.926v-7.59c0-1.115-.116-1.519-.334-1.926a2.272 2.272 0 0 0-.945-.945z" fill="#000000"/> 
-                </g>
-                <defs> 
-                  <clipPath id="a"> 
-                    <path fill="#000000" d="M0 0h24v24H0z"/> 
-                  </clipPath> 
-                </defs> 
-              </g>
-            </svg>
-          </div>
+      <div id="nav">
+        <div id="search">
+          <input type="text" placeholder="Search any service to filter" id="filter" onChange={getFilter} />
+          <button id="filter-button" onClick={getFilter}></button>
         </div>
 
-        <p id="account-info-password">Password</p>
-        <div className="info-copy">
-          <input type="text" id="password-info" readOnly />
-
-          <div className="icon-button" id="copy-icon" onClick={ () => copy("password") }>
-            <svg onMouseOver={() => copyOnMouseOver("copy-password")} onMouseOut={() => copyOnMouseOut("copy-password")} width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g id="SVGRepo_bgCarrier" strokeWidth="0"/>
-              <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"/>
-              <g id="SVGRepo_iconCarrier"> 
-                <g clipPath="url(#a)"> 
-                  <path fillRule="evenodd" clipRule="evenodd" id="copy-password" d="M8 5h7.795c1.115 0 1.519.116 1.926.334.407.218.727.538.945.945.218.407.334.811.334 1.926V16a1 1 0 1 0 2 0V8.128c0-1.783-.186-2.43-.534-3.082a3.635 3.635 0 0 0-1.512-1.512C18.302 3.186 17.655 3 15.872 3H8a1 1 0 0 0 0 2zm7.721 2.334C15.314 7.116 14.91 7 13.795 7h-7.59c-1.115 0-1.519.116-1.926.334a2.272 2.272 0 0 0-.945.945C3.116 8.686 3 9.09 3 10.205v7.59c0 1.114.116 1.519.334 1.926.218.407.538.727.945.945.407.218.811.334 1.926.334h7.59c1.114 0 1.519-.116 1.926-.334.407-.218.727-.538.945-.945.218-.407.334-.811.334-1.926v-7.59c0-1.115-.116-1.519-.334-1.926a2.272 2.272 0 0 0-.945-.945z" fill="#000000"/> 
-                </g> 
-                <defs> 
-                  <clipPath id="a"> 
-                    <path fill="#000000" d="M0 0h24v24H0z"/> 
-                  </clipPath> 
-                </defs> 
-              </g>
-            </svg>
-          </div>
-        </div>
-
-        <p id="account-info-notes">Notes</p>
-        <input type="text" id="notes-info" readOnly />
-
-        <p id="accounts-path">Current Directory</p>
-        <input type="email" placeholder="No path was selected" readOnly id="show-current-path" />
-        <button id="select-path" onClick={changePath}>Change</button>
-      </div>
-
-      <div className="display" id="accounts-list">
-        <h3 className="title" id="accounts-list-title">Accounts List</h3>
-
-        <div id="test">
-          <input type="text" placeholder="Type a service to filter" id="filter" onChange={getFilter} />
-          <button onClick={getFilter}>Filter</button>
-        </div>
-
-        <ul id="list"></ul>
-      </div>
-
-      <div className="display" id="create-account">
-        <h3 className="title" id="create-account-title">New Account</h3>
-
-        <div id="form">
-          <p id="get-service">Service name</p>
-          <input type="text" placeholder="Service" id="service" />
-
-          <p id="get-username">Username/Email</p>
-          <input onChange={() => { innerHTML("account-already-exists") }}
-           type="text" placeholder="example@abc.com" id="username" />
-          <p id="account-already-exists" className="error-message"></p>
-
-          <p id="get-password">Password</p>
-          <input type="text" onChange={updateSafePassErr} placeholder="Password" id="password" />
-
-          <button id="generate" onClick={getPassword}>Generate</button>
-          <p id="not-safe-password" className="error-message"></p>
-
-          <input onChange={updateRange} type="range" name="Length" id="password-length" min={8} max={20}  defaultValue={12} />
-          <p id="show-length">Length: 12</p>
-
-          <p id="get-notes">Notes/Observations</p>
-          <input type="text" placeholder="Optional" id="notes" />
-        </div>
-
-        <div id="options">
-          <p id="paths-error" className="error-message"></p>
-          <button id="save" onClick={saveAccount}>Save</button>
-          <button id="edit" onClick={editAccount} hidden>Edit</button>
-          <button id="delete" onClick={deleteAccount} hidden>Delete</button>
-          <button id="cancel" onClick={clear}>Cancel</button>
-          <p id="edit-confirmation-warning"></p>
+        <div id="util">
+          <button id="notifications"></button>
+          <button id="settings"></button>
         </div>
       </div>
+
+      <div id="accounts-list">
+        <button id="new-account">New Item</button>
+      </div>
+
+      <div id="account-info">
+
+      </div>
+
     </div>
   );
 }

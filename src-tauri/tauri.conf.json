@@ -6,8 +6,8 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "Password Manager",
-    "version": "0.5.8"
+    "productName": "Password Manager v0.5.8b",
+    "version": "0.5.9"
   },
   "tauri": {
     "allowlist": {
@@ -40,8 +40,8 @@
     "windows": [
       {
         "title": "Password Manager",
-        "width": 1400,
-        "height": 800,
+        "width": 1100,
+        "height": 750,
         "center": true
       }
     ],

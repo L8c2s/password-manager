@@ -4,8 +4,8 @@
   line-height: 24px;
   font-weight: 400;
 
-  color: #0f0f0f;
-  background-color: #f6f6f6;
+  color: #f6f6f6;
+  background-color: #050414;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -16,129 +16,94 @@
 
 /* ids */
 
-#options {
-  text-align: center;
-  margin-top: 50px;
-  /* background-color: black; */
-}
-
-#password-length {
-  width: 20%;
-}
-
-#show-length {
-  display: inline-block;
-  vertical-align: top;
-  margin-left: 5px;
-}
-
-#list {
+#nav {
+  position: sticky;
+  top: 10px;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  margin: 0;
   display: flex;
+  flex-direction: row;
+  background-color: #050414;
+  z-index: 1;
+}
+
+#search,
+#util {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  margin-right: 40px;
+}
+
+#search {
   justify-content: center;
-  align-items: center;
 }
 
-#test {
-  text-align: center;
+#util {
+  justify-content: right;  
 }
 
-#username-info,
-#password-info {
-  margin-right: 20px;
+#filter {
+  width: 300px;
+  padding-left: 40px;
+  background: url("icons/search.svg") no-repeat 10px center;
+  background-color: #1e1d2b;
 }
 
-#show-current-path {
-  width: 250px;
+#filter-button {
+  background: url("icons/filter.svg") no-repeat center;
+  background-color: #2066ec;
+  width: 40px;
+  height: 40px;
 }
 
-.info-copy {
-  display: flex;
-  align-items: center;
+#notifications {
+  background: url("icons/notifications.svg") no-repeat center;
+  width: 40px;
+  height: 40px;
+}
+
+#settings {
+  background: url("icons/settings.svg") no-repeat center;
+  width: 40px;
+  height: 40px;
+}
+
+#accounts-list {
+  position: relative;
+  width: 100%;
+  height: 2200px;
+}
+
+#new-account {
+  position: fixed;
+  bottom: 10px;
+  left: 25%;
+  transform: translate(-50%, 0);
+  width: 150px
+}
+
+#account-info {
+  position: fixed;
+  bottom: 20px;
+  right: 40px;
+  width: 470px;
+  height: 640px;
+  background-color: #181b2c;
+  border-radius: 15px;
 }
 
 /* classes */
 
 .container {
   margin: 0;
-  padding-top: 10vh;
-  display: flex;
+  padding-top: 0;
   flex-direction: row;
-  justify-content: center;
-}
-
-.row {
-  display: flex;
-  justify-content: center;
-}
-
-.display {
-  display: block;
-  width: 500px;
-  height: 500px;
-  margin: 10px;
-}
-
-.title {
-  text-align: center;
-}
-
-.service,
-.username,
-.notes {
-  margin: 1px;
-}
-
-.service {
-  font-size: large;
-  font-weight: bold;
-}
-
-.accounts-list-item {
-  height: auto;
-  width: 80%;
-  /* background-color: black; */
-  padding: 5px 10px 3px 10px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  transition: border-color 0.25s;
-  display: flex;
-  align-items: center;
-  margin: 5px auto 5px auto;
-}
-
-.accounts-list-item:hover {
-  border-color: #396cd8;
-}
-
-.account-info {
-  width: 100%;
-}
-
-.icon-container {
-  display: flex;
-  align-items: center;
-  float: right;
-}
-
-.icon-button {
-  height: 30px;
-  width: 30px;
-  border: 1px solid transparent;
-  transition: border-color 0.25s;
-  text-align: center;
-  cursor: pointer;
-}
-
-.error-message {
-  color: red;
-  margin: 0 auto;
 }
 
 /* tags */
-
-h1 {
-  text-align: center;
-}
 
 input,
 button {
@@ -148,8 +113,6 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
   transition: border-color 0.25s;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
   margin: 5px;
@@ -157,14 +120,27 @@ button {
 
 button {
   cursor: pointer;
+  background-color: #2066ec;
+  color: #f6f6f6;
+}
+
+input {
+  color: #94a3c9;
+  background-color: #1e1d2b;
+  transition: border-color .25s;
 }
 
 button:hover {
-  border-color: #396cd8;
+  border-color: #f6f6f6;
 }
+
 button:active {
   border-color: #396cd8;
-  background-color: #e8e8e8;
+  background-color: #0051ff;
+}
+
+input:focus {
+  border-color: #206eff;
 }
 
 input,
@@ -175,20 +151,4 @@ button {
 ul {
   display: flex;
   flex-direction: column;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
 }
