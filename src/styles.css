@@ -71,10 +71,17 @@
   height: 40px;
 }
 
+#settings-nav {
+  width: 100%;
+  height: 10%;
+  padding-left: 50px;
+  display: flex;
+  align-items: center;
+}
+
 #accounts-list {
   position: relative;
   width: 100%;
-  height: 2200px;
 }
 
 #new-account {
@@ -89,13 +96,144 @@
   position: fixed;
   bottom: 20px;
   right: 40px;
-  width: 470px;
-  height: 640px;
+  width: 45%;
+  height: 85%;
   background-color: #181b2c;
   border-radius: 15px;
+  display: block;
+}
+
+#blur {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: none;
+}
+
+#directory-display {
+  background: url("icons/no-folder.svg") no-repeat 10px center;
+  padding-left: 40px;
+  width: 40%;
+}
+
+#settings-options {
+  width: 94%;
+  height: 80%;
+  margin-top: 40px;
+  margin-left: 30px;
+  /* background-color: blue; */
+}
+
+#info-nav {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 50px;
+}
+
+#decorations {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+}
+
+#warning-notification {
+  width: 90%;
+  height: 8%;
+  margin: 10px auto;
+  border-radius: 8px;
+  background-color: #21ec32;
+  /* background-color: #ff8d23; */
+  display: flex;
+  align-items: center;
+}
+
+#warning {
+  margin-left: 10px;
+  color: #f2f2f2;
+  font-weight: bold;
+}
+
+#generate-password {
+  background: url("icons/generate-password.svg") no-repeat center;
+  width: 40px;
+  height: 40px;
+}
+
+#visibility {
+  width: 40px;
+  height: 40px
+}
+
+#password-info {
+  display: flex;
+  flex-direction: row;
+}
+
+#password-info-display {
+  width: 90%;
+  height: 100%;
+}
+
+#password-info-decorations {
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+  align-items: center;
+}
+
+#copy-password {
+  background: url("icons/copy.svg") no-repeat center;
+  width: 40px;
+  height: 40px;
+}
+
+#more {
+  background: url("icons/three-dots.svg") no-repeat center;
+  width: 40px;
+  height: 40px;
+}
+
+#edit {
+  background: url("icons/edit.svg") no-repeat center;
+  width: 40px;
+  height: 40px;
+}
+
+#favorite-button {
+  width: 40px;
+  height: 40px;
 }
 
 /* classes */
+
+.popup {
+  position: fixed;
+  left: 25%;
+  top: 3.5%;
+  transform: translate(-50%, 0);
+  transform-origin: center;
+  margin: auto;
+  width: 50%;
+  height: 93%;
+  background-color: #181b2c;
+  z-index: 3;
+  border-radius: 15px;
+  display: none;
+}
+
+.not-favorite {
+  background: url("icons/not-favorite.svg") no-repeat center;
+}
+
+.favorite {
+  background: url("icons/favorite.svg") no-repeat center;
+}
 
 .container {
   margin: 0;
@@ -103,7 +241,64 @@
   flex-direction: row;
 }
 
+.slide-in {
+  animation: slide-in .5s forwards;
+}
+
+.slide-out {
+  animation: slide-out .5s forwards;
+}
+
+.info-title {
+  margin: 5px;
+  font-weight: bold;
+  color: #6b6e8f;
+  font-size: 17px;
+}
+
+.info {
+  width: 90%;
+  height: 5%;
+  margin: 35px auto;
+}
+
+.info input {
+  background-color: #181b2c;
+  width: 60%;
+}
+
+.visible {
+  background: url("icons/visibility.svg") no-repeat center;
+}
+
+.visible:active,
+.invisible:active,
+.not-favorite:active {
+  background-color: rgba(255, 255, 255, 0);
+}
+
+.invisible {
+  background: url("icons/visibility-off.svg") no-repeat center;
+}
+
+.service-name {
+  width: 50%;
+  height: 100%;
+}
+
+.zoom-in {
+  animation: zoom-in .1s forwards;
+}
+
+.zoom-out {
+  animation: zoom-out .1s forwards;
+}
+
 /* tags */
+
+h2 {
+  margin: 15px;
+}
 
 input,
 button {
@@ -125,7 +320,7 @@ button {
 }
 
 input {
-  color: #94a3c9;
+  color: #d4d4d4;
   background-color: #1e1d2b;
   transition: border-color .25s;
 }
@@ -151,4 +346,40 @@ button {
 ul {
   display: flex;
   flex-direction: column;
+}
+
+/* animations */
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  } to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out {
+  from {
+    transform: translate(0);
+  } to {
+    transform: translate(110%);
+    display: none;
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    transform: scale(.99);
+  } to {
+    transform: scale(1);
+  }
+}
+
+@keyframes zoom-out {
+  from {
+    transform: scale(1);
+  } to {
+    transform: scale(.99);
+    display: none;
+  }
 }

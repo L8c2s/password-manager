@@ -3,7 +3,6 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { writeTextFile, readTextFile, exists, createDir, copyFile } from "@tauri-apps/api/fs";
 import { open } from "@tauri-apps/api/dialog";
 import { appConfigDir } from "@tauri-apps/api/path";
-import "./App.css";
 
 let lastClickedId;
 
@@ -115,10 +114,23 @@ const checkPath = async () => {
   let split_path = mainPath.split("\\");
   let show_path = `${split_path.at(-2)}\\${split_path.at(-1)}`;
 
-  document.getElementById("show-current-path").value = show_path;
+  document.getElementById("directory-display").value = show_path;
 }
 
-const changePath = async () => {
+const changePath = async (action=null) => {
+  if (action === "clear") {
+    mainPath = "";
+    jsonAccountsPath = "";
+    textAccountsPath = "";
+    idsPath = "";
+
+    savePath();
+    updateAccountsList();
+
+    document.getElementById("directory-display").value = "";
+    return;
+  }
+
   const pathSelected = await open({
     directory: true,
     multiple: false,
@@ -146,7 +158,14 @@ const changePath = async () => {
 }
 
 const savePath = async () => {
-  const content = `${mainPath}\n${jsonAccountsPath}\n${textAccountsPath}\n${idsPath}`;
+  let content;
+
+  if (!mainPath || !jsonAccountsPath || !textAccountsPath || !idsPath) {
+    content = "";
+  } else {
+    content = `${mainPath}\n${jsonAccountsPath}\n${textAccountsPath}\n${idsPath}`;
+  };
+
   await writeTextFile("paths.txt", content);
 }
 
@@ -528,7 +547,6 @@ const createItem = (accountInfo) => {
   list.appendChild(div_accounts_list_item);
 }
 
-
 const getFilter = async () => {
   const filter = document.getElementById("filter").value || null;
   await updateAccountsList(filter);
@@ -537,12 +555,10 @@ const getFilter = async () => {
 const updateAccountsList = async (filter=null) => {
   const accounts = await readAccounts();
 
-  // console.log("updateAccountsList: ", accounts);
-
-  if (!accounts && accounts != {}) return false;
-
   const list = document.getElementById("list");
   list.innerHTML = "";
+
+  if (!accounts && accounts != {}) return false;
 
   const accountsListed = new Set();
   const accountsToList = [];
@@ -573,9 +589,11 @@ const updateAccountsList = async (filter=null) => {
   });
 }
 
-const setFavorite = async (id) => {
-  document.getElementById(id+"_svg").setAttribute("class", "favorite");
-  document.getElementById(id+"_path").setAttribute("fill", "#ffff00");
+const setFavorite = async () => {
+  const favoriteButton = document.getElementById("favorite");
+
+  if (favoriteButton.className === "not-favorite") favoriteButton.className = "favorite";
+  else favoriteButton.className = "not-favorite";
 }
 
 // ## events
@@ -642,8 +660,10 @@ const favOnClick = async (id) => {
 }
 
 const itemOnClick = async (itemId) => {
-  innerHTML("create-account-title", "Edit Account");
-  hideComponent("save", true);
+  const accountInfo = document.getElementById("account-info");
+  accountInfo.style = "display: block;";
+  accountInfo.className = "slide-in";
+
   lastClickedId = itemId;
 
   const accounts = await readAccounts();
@@ -662,23 +682,64 @@ const itemOnClick = async (itemId) => {
   hideComponent("delete", false);
 }
 
+const closeInfo = async () => {
+  const accountInfo = document.getElementById("account-info");
+  accountInfo.classList.remove("slide-in");
+  accountInfo.className = "slide-out";
+}
+
 const copy = async (info) => {
-  if (!lastClickedId) return false;
+  // if (!lastClickedId) return false;
 
-  let currentAccount = null;
-  const accounts = await readAccounts();
-  for (const [_, accountsList] of Object.entries(accounts)) {
-    for (const [_, account] of accountsList.entries()) {
-      if (account.id === lastClickedId) {
-        currentAccount = account;
-      }
-    }
+  // let currentAccount = null;
+  // const accounts = await readAccounts();
+  // for (const [_, accountsList] of Object.entries(accounts)) {
+  //   for (const [_, account] of accountsList.entries()) {
+  //     if (account.id === lastClickedId) {
+  //       currentAccount = account;
+  //     }
+  //   }
+  // }
+
+  // if (!currentAccount) return false;
+
+  const password = document.getElementById("password");
+  if (!password.value) return false;
+
+  navigator.clipboard.writeText(password.value);
+}
+
+const closePopup = () => {
+  const blur = document.getElementById("blur");
+  blur.style = "";
+
+  const popup = document.querySelector(".popup");
+  popup.classList.remove("zoom-in");
+  popup.classList.add("zoom-out");
+}
+
+const openPopup = (id) => {
+  const popup = document.getElementById(id);
+  popup.style = "display: block;";
+  popup.classList.remove("zoom-out");
+  popup.classList.add("zoom-in");
+
+  const blur = document.getElementById("blur");
+  blur.style = "display: block; backdrop-filter: blur(3px);";
+}
+
+const turnVisibility = () => {
+  const visibility = document.getElementById("visibility");
+  const password = document.getElementById("password");
+  const isVisible = password.getAttribute("type");
+
+  if (isVisible === "text") {
+    password.setAttribute("type", "password");
+    visibility.className = "invisible";
+  } else {
+    password.setAttribute("type", "text")
+    visibility.className = "visible";
   }
-
-  // console.log(currentAccount[info])
-
-  if (!currentAccount) return false;
-  navigator.clipboard.writeText(currentAccount[info]);
 }
 
 window.addEventListener("load", async () => {
@@ -686,30 +747,103 @@ window.addEventListener("load", async () => {
   await updateIds();
   updateAccountsList();
   console.log(window.innerWidth, window.innerHeight);
-  document.addEventListener('contextmenu', event => event.preventDefault());
+  // document.addEventListener('contextmenu', event => event.preventDefault());
 })
 
 function App() {
   return (
     <div className="container">
 
-      <div id="nav">
-        <div id="search">
-          <input type="text" placeholder="Search any service to filter" id="filter" onChange={getFilter} />
-          <button id="filter-button" onClick={getFilter}></button>
+      <div id="main">
+        
+        <div id="nav">
+          <div id="search">
+            <input type="text" placeholder="Search any service to filter" id="filter" onChange={getFilter} />
+            <button id="filter-button" onClick={getFilter}></button>
+          </div>
+
+          <div id="util">
+            <button id="notifications"></button>
+            <button id="settings" onClick={() => { openPopup("settings-popup") }}></button>
+          </div>
         </div>
 
-        <div id="util">
-          <button id="notifications"></button>
-          <button id="settings"></button>
+        <div id="close-info">
+          <div id="accounts-list">
+            <ul id="list"></ul>
+            <button id="new-account">New Item</button>
+          </div>
+        </div>
+
+        <div id="account-info">
+          <div id="info-nav">
+            <div id="decorations">
+              <button id="favorite-button" className="not-favorite" onClick={setFavorite}></button>
+              <button id="edit"></button>
+              <button id="more"></button>
+            </div>
+          </div>
+
+          <div id="warning-notification">
+            <p id="warning">Your account is safe.</p>
+          </div>
+
+          <div id="info-display">
+
+            <div id="service-info" className="info">
+              <p className="info-title" id="service-title">Service</p>
+              <input type="text" readOnly id="service" placeholder="Service" />
+            </div>
+
+            <div id="username-info" className="info">
+              <p className="info-title" id="username-title">Username</p>
+              <input type="text" readOnly id="username" placeholder="example@abc.com" />
+            </div>
+
+            <div id="password-info" className="info">
+              <div id="password-info-display">
+                <p className="info-title" id="password-title">Password</p>
+                <input type="password" readOnly id="password" placeholder="Password" />
+              </div>
+
+              <div id="password-info-decorations">
+                <button id="copy-password" onClick={copy}></button>
+                <button id="visibility" className="invisible" onClick={turnVisibility}></button>
+              </div>
+            </div>
+
+            <div id="notes-info" className="info">
+              <p className="info-title" id="notes-title">Notes</p>
+              <input type="text" readOnly id="notes" placeholder="Notes/Observations" />
+            </div>
+
+          </div>
         </div>
       </div>
 
-      <div id="accounts-list">
-        <button id="new-account">New Item</button>
+      <div id="blur" onClick={closePopup}></div>
+
+      <div id="settings-popup" className="popup zoom-out">
+        <div id="settings-nav">
+          <h1 id="settings-title">Settings</h1>
+        </div>
+
+        <div id="settings-options">
+          <p id="change-directory-title">Change Directory</p>
+          <input type="text" placeholder="Click here to select/change the path" id="directory-display" readOnly onClick={changePath} />
+          <button id="clear-directory" onClick={() => changePath("clear")}>Clear</button>
+        </div>
       </div>
 
-      <div id="account-info">
+      <div id="notifications-popup">
+
+      </div>
+
+      <div id="create-account-popup">
+
+      </div>
+
+      <div id="edit-account-popup">
 
       </div>
 

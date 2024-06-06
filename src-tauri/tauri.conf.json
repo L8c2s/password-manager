@@ -6,7 +6,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "Password Manager v0.5.8b",
+    "productName": "Password Manager",
     "version": "0.5.9"
   },
   "tauri": {
@@ -39,7 +39,7 @@
     },
     "windows": [
       {
-        "title": "Password Manager",
+        "title": "Password Manager v0.5.9b",
         "width": 1100,
         "height": 750,
         "center": true
