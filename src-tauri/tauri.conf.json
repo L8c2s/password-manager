@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "Password Manager",
-    "version": "0.5.9"
+    "version": "0.6.4-UI.5b"
   },
   "tauri": {
     "allowlist": {
@@ -39,7 +39,7 @@
     },
     "windows": [
       {
-        "title": "Password Manager v0.5.9b",
+        "title": "Password Manager v0.6.0-UI.5b",
         "width": 1100,
         "height": 750,
         "center": true

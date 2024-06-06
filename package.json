@@ -1,7 +1,7 @@
 {
   "name": "password-manager",
   "private": true,
-  "version": "0.5.9",
+  "version": "0.6.0-UI.5b",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,8 +11,6 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^1",
-    "json-stringify-pretty-compact": "^4.0.0",
-    "jsonfile": "^6.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

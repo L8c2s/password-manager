@@ -5,6 +5,7 @@ import { open } from "@tauri-apps/api/dialog";
 import { appConfigDir } from "@tauri-apps/api/path";
 
 let lastClickedId;
+let monthsToUpdate = "";
 
 let mainPath = "";
 let jsonAccountsPath = "";
@@ -114,7 +115,9 @@ const checkPath = async () => {
   let split_path = mainPath.split("\\");
   let show_path = `${split_path.at(-2)}\\${split_path.at(-1)}`;
 
-  document.getElementById("directory-display").value = show_path;
+  const display = document.getElementById("directory-display");
+  display.value = show_path;
+  display.className = "directory-found";
 }
 
 const changePath = async (action=null) => {
@@ -124,10 +127,12 @@ const changePath = async (action=null) => {
     textAccountsPath = "";
     idsPath = "";
 
-    savePath();
+    saveConfig();
     updateAccountsList();
 
-    document.getElementById("directory-display").value = "";
+    const display = document.getElementById("directory-display");
+    display.value = "";
+    display.className = "directory-not-found";
     return;
   }
 
@@ -153,32 +158,42 @@ const changePath = async (action=null) => {
   idsPath = `${mainPath}\\ids.json`;
 
   checkPath();
-  savePath();
+  saveConfig();
   updateAccountsList();
 }
 
-const savePath = async () => {
-  let content;
+const saveConfig = async () => {
+  const config = {
+    "accounts-directory": mainPath,
+    "months-to-update": monthsToUpdate
+  }
 
-  if (!mainPath || !jsonAccountsPath || !textAccountsPath || !idsPath) {
-    content = "";
-  } else {
-    content = `${mainPath}\n${jsonAccountsPath}\n${textAccountsPath}\n${idsPath}`;
-  };
-
-  await writeTextFile("paths.txt", content);
+  await writeTextFile("config.json", JSON.stringify(config));
 }
 
-const loadPaths = async () => {
-  const paths = await readTextFile("paths.txt");
-  [mainPath, jsonAccountsPath, textAccountsPath, idsPath] = paths.split("\n");
+const loadPaths = async (config) => {
+  mainPath = config["accounts-directory"];
 
-  // console.log(mainPath);
-  // console.log(jsonAccountsPath);
-  // console.log(textAccountsPath);
-  // console.log(idsPath);
+  if (!mainPath) return false;
+
+  jsonAccountsPath = `${mainPath}\\accounts.json`;
+  textAccountsPath = `${mainPath}\\accounts.txt`;
+  idsPath = `${mainPath}\\ids.json`;
 
   checkPath();
+}
+
+const loadConfig = async () => {
+  const config = JSON.parse(await readTextFile("config.json"));
+
+  if (!config) {
+    await saveConfig();
+    return loadConfig();
+  }
+
+  await loadPaths(config);
+
+  monthsToUpdate = config["months-to-update"];
 }
 
 // ## ids related
@@ -583,14 +598,13 @@ const updateAccountsList = async (filter=null) => {
   accountsToList.forEach((account) => {
     createItem(account);
     if (favorites > 0) {
-      setFavorite(account.id);
       favorites -= 1;
     }
   });
 }
 
 const setFavorite = async () => {
-  const favoriteButton = document.getElementById("favorite");
+  const favoriteButton = document.getElementById("favorite-button");
 
   if (favoriteButton.className === "not-favorite") favoriteButton.className = "favorite";
   else favoriteButton.className = "not-favorite";
@@ -743,7 +757,7 @@ const turnVisibility = () => {
 }
 
 window.addEventListener("load", async () => {
-  await loadPaths();
+  await loadConfig();
   await updateIds();
   updateAccountsList();
   console.log(window.innerWidth, window.innerHeight);
@@ -768,15 +782,16 @@ function App() {
           </div>
         </div>
 
-        <div id="close-info">
-          <div id="accounts-list">
-            <ul id="list"></ul>
-            <button id="new-account">New Item</button>
-          </div>
+        <div id="accounts-list">
+          <ul id="list"></ul>
+          <button id="new-account"></button>
         </div>
 
         <div id="account-info">
           <div id="info-nav">
+            <div id="close-decoration">
+              <button id="close-info" onClick={closeInfo}></button>
+            </div>
             <div id="decorations">
               <button id="favorite-button" className="not-favorite" onClick={setFavorite}></button>
               <button id="edit"></button>
@@ -830,7 +845,8 @@ function App() {
 
         <div id="settings-options">
           <p id="change-directory-title">Change Directory</p>
-          <input type="text" placeholder="Click here to select/change the path" id="directory-display" readOnly onClick={changePath} />
+          <input type="text" className="directory-not-found" placeholder="Click here to select/change the path"
+            id="directory-display" readOnly onClick={changePath} />
           <button id="clear-directory" onClick={() => changePath("clear")}>Clear</button>
         </div>
       </div>
