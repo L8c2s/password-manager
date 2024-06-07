@@ -1741,7 +1741,7 @@ dependencies = [
 
 [[package]]
 name = "password-manager"
-version = "0.6.0-UI.5b"
+version = "0.6.0-UI.8b"
 dependencies = [
  "tauri",
  "tauri-build",

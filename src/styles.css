@@ -74,7 +74,7 @@
 #settings-nav {
   width: 90.8%;
   height: 10%;
-  padding-left: 40px;
+  padding-left: 25px;
   padding-top: 15px;
   display: flex;
   align-items: center;
@@ -124,10 +124,29 @@
   width: 50%;
 }
 
+#recovery-explanation {
+  text-align: justify;
+}
+
+#recovery-content {
+  text-align: center;
+}
+
+#recovery-popup {
+  height: fit-content;
+  width: 50%;
+  top: 20%;
+}
+
+#recovery-path {
+  background: url("icons/normal-folder.svg") no-repeat 10px center;
+  padding-left: 40px;
+  width: 50%;
+}
+
 #settings-options {
   width: 94%;
   height: 80%;
-  margin-top: 40px;
   margin-left: 30px;
 }
 
@@ -254,6 +273,10 @@
 }
 
 /* classes */
+
+.recover-content {
+  margin: 40px 15px auto 15px;
+}
 
 .inline-block {
   display: inline-block;
@@ -433,6 +456,10 @@ button:active {
   background-color: #0051ff;
 }
 
+button:disabled {
+  filter: grayscale(100%);
+}
+
 input:focus {
   border-color: #206eff;
 }
@@ -468,7 +495,7 @@ ul {
 
 @keyframes zoom-in {
   from {
-    transform: scale(.99);
+    transform: scale(.95);
   } to {
     transform: scale(1);
   }

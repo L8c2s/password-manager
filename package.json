@@ -1,7 +1,7 @@
 {
   "name": "password-manager",
   "private": true,
-  "version": "0.6.0-UI.5b",
+  "version": "0.6.0-UI.8b",
   "type": "module",
   "scripts": {
     "dev": "vite",
