@@ -1,12 +1,9 @@
 import React from "react";
-import { invoke } from "@tauri-apps/api/tauri";
 import { writeTextFile, readTextFile, exists, createDir, copyFile } from "@tauri-apps/api/fs";
 import { open } from "@tauri-apps/api/dialog";
-import { appConfigDir } from "@tauri-apps/api/path";
 
 let lastClickedId;
-let monthsToUpdate = "";
-
+let monthsToUpdate = 3;
 let mainPath = "";
 let jsonAccountsPath = "";
 let textAccountsPath = "";
@@ -30,6 +27,7 @@ const createTextFile = async () => {
   }).join("\n\n")
 
   await writeTextFile(textAccountsPath, formattedData);
+  innerHTML("file-generated", `File created in ${mainPath}\\accounts.txt`);
 }
 
 // ## paths related
@@ -63,7 +61,7 @@ const createBackup = async () => {
 
   await createDir(backupPath);
   await copyFile(jsonAccountsPath, `${backupPath}\\accounts.json`);
-  await copyFile(textAccountsPath, `${backupPath}\\accounts.txt`);
+  // await copyFile(textAccountsPath, `${backupPath}\\accounts.txt`);
   await copyFile(idsPath, `${backupPath}\\ids.json`);
 }
 
@@ -168,7 +166,7 @@ const saveConfig = async () => {
     "months-to-update": monthsToUpdate
   }
 
-  await writeTextFile("config.json", JSON.stringify(config));
+  await writeTextFile("passmanager.config.json", JSON.stringify(config));
 }
 
 const loadPaths = async (config) => {
@@ -184,7 +182,7 @@ const loadPaths = async (config) => {
 }
 
 const loadConfig = async () => {
-  const config = JSON.parse(await readTextFile("config.json"));
+  const config = JSON.parse(await readTextFile("passmanager.config.json"));
 
   if (!config) {
     await saveConfig();
@@ -194,6 +192,12 @@ const loadConfig = async () => {
   await loadPaths(config);
 
   monthsToUpdate = config["months-to-update"];
+  document.getElementById("months-to-update").value = monthsToUpdate;
+}
+
+const monthsUpdate = async (amount) => {
+  document.getElementById("months-to-update").value = monthsToUpdate = amount;
+  await saveConfig();
 }
 
 // ## ids related
@@ -261,7 +265,6 @@ const deleteAccount = async () => {
   removeIds(id)
   await writeTextFile(jsonAccountsPath, JSON.stringify(accounts));
   updateAccountsList();
-  await createTextFile();
   await createBackup();
 
   const inputSelectors = "#create-account input[type='text'], #account-info input[type='text']"
@@ -270,9 +273,6 @@ const deleteAccount = async () => {
   innerHTML("not-safe-password");
   innerHTML("account-already-exists");
   innerHTML("create-account-title", "New Account");
-  hideComponent("save", false);
-  hideComponent("delete", true);
-  hideComponent("edit", true);
   lastClickedId = "";
 }
 
@@ -346,12 +346,8 @@ const updateAccount = async (isNewAccount) => {
   innerHTML("not-safe-password");
   innerHTML("account-already-exists");
   innerHTML("create-account-title", "New Account");
-  hideComponent("delete", true);
-  hideComponent("edit", true);
-  hideComponent("save", false);
   lastClickedId = "";
 
-  await createTextFile();
   await createBackup();
 }
 
@@ -463,12 +459,6 @@ const generatePassword = (length=0) => {
 
 // # utilities
 
-const hideComponent = (id, hide = true) => {
-  const component = document.getElementById(id);
-  component.hidden = hide;
-};
-
-
 const innerHTML = (id, text = "") => {
   document.getElementById(id).innerHTML = text;
 };
@@ -476,7 +466,6 @@ const innerHTML = (id, text = "") => {
 // itemOnClick
 const setValue = (id, value) => {
   document.getElementById(id).value = value;
-  document.getElementById(id+"-info").value = value;
 }
 
 // # html related
@@ -522,40 +511,7 @@ const createItem = (accountInfo) => {
   let div_icon_button = document.createElement("div");
   div_icon_button.setAttribute("class", "icon-button");
   div_icon_button.setAttribute("id", "favorite-icon");
-
-  let svg_fav_icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg_fav_icon.addEventListener("click", () => favOnClick(accountInfo["id"]));
-  svg_fav_icon.addEventListener("mouseover", () => favOnMouseOver(accountInfo["id"]+"_path"));
-  svg_fav_icon.addEventListener("mouseout", () => favOnMouseOut(accountInfo["id"]));
-  svg_fav_icon.setAttribute("id", accountInfo["id"]+"_svg");
-  svg_fav_icon.setAttribute("class", "not-favorite");
-  svg_fav_icon.setAttribute("width", "23px");
-  svg_fav_icon.setAttribute("height", "23px");
-  svg_fav_icon.setAttribute("viewBox", "0 -1 1024 1024");
-  svg_fav_icon.setAttribute("version", "1.1");
-  svg_fav_icon.setAttribute("fill", "#0000000")
-
-  let g_SVGRepo_bgCarrier = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  g_SVGRepo_bgCarrier.setAttribute("id", "SVGRepo_bgCarrier");
-  g_SVGRepo_bgCarrier.setAttribute("strokeWidth", "0")
   
-  let g_SVGRepo_tracerCarrier = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  g_SVGRepo_tracerCarrier.setAttribute("id", "SVGRepo_tracerCarrier");
-  g_SVGRepo_tracerCarrier.setAttribute("strokeLinecap", "round");
-  g_SVGRepo_tracerCarrier.setAttribute("strokeLinejoin", "round");
-
-  let SVGRepo_iconCarrier = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  SVGRepo_iconCarrier.setAttribute("id", "SVGRepo_iconCarrier");
-
-  let favPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  favPath.setAttribute("id", accountInfo["id"]+"_path");
-  favPath.setAttribute("d", "M802.4 967.2c-7.2 0-15.2-1.6-21.6-4.8l-258.4-128.8-252.8 140c-18.4 10.4-41.6 5.6-56-9.6-8.8-9.6-12.8-23.2-11.2-36.8l43.2-285.6L33.6 444C20.8 432 16 414.4 21.6 397.6c4.8-16.8 18.4-28.8 36-31.2l285.6-48L464.8 56c7.2-15.2 22.4-25.6 39.2-26.4 17.6-0.8 33.6 8.8 41.6 24l133.6 256.8 287.2 35.2c17.6 2.4 31.2 13.6 36.8 30.4 5.6 16 1.6 34.4-10.4 46.4L790.4 629.6l55.2 284c2.4 12.8-0.8 26.4-8.8 36.8-8.8 10.4-21.6 16.8-34.4 16.8zM520.8 784.8c7.2 0 15.2 1.6 21.6 4.8l255.2 127.2-54.4-280c-3.2-14.4 1.6-29.6 12-40l200-203.2L672 358.4c-14.4-1.6-28-11.2-34.4-24L506.4 81.6 385.6 340c-6.4 13.6-19.2 23.2-33.6 25.6L70.4 412l208 194.4c11.2 10.4 16 24.8 13.6 40L249.6 928l249.6-137.6c7.2-3.2 14.4-4.8 21.6-5.6z")
-  favPath.setAttribute("fill", "#000000")
-  
-  svg_fav_icon.append(g_SVGRepo_bgCarrier, g_SVGRepo_tracerCarrier);
-  SVGRepo_iconCarrier.appendChild(favPath);
-  svg_fav_icon.appendChild(SVGRepo_iconCarrier);
-  div_icon_button.appendChild(svg_fav_icon);
   div_icon_container.appendChild(div_icon_button);
   div_account_info.append(p_service, p_username, p_notes);
   div_accounts_list_item.append(div_account_info, div_icon_container);
@@ -621,10 +577,24 @@ const clear = () => {
   innerHTML("create-account-title", "New Account");
   innerHTML("not-safe-password");
   innerHTML("account-already-exists");
-  hideComponent("edit", true);
-  hideComponent("delete", true)
-  hideComponent("save", false);
   lastClickedId = "";
+}
+
+const monthsDropdown = () => {
+  const dropdown = document.getElementById("months-dropdown");
+  const dropdownInput = document.getElementById("months-to-update");
+
+  if (dropdown.style.display === "flex") {
+    dropdown.style.display = "none";
+
+    dropdownInput.classList.remove("drop-up");
+    dropdownInput.classList.add("drop-down");
+  } else {
+    dropdown.style.display = "flex";
+
+    dropdownInput.classList.remove("drop-down");
+    dropdownInput.classList.add("drop-up");
+  }
 }
 
 // list item functions
@@ -674,6 +644,8 @@ const favOnClick = async (id) => {
 }
 
 const itemOnClick = async (itemId) => {
+  turnVisibility("off");
+
   const accountInfo = document.getElementById("account-info");
   accountInfo.style = "display: block;";
   accountInfo.className = "slide-in";
@@ -691,15 +663,17 @@ const itemOnClick = async (itemId) => {
   setValue("username", accounts[serviceName][listIndex]["username"]);
   setValue("password", accounts[serviceName][listIndex]["password"]);
   setValue("notes", accounts[serviceName][listIndex]["notes"]);
-
-  hideComponent("edit", false);
-  hideComponent("delete", false);
 }
 
 const closeInfo = async () => {
   const accountInfo = document.getElementById("account-info");
   accountInfo.classList.remove("slide-in");
   accountInfo.className = "slide-out";
+
+  setValue("service", "");
+  setValue("username", "");
+  setValue("password", "");
+  setValue("notes", "");
 }
 
 const copy = async (info) => {
@@ -730,6 +704,8 @@ const closePopup = () => {
   const popup = document.querySelector(".popup");
   popup.classList.remove("zoom-in");
   popup.classList.add("zoom-out");
+
+  innerHTML("file-generated", "");
 }
 
 const openPopup = (id) => {
@@ -742,15 +718,21 @@ const openPopup = (id) => {
   blur.style = "display: block; backdrop-filter: blur(3px);";
 }
 
-const turnVisibility = () => {
+const turnVisibility = (turn) => {
   const visibility = document.getElementById("visibility");
   const password = document.getElementById("password");
-  const isVisible = password.getAttribute("type");
+  let isVisible = password.getAttribute("type");
+
+  if (turn === "off") {
+    isVisible = "text";
+  } else if (turn === "on") {
+    isVisible = "password";
+  }
 
   if (isVisible === "text") {
     password.setAttribute("type", "password");
     visibility.className = "invisible";
-  } else {
+  } else if (isVisible === "password") {
     password.setAttribute("type", "text")
     visibility.className = "visible";
   }
@@ -777,7 +759,13 @@ function App() {
           </div>
 
           <div id="util">
-            <button id="notifications"></button>
+            <div className="dropdown">
+              <button id="notifications"></button>
+              <div id="notifications-dropdown" className="dropdown-content">
+
+              </div>
+            </div>
+
             <button id="settings" onClick={() => { openPopup("settings-popup") }}></button>
           </div>
         </div>
@@ -792,6 +780,7 @@ function App() {
             <div id="close-decoration">
               <button id="close-info" onClick={closeInfo}></button>
             </div>
+
             <div id="decorations">
               <button id="favorite-button" className="not-favorite" onClick={setFavorite}></button>
               <button id="edit"></button>
@@ -807,18 +796,18 @@ function App() {
 
             <div id="service-info" className="info">
               <p className="info-title" id="service-title">Service</p>
-              <input type="text" readOnly id="service" placeholder="Service" />
+              <input type="text" readOnly className="read-only" id="service" placeholder="Service" />
             </div>
 
             <div id="username-info" className="info">
               <p className="info-title" id="username-title">Username</p>
-              <input type="text" readOnly id="username" placeholder="example@abc.com" />
+              <input type="text" readOnly className="read-only" id="username" placeholder="example@abc.com" />
             </div>
 
             <div id="password-info" className="info">
               <div id="password-info-display">
                 <p className="info-title" id="password-title">Password</p>
-                <input type="password" readOnly id="password" placeholder="Password" />
+                <input type="password" readOnly className="read-only" id="password" placeholder="Password" />
               </div>
 
               <div id="password-info-decorations">
@@ -829,7 +818,7 @@ function App() {
 
             <div id="notes-info" className="info">
               <p className="info-title" id="notes-title">Notes</p>
-              <input type="text" readOnly id="notes" placeholder="Notes/Observations" />
+              <input type="text" readOnly className="read-only" id="notes" placeholder="Notes/Observations" />
             </div>
 
           </div>
@@ -844,15 +833,39 @@ function App() {
         </div>
 
         <div id="settings-options">
-          <p id="change-directory-title">Change Directory</p>
-          <input type="text" className="directory-not-found" placeholder="Click here to select/change the path"
-            id="directory-display" readOnly onClick={changePath} />
-          <button id="clear-directory" onClick={() => changePath("clear")}>Clear</button>
+          <div id="directory-option" className="settings-option">
+            <p id="change-directory-title">Change Directory</p>
+            <input type="text" className="directory-not-found read-only" placeholder="Click here to select/change the path"
+              id="directory-display" readOnly onClick={changePath} />
+            <button id="clear-directory" onClick={() => changePath("clear")}>Clear</button>
+          </div>
+
+          <div id="months-option" className="settings-option">
+            <p id="months-to-update-title">Amount of months to update passwords</p>
+
+            <div className="dropdown">
+              <p className="notify-in">Notify in</p>
+              <input onClick={monthsDropdown} type="text" readOnly className="read-only drop-down" id="months-to-update" value={"1"} />
+              <p className="notify-in">months</p>
+
+              <div id="months-dropdown" className="dropdown-content">
+                <a href="#" onClick={ () => { monthsUpdate(1) } }>1</a>
+                <a href="#" onClick={ () => { monthsUpdate(2) } }>2</a>
+                <a href="#" onClick={ () => { monthsUpdate(3) } }>3</a>
+                <a href="#" onClick={ () => { monthsUpdate(4) } }>4</a>
+                <a href="#" onClick={ () => { monthsUpdate(5) } }>5</a>
+                <a href="#" onClick={ () => { monthsUpdate(6) } }>6</a>
+              </div>
+            </div>
+          </div>
+
+          <div className="settings-option" id="create-txt-file">
+            <p id="create-txt-file-title">Generate an easy to read text file with all your accounts</p>
+            <button className="inline-block" id="create-txt" onClick={createTextFile}>Generate File</button>
+            <p className="inline-block" id="file-generated"></p>
+          </div>
+
         </div>
-      </div>
-
-      <div id="notifications-popup">
-
       </div>
 
       <div id="create-account-popup">

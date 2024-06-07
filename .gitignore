@@ -29,4 +29,4 @@ tests/*
 src/AccountInfo.jsx
 src/AccountsList.jsx
 src/CreateAccount.jsx
-src-tauri/config.json
+src-tauri/passmanager.config.json
