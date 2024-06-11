@@ -3,7 +3,7 @@ import { writeTextFile, readTextFile, exists, createDir, copyFile } from "@tauri
 import { open } from "@tauri-apps/api/dialog";
 
 let lastClickedId;
-let monthsToUpdate = 3;
+let monthsToUpdate = 0;
 let mainPath = "";
 let jsonAccountsPath = "";
 let textAccountsPath = "";
@@ -13,7 +13,16 @@ let idsPath = "";
 
 const createTextFile = async () => {
   const accounts = await readAccounts();
-  if (!accounts || !textAccountsPath) return false;
+  if (!accounts) return false;
+
+  textAccountsPath = await open({
+    directory: true,
+    multiple: false,
+    defaultPath: "$DOCUMENT"
+  });
+
+  if (!textAccountsPath) return false;
+  textAccountsPath += "\\accounts.txt";
 
   const formattedData = Object.entries(accounts).map(([service, accountsList]) => {
     const accountInfo = accountsList.map((account) => {
@@ -28,7 +37,7 @@ const createTextFile = async () => {
   }).join("\n\n")
 
   await writeTextFile(textAccountsPath, formattedData);
-  innerHTML("file-generated", `File accounts.txt created in the current directory`);
+  innerHTML("file-generated", `File accounts.txt created in ${textAccountsPath}`);
 }
 
 // ## paths related
@@ -83,18 +92,13 @@ const createFile = async (file) => {
 }
 
 const checkPath = async () => {
-  if (!jsonAccountsPath || !textAccountsPath || !idsPath) return false;
+  if (!jsonAccountsPath || !idsPath) return false;
 
   const json_exists = await exists(jsonAccountsPath);
-  const text_exists = await exists(textAccountsPath);
   const ids_exists = await exists(idsPath);
 
   if (!json_exists) {
     createFile("json");
-  }
-
-  if (!text_exists) {
-    createFile("text");
   }
 
   if (!ids_exists) {
@@ -153,7 +157,6 @@ const changePath = async (action=null) => {
 
   mainPath = `${pathSelected}\\PasswordManager`;
   jsonAccountsPath = `${mainPath}\\accounts.json`;
-  textAccountsPath = `${mainPath}\\accounts.txt`;
   idsPath = `${mainPath}\\ids.json`;
 
   checkPath();
@@ -176,7 +179,6 @@ const loadPaths = async (config) => {
   if (!mainPath) return false;
 
   jsonAccountsPath = `${mainPath}\\accounts.json`;
-  textAccountsPath = `${mainPath}\\accounts.txt`;
   idsPath = `${mainPath}\\ids.json`;
 
   checkPath();
@@ -192,6 +194,7 @@ const loadConfig = async () => {
 
   await loadPaths(config);
   monthsToUpdate = config["months-to-update"];
+  monthsUpdate(monthsToUpdate);
 }
 
 const monthsUpdate = async (amount) => {
@@ -525,6 +528,8 @@ const getFilter = async () => {
 const updateAccountsList = async (filter=null) => {
   const accounts = await readAccounts();
 
+  // change to an array
+
   const list = document.getElementById("list");
   list.innerHTML = "";
 
@@ -704,11 +709,11 @@ const closePopup = () => {
   popup.forEach(pp => {
     pp.classList.remove("zoom-in")
     pp.classList.add("zoom-out");
-  })
+  });
 
   innerHTML("file-generated");
   setValue("recovery-path", "");
-  document.getElementById("recover").setAttribute("disabled", "true")
+  innerHTML("recover-status");
 }
 
 const openPopup = (id) => {
@@ -744,8 +749,7 @@ const turnVisibility = (turn) => {
 }
 
 const setRecoverPath = async () => {
-  const recover_path = document.getElementById("recovery-path");
-  const recover_button = document.getElementById("recover");
+  const recoverPath = document.getElementById("recovery-path");
 
   const pathSelected = await open({
     multiple: false,
@@ -756,10 +760,72 @@ const setRecoverPath = async () => {
   })
 
   if (!pathSelected) return false;
+  recoverPath.value = `${pathSelected}`;
+}
 
-  let split_path = pathSelected.split("\\");
-  recover_path.value = `${split_path.at(-2)}\\${split_path.at(-1)}`;
-  recover_button.removeAttribute("disabled");
+const recoverFromJson = async (jsonFile) => {
+  let accounts = {};
+
+  Object.entries(jsonFile).forEach(([service, accountsList]) => {
+    accountsList.entries().forEach(async ([_, account]) => {
+      accounts[service] ??= [];
+
+      const password = account.password ? account.password : await generatePassword(12);
+      let passwordHistory = account["password-history"] ? account["password-history"] : [];
+
+      if (!passwordHistory.includes(password)) {
+        passwordHistory.push(password);
+      }
+
+      accounts[service].push({
+        service,
+        "username": account.username ? account.username : "__DEFAULT__",
+        "password": password,
+        "notes": account.notes ? account.notes : "",
+        "favorite": account.favorite ? account.favorite : false,
+        "password-history": passwordHistory,
+        "id": account.id ? account.id : generatePassword(6)
+      })
+    })
+  });
+
+  if (!accounts) {
+    return false;
+  }
+
+  checkPath();
+  await writeTextFile(jsonAccountsPath, JSON.stringify(accounts));
+  await updateAccountsList();
+  return true;
+}
+
+const recoverFromText = async (textFile) => {
+  let accounts = {};
+
+  const lines = textFile.split("\n");
+}
+
+const recoveryArea = async () => {
+  const filePath = document.getElementById("recovery-path").value;
+  if (!filePath) return false;
+
+  const openedFile = await readTextFile(filePath);
+
+  let isJson;
+  let success = false;
+
+  try {
+    isJson = JSON.parse(openedFile);
+    success = recoverFromJson(isJson);
+  } catch {
+    success = recoverFromText(openedFile);
+  }
+
+  if (success) {
+    innerHTML("recover-status", "All accounts recovered.");
+  } else {
+    innerHTML("recover-status", "Could not recover from the file.");
+  }
 }
 
 window.addEventListener("load", async () => {
@@ -768,14 +834,14 @@ window.addEventListener("load", async () => {
   updateAccountsList();
   console.log(window.innerWidth, window.innerHeight);
   // document.addEventListener('contextmenu', event => event.preventDefault());
-})
+});
 
 function App() {
   return (
     <div className="container">
 
       <div id="main">
-        
+
         <div id="nav">
           <div id="search">
             <input type="text" placeholder="Search any service to filter" id="filter" onChange={getFilter} />
@@ -879,6 +945,7 @@ function App() {
                 <a href="#" onClick={ () => { monthsUpdate(4) } }>4</a>
                 <a href="#" onClick={ () => { monthsUpdate(5) } }>5</a>
                 <a href="#" onClick={ () => { monthsUpdate(6) } }>6</a>
+                <a href="#" onClick={ () => { monthsUpdate(0)} }>Never</a>
               </div>
             </div>
           </div>
@@ -886,7 +953,7 @@ function App() {
           <div className="settings-option" id="create-txt-file">
             <p id="create-txt-file-title">Generate an easy to read text file with all your accounts</p>
             <button className="inline-block" id="create-txt" onClick={createTextFile}>Generate File</button>
-            <p className="inline-block" id="file-generated"></p>
+            <p id="file-generated"></p>
           </div>
 
           <div className="popup-option" id="recovery">
@@ -912,7 +979,7 @@ function App() {
 
           <div id="recover-area">
             <input onClick={setRecoverPath} type="text" readOnly placeholder="Click here to select a path" id="recovery-path" />
-            <button id="recover" disabled>Recover</button>
+            <button id="recover" onClick={recoveryArea}>Recover</button>
             <p id="recover-status"></p>
           </div>
         </div>

@@ -302,7 +302,6 @@
   background-color: #131522;
   border-radius: 8px;
   min-width: 10px;
-  left: 4.5%;
 }
 
 .dropdown-content a {
@@ -495,7 +494,7 @@ ul {
 
 @keyframes zoom-in {
   from {
-    transform: scale(.95);
+    transform: scale(.99);
   } to {
     transform: scale(1);
   }
