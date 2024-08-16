@@ -1,0 +1,19 @@
+[package]
+name = "password-manager"
+version = "0.6.0-UI.8b"
+description = "An app to save accounts with secure passwords."
+authors = ["Lucas Ferreira"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1", features = [] }
+
+[dependencies]
+tauri = { version = "1", features = [ "fs-copy-file", "fs-create-dir", "fs-exists", "path-all", "dialog-all", "fs-read-file", "fs-write-file", "shell-open"] }
+
+[features]
+# This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
+custom-protocol = ["tauri/custom-protocol"]
+ 
