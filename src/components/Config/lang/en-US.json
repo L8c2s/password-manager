@@ -1,0 +1,8 @@
+{
+    "Header": {
+        "search.placeholder": "Search any account"
+    },
+    "App": {
+        "helloWorld": "Hello World!"
+    }
+}

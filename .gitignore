@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# personal files
+*.txt
+tests/*
+src-tauri/passmanager.config.json
+old/
