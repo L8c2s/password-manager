@@ -5,7 +5,7 @@ import { getConfigValue } from "../Config/config";
 import { getMsgLang } from "../Config/lang";
 
 
-export function Header({ searchTerm, setSearchTerm }) {
+export function Header({ searchTerm, setSearchTerm, settingsPopup, setSettingsPopup }) {
     const [langSet, setLangSet] = useState("");
     
     useEffect(() => {
@@ -41,7 +41,9 @@ export function Header({ searchTerm, setSearchTerm }) {
             </div>
 
             <div id="utils">
-                <button id="open-settings"></button>
+                <button id="open-settings"
+                    onClick={() => { setSettingsPopup(!settingsPopup) }}
+                ></button>
             </div>
         </div>
     );

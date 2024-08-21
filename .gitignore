@@ -27,4 +27,5 @@ dist-ssr
 *.txt
 tests/*
 src-tauri/passmanager.config.json
+old
 old/*

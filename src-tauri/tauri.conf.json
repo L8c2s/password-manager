@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "Password Manager",
-    "version": "0.7.0-REBUILD.1a"
+    "version": "0.7.0-REBUILD.2a"
   },
   "tauri": {
     "allowlist": {
@@ -26,7 +26,7 @@
     },
     "windows": [
       {
-        "title": "Password Manager v0.7.0-REBUILD.1a",
+        "title": "Password Manager v0.7.0-REBUILD.2a",
         "width": 1100,
         "height": 750,
         "center": true

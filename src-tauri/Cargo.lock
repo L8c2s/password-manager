@@ -1723,7 +1723,7 @@ dependencies = [
 
 [[package]]
 name = "password-manager"
-version = "0.7.0-REBUILD.1a"
+version = "0.7.0-REBUILD.2a"
 dependencies = [
  "serde",
  "serde_json",

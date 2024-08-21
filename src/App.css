@@ -76,20 +76,3 @@ button {
     display: none;
   }
 }
-
-@keyframes zoom-in {
-  from {
-    transform: scale(.99);
-  } to {
-    transform: scale(1);
-  }
-}
-
-@keyframes zoom-out {
-  from {
-    transform: scale(1);
-  } to {
-    transform: scale(.99);
-    display: none;
-  }
-}
