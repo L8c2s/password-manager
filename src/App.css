@@ -35,16 +35,16 @@ button {
 input {
   transition: border-color .25s;
   background: #1e1d2b;
-  color: #d4d4d4;
+  color: #f6f6f6;
 }
 
 button:hover {
-  border-color: #396cd8;
+  border-color: #f6f6f6;
 }
 
 button:active {
   border-color: #396cd8;
-  background-color: #e8e8e8;
+  background-color: #0051ff;
 }
 
 button:disabled {

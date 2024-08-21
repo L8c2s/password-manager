@@ -23,8 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
-# personal files
+# Personal files
 *.txt
 tests/*
 src-tauri/passmanager.config.json
-old/
+old/*

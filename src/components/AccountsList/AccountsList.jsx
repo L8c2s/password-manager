@@ -8,6 +8,7 @@ export function UpdateList({ searchTerm }) {
         { id: 1, service: "Microsoft", username: "email@exam.ple", password: "123456", notes: "my second account" },
         { id: 2, service: "Twitch", username: "email@exam.ple", password: "123456", notes: "my twitch account" },
         { id: 3, service: "Twitter", username: "email@exam.ple", password: "123456", notes: "my twitter account" },
+        
     ]
 
     const filteredAccounts = accounts.filter((account) => 

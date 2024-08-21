@@ -1,6 +1,6 @@
 [package]
 name = "password-manager"
-version = "0.7.0-REBUILD.0a"
+version = "0.7.0-REBUILD.1a"
 description = "An app to save accounts with secure passwords."
 authors = ["Lucas Ferreira"]
 edition = "2021"

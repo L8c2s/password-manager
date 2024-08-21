@@ -35,6 +35,13 @@ export function Header({ searchTerm, setSearchTerm }) {
                     value={searchTerm}
                     onChange={(e) => { setSearchTerm(e.target.value) }}
                 />
+                <button id="clear-search-bar"
+                    onClick={() => { setSearchTerm("") }}
+                ></button>
+            </div>
+
+            <div id="utils">
+                <button id="open-settings"></button>
             </div>
         </div>
     );

@@ -1,9 +1,46 @@
 #header {
-    width: 100%;
-    height: 30%;
-    border-bottom: black 1px solid;
+    position: sticky;
+    top: 0;
+    width: 100vv;
+    height: 10vh;
+    border-bottom: black 5px solid;
+    /* background: blue; */
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    z-index: 1;
+}
+
+#search,
+#utils {
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+}
+
+#utils {
+    justify-content: right;
 }
 
 #search-bar {
-    width: 250px;
+    width: 260px;
+    background: #1e1d2b url("../../icons/search.svg") no-repeat 10px center;
+    padding-left: 40px;
+}
+
+#clear-search-bar {
+    background: #2066ec url("../../icons/backspace.svg") no-repeat center;
+    width: 37px;
+    height: 37px;
+    margin-left: 10px;
+}
+
+#open-settings {
+    background: url("../../icons/settings.svg") no-repeat center;
+    width: 37px;
+    height: 37px;
+    margin-right: 45px;
 }
