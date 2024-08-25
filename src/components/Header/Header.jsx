@@ -7,7 +7,7 @@ import { getMsgLang } from "../Config/lang";
 
 export function Header({ searchTerm, setSearchTerm, settingsPopup, setSettingsPopup }) {
     const [langSet, setLangSet] = useState("");
-    
+
     useEffect(() => {
         const loadLang = async () => {
             let langSaved = await getConfigValue("lang");
@@ -34,6 +34,7 @@ export function Header({ searchTerm, setSearchTerm, settingsPopup, setSettingsPo
                     id="search-bar"
                     value={searchTerm}
                     onChange={(e) => { setSearchTerm(e.target.value) }}
+                    autoFocus="autofocus"
                 />
                 <button id="clear-search-bar"
                     onClick={() => { setSearchTerm("") }}

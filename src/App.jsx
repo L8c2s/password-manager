@@ -27,8 +27,12 @@ function App() {
     }, []);
 
     useEffect(() => {
-        
-    }, [langSet])
+        if (settingsPopup) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+    })
 
     return (
         <div id="content">

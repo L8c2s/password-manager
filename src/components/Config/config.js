@@ -4,6 +4,8 @@ import { readTextFile, writeTextFile, exists } from "@tauri-apps/api/fs";
 const CONFIGPATH = "./config/config.json"
 const DEBUGCONFIGPATH = "D:/OtherProjects/Tauri/password-manager/src/components/Config/config/config.json"
 
+// todo: create a verification for important folders and files that the program needs to work properly, like ./config/config.json
+
 export async function saveConfig(newConfig) {
     newConfig = JSON.stringify(newConfig);
     try {
@@ -18,11 +20,15 @@ export async function loadConfig() {
     try {
         config = JSON.parse(await readTextFile(CONFIGPATH));
     } catch {
-        config = JSON.parse(await readTextFile(DEBUGCONFIGPATH));
+        try {
+            config = JSON.parse(await readTextFile(DEBUGCONFIGPATH));
+        } catch {
+            config = false;
+        }
     }
 
     if (!config || !config.hasOwnProperty("accounts_dir") || !config.hasOwnProperty("lang")) {
-        config = { accounts_dir: "", lang: "en-US" }
+        config = { accounts_dir: "", lang: "pt-BR" }
         await saveConfig(config);
     }
 

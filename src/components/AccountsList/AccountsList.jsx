@@ -1,26 +1,70 @@
-import React from "react";
+import { readTextFile } from "@tauri-apps/api/fs";
+import React, { useState, useEffect } from "react";
 import "./AccountsList.css";
+
+import { getConfigValue } from "../Config/config";
 
 
 export function UpdateList({ searchTerm }) {
-    const accounts = [
-        { id: 0, service: "Google", username: "email@exam.ple", password: "123456", notes: "my first account" },
-        { id: 1, service: "Microsoft", username: "email@exam.ple", password: "123456", notes: "my second account" },
-        { id: 2, service: "Twitch", username: "email@exam.ple", password: "123456", notes: "my twitch account" },
-        { id: 3, service: "Twitter", username: "email@exam.ple", password: "123456", notes: "my twitter account" },
-        
-    ]
+    const [accountsDir, setAccountsDir] = useState("");
+    const [accounts, setAccounts] = useState({});
+    const [filteredAccounts, setFilteredAccounts] = useState([]);
 
-    const filteredAccounts = accounts.filter((account) => 
-        account.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        account.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        account.notes.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    useEffect(() => {
+        const loadDir = async () => {
+            let dirSet = await getConfigValue("accounts_dir");
+            setAccountsDir(`${dirSet}/accounts.json`);
+        };
+        loadDir();
+    }, [])
+
+    useEffect(() => {
+        const loadAccounts = async () => {
+            let accountsFile;
+            try {
+                accountsFile = await readTextFile(accountsDir);
+            } catch {
+                accountsFile = "";
+            }
+
+            if (!accountsFile) {
+                accountsFile = "{}";
+            }
+
+            setAccounts(await JSON.parse(accountsFile));
+        }
+        loadAccounts();
+    }, [accountsDir])
+
+    useEffect(() => {
+        const filterAccounts = () => {
+            let newFilteredAccounts = [];
+            for (const service in accounts) {
+                newFilteredAccounts = [
+                    ...newFilteredAccounts,
+                    ...accounts[service].filter((acc) =>
+                        acc.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        acc.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        acc.notes.toLowerCase().includes(searchTerm.toLowerCase())
+                    ),
+                ];
+            }
+            setFilteredAccounts(newFilteredAccounts);
+        };
+        filterAccounts();
+    }, [searchTerm, accounts]);
 
     return (
-        <ul>
+        <ul id="accounts-list">
             {filteredAccounts.map((account) => (
-                <div className="account-list-item" key={account.id}>{account.service}</div>
+                <div className="account-list-item" key={account.id}>
+                    <p className="service">
+                        {account.service}
+                    </p>
+                    <p className="username">
+                        {account.username}
+                    </p>
+                </div>
             ))}
         </ul>
     )

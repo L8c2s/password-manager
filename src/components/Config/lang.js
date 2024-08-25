@@ -6,9 +6,17 @@ const DEBUGLANGPATH = "D:/OtherProjects/Tauri/password-manager/src/components/Co
 export async function loadLangFile(langSet) {
     let langFile;
     try {
-        langFile = await readTextFile(`${LANGPATH}/${langSet}.json`);
+        let path = `${LANGPATH}/${langSet}.json`;
+        if (await exists(path))
+            langFile = await readTextFile(path);
+        else
+            throw Error();
     } catch {
-        langFile = await readTextFile(`${DEBUGLANGPATH}/${langSet}.json`);
+        let path = `${DEBUGLANGPATH}/${langSet}.json`;
+        if (await exists(path))
+            langFile = await readTextFile(path);
+        else
+            langFile = false;
     }
 
     if (!langFile) {

@@ -7,7 +7,6 @@
     z-index: 2;
     align-items: center;
     justify-content: center;
-    transition: zoom-in .5s;
 }
 
 #settings-blur {
@@ -19,11 +18,40 @@
 #settings-window {
     width: 70%;
     height: 70%;
-    background: darkblue;
     position: fixed;
     top: 8%;
     left: 12%;
     padding: 50px;
+    background: #050414;
+    border-radius: 11px;
+    border: #728dc0 1px solid;
+    overflow-y: auto;
+}
+
+#settings-title {
+    margin-bottom: 50px;
+}
+
+#accounts-dir {
+    background: #1e1d2b url("../../icons/folder.svg") no-repeat 10px center;
+    width: 40%;
+    padding-left: 40px;
+    margin-right: 10px;
+}
+
+#language-list {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0;
+    margin-bottom: 40px;
+}
+
+/* #app-language {
+    display: none;
+} */
+
+.settings-content {
+    margin-bottom: 50px;
 }
 
 .zoom-in {

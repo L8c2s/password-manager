@@ -33,7 +33,6 @@ button {
 }
 
 input {
-  transition: border-color .25s;
   background: #1e1d2b;
   color: #f6f6f6;
 }

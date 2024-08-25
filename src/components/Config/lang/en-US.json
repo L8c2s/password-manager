@@ -4,5 +4,14 @@
     },
     "App": {
         "helloWorld": "Hello World!"
+    },
+    "Settings": {
+        "title": "Settings",
+        "accounts-dir-placeholder": "Directory to save and load all accounts",
+        "button-change-dir-text": "Change",
+        "months-to-update-pass-title": "Months to Update Password",
+        "accounts-dir-title": "Accounts Directory",
+        "lang-title": "Language",
+        "apply-language-button-value": "Apply"
     }
 }
