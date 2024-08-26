@@ -9,6 +9,7 @@ export function UpdateList({ searchTerm }) {
     const [accountsDir, setAccountsDir] = useState("");
     const [accounts, setAccounts] = useState({});
     const [filteredAccounts, setFilteredAccounts] = useState([]);
+    const [sortFilter, setSortFilter] = useState("");
 
     useEffect(() => {
         const loadDir = async () => {
@@ -37,36 +38,43 @@ export function UpdateList({ searchTerm }) {
     }, [accountsDir])
 
     useEffect(() => {
-        const filterAccounts = () => {
-            let newFilteredAccounts = [];
-            for (const service in accounts) {
-                newFilteredAccounts = [
-                    ...newFilteredAccounts,
-                    ...accounts[service].filter((acc) =>
-                        acc.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        acc.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        acc.notes.toLowerCase().includes(searchTerm.toLowerCase())
-                    ),
-                ];
-            }
-            setFilteredAccounts(newFilteredAccounts);
-        };
-        filterAccounts();
+        let newFilteredAccounts = [];
+        for (const service in accounts) {
+            newFilteredAccounts = [
+                ...newFilteredAccounts,
+                ...accounts[service].filter((acc) =>
+                    acc.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    acc.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    acc.notes.toLowerCase().includes(searchTerm.toLowerCase())
+                ),
+            ];
+        }
+        setFilteredAccounts(newFilteredAccounts);
     }, [searchTerm, accounts]);
 
     return (
-        <ul id="accounts-list">
-            {filteredAccounts.map((account) => (
-                <div className="account-list-item" key={account.id}>
-                    <p className="service">
-                        {account.service}
-                    </p>
-                    <p className="username">
-                        {account.username}
-                    </p>
-                </div>
-            ))}
-        </ul>
+        <div id="accounts-list-div">
+            <div id="settings-utils">
+                <button id="sort"
+                 onClick={ () => setSortFilter("name") }
+                ></button>
+            </div>
+            <ul id="accounts-list">
+                {filteredAccounts.map((account) => (
+                    <div className="account-list-item" key={account.id}>
+                        <h3 className="account-item-info" id="service">
+                            {account.service}
+                        </h3>
+                        <p className="account-item-info" id="username">
+                            {account.username}
+                        </p>
+                        <p className="account-item-info" id="notes">
+                            {account.notes}
+                        </p>
+                    </div>
+                ))}
+            </ul>
+        </div>
     )
 }
 

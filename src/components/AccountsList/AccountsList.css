@@ -1,3 +1,38 @@
 body {
     color: white;
 }
+
+#username,
+#notes {
+    color: #b6b6b6;
+}
+
+#sort {
+    background: url("../../icons/sort.svg") no-repeat center;
+    width: 40px;
+    height: 40px;
+}
+
+#settings-utils {
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    width: 51%;
+}
+
+.account-item-info {
+    margin: 0;
+}
+
+.account-list-item {
+    margin: 20px;
+    border-radius: 8px;
+    padding: 7px;
+    border-bottom: 1px #728dc0 solid;
+    width: 45%;
+    cursor: pointer;
+}
+
+.account-list-item:hover {
+    border-bottom: 5px solid #196aff;
+}

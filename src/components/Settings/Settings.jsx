@@ -9,7 +9,6 @@ import { getMsgLang } from "../Config/lang";
 export function Settings({ settingsPopup, setSettingsPopup }) {
     const [langSet, setLangSet] = useState("");
     const [updateLangSet, setUpdateLangSet] = useState("");
-    const [accountsDir, setAccountsDir] = useState("");
     const [accountsDirValue, setAccountsDirValue] = useState("");
     const [monthsToUpdateValue, setMonthsToUpdateValue] = useState(0);
 
@@ -27,7 +26,6 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
                 dirValue = `${dirValue[dirValue.length-2]}\\${dirValue[dirValue.length-1]}`;
             }
 
-            setAccountsDir(dir);
             setAccountsDirValue(dirValue);
         }
 
