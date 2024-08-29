@@ -6,12 +6,19 @@
         "helloWorld": "Hello World!"
     },
     "Settings": {
-        "title": "Settings",
-        "accounts-dir-placeholder": "Directory to save and load all accounts",
-        "button-change-dir-text": "Change",
-        "months-to-update-pass-title": "Months to Update Password",
-        "accounts-dir-title": "Accounts Directory",
-        "lang-title": "Language",
-        "apply-language-button-value": "Apply"
+        ".title": "Settings",
+        "accounts-dir.placeholder": "Directory to save and load all accounts",
+        "change-accounts-dir.text1": "Change",
+        "months-to-update-pass.title": "Months to Update Password",
+        "change-accounts-dir.title": "Accounts Directory",
+        "app-language-title.title": "Language",
+        "update-language.text": "Apply"
+    },
+    "AccountsList": {
+        "sort-message.username": "Username",
+        "sort-message.service": "Service",
+        "sort-message.created": "Created",
+        "sort-message.last-modified": "Last Modified",
+        "sort-message.no-filter": "No Filter"
     }
 }

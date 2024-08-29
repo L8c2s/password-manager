@@ -6,6 +6,7 @@ import "./App.css";
 import { Header } from "./components/Header/Header";
 import { UpdateList } from "./components/AccountsList/AccountsList";
 import { Settings } from "./components/Settings/Settings";
+import { AccountsInfo } from "./components/AccountInfo/AccountInfo";
 
 // configurations
 import { getConfigValue } from "./components/Config/config";
@@ -16,6 +17,8 @@ function App() {
     const [langSet, setLangSet] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [settingsPopup, setSettingsPopup] = useState(false);
+    const [showAccountInfo, setShowAccountInfo] = useState(false);
+    const [selectedId, setSelectedId] = useState("");
 
     useEffect(() => {
         const loadLang = async () => {
@@ -32,7 +35,7 @@ function App() {
         } else {
             document.body.style.overflow = "auto";
         }
-    })
+    });
 
     return (
         <div id="content">
@@ -40,7 +43,8 @@ function App() {
                 searchTerm={searchTerm} setSearchTerm={setSearchTerm}
                 settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
             />
-            <UpdateList searchTerm={searchTerm} />
+            <UpdateList searchTerm={searchTerm} setShowAccountInfo={setShowAccountInfo} selectedId={selectedId} setSelectedId={setSelectedId} />
+            <AccountsInfo showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo} selectedId={selectedId} setSelectedId={setSelectedId} />
             <Settings settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup} />
         </div>
     );

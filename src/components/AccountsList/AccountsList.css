@@ -20,6 +20,11 @@ body {
     width: 51%;
 }
 
+#sort-message {
+    color: #747474;
+    margin-right: 10px;
+}
+
 .account-item-info {
     margin: 0;
 }
@@ -35,4 +40,21 @@ body {
 
 .account-list-item:hover {
     border-bottom: 5px solid #196aff;
+}
+
+.show {
+    opacity: 1;
+}
+
+.hidden {
+    opacity: 0;
+    animation: hide .5s forwards;
+}
+
+@keyframes hide {
+    from {
+        opacity: 1;
+    } to {
+        opacity: 0;
+    }
 }

@@ -28,7 +28,7 @@ export async function loadConfig() {
     }
 
     if (!config || !config.hasOwnProperty("accounts_dir") || !config.hasOwnProperty("lang")) {
-        config = { accounts_dir: "", lang: "pt-BR" }
+        config = { accounts_dir: "", lang: "pt-BR", sort_filter: "default" }
         await saveConfig(config);
     }
 

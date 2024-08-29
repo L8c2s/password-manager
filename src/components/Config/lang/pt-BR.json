@@ -6,12 +6,19 @@
         "helloWorld": "Olá Mundo!"
     },
     "Settings": {
-        "title": "Configurações",
-        "accounts-dir-placeholder": "Diretório para salvar e carregar contas",
-        "button-change-dir-text": "Alterar",
-        "months-to-update-pass-title": "Meses para Atualizar Senhas",
-        "accounts-dir-title": "Diretório de Contas",
-        "lang-title": "Idioma",
-        "apply-language-button-value": "Aplicar"
+        ".title": "Configurações",
+        "accounts-dir.placeholder": "Diretório para salvar e carregar contas",
+        "change-accounts-dir.text": "Alterar",
+        "months-to-update-pass.title": "Meses para Atualizar Senhas",
+        "change-accounts-dir.title": "Diretório de Contas",
+        "app-language-title.title": "Idioma",
+        "update-language.text": "Aplicar"
+    },
+    "AccountsList": {
+        "sort-message.username": "Nome de Usuário",
+        "sort-message.service": "Serviço",
+        "sort-message.created": "Data de Criação",
+        "sort-message.last-modified": "Última Modificação",
+        "sort-message.no-filter": "Sem Filtro"
     }
 }

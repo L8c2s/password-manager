@@ -63,22 +63,22 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
     // ------------------------------ //
 
     const [title, setTitle] = useState("");
-    const [changeDirButtonText, setChangeDirButtonText] = useState("");
+    const [changeAccDirText, setChangeAccDirText] = useState("");
     const [accountsDirPlhd, setAccountsDirPlhd] = useState("");
-    const [monthsToUpdateTitle, setMonthsToUpdateTitle] = useState("");
-    const [accountsDirTitle, setAccountsDirTitle] = useState("");
-    const [languageTitle, setLanguageTitle] = useState("");
-    const [applyButtonValue, setApplyButtonValue] = useState("");
+    const [monthsToUpdatePassTitle, setMonthsToUpdatePassTitle] = useState("");
+    const [accountsDirTitle, setChangeAccDirTitle] = useState("");
+    const [appLangTitle, setAppLangTitle] = useState("");
+    const [updateLangText, setUpdateLangText] = useState("");
 
     useEffect(() => {
         const update = async () => {
-            setTitle(await getMsgLang(langSet, "Settings", "title"));
-            setAccountsDirPlhd(await getMsgLang(langSet, "Settings", "accounts-dir-placeholder"))
-            setChangeDirButtonText(await getMsgLang(langSet, "Settings", "button-change-dir-text"));
-            setMonthsToUpdateTitle(await getMsgLang(langSet, "Settings", "months-to-update-pass-title"));
-            setAccountsDirTitle(await getMsgLang(langSet, "Settings", "accounts-dir-title"));
-            setLanguageTitle(await getMsgLang(langSet, "Settings", "lang-title"));
-            setApplyButtonValue(await getMsgLang(langSet, "Settings", "apply-language-button-value"));
+            setTitle(await getMsgLang(langSet, "Settings", ".title"));
+            setAccountsDirPlhd(await getMsgLang(langSet, "Settings", "accounts-dir.placeholder"))
+            setChangeAccDirText(await getMsgLang(langSet, "Settings", "change-accounts-dir.text"));
+            setMonthsToUpdatePassTitle(await getMsgLang(langSet, "Settings", "months-to-update-pass.title"));
+            setChangeAccDirTitle(await getMsgLang(langSet, "Settings", "change-accounts-dir.title"));
+            setAppLangTitle(await getMsgLang(langSet, "Settings", "app-language-title.title"));
+            setUpdateLangText(await getMsgLang(langSet, "Settings", "update-language.text"));
         }
 
         update();
@@ -123,11 +123,11 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
                     <div id="accounts-directory" className="settings-content">
                         <h3 id="change-accounts-dir-title">{accountsDirTitle}</h3>
                         <input type="text" id="accounts-dir" readOnly placeholder={accountsDirPlhd} value={accountsDirValue} />
-                        <button id="change-accounts-dir" onClick={changeAccountsDir}>{changeDirButtonText}</button>
+                        <button id="change-accounts-dir" onClick={changeAccountsDir}>{changeAccDirText}</button>
                     </div>
 
                     <div id="app-language" className="settings-content">
-                        <h3 id="app-language-title">{languageTitle}</h3>
+                        <h3 id="app-language-title">{appLangTitle}</h3>
                         <ul id="language-list">
                             <input type="radio" name="language-option" id="en-us" value="en-US" className="lang-option" checked={updateLangSet === "en-US"}
                             onChange={() => {
@@ -147,7 +147,7 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
                             onClick={() => {
                                 changeLanguage(updateLangSet)
                             }}
-                        >{applyButtonValue}</button>
+                        >{updateLangText}</button>
                     </div>
 
                     {/* <div id="months-notification" className="settings-content">
