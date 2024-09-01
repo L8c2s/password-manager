@@ -4,11 +4,11 @@ import "./AccountsList.css";
 
 import { getConfigValue, loadConfig, saveConfig } from "../Config/config";
 import { getMsgLang } from "../Config/lang";
+import { editAccount, editAccountKey, getAccount, getAccounts, setAccountFavorite } from "../Config/accountsManager/manager";
 
 
-export function UpdateList({ searchTerm, setShowAccountInfo, selectedId, setSelectedId }) {
+export function UpdateList({ accounts, setAccounts, searchTerm, setSearchTerm, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite }) {
     const [accountsDir, setAccountsDir] = useState("");
-    const [accounts, setAccounts] = useState({});
     const [filteredAccounts, setFilteredAccounts] = useState([]);
     const [defaultFilteredAccounts, setDefaultFilteredAccounts] = useState([]);
     const [classSortMessage, setClassSortMessage] = useState(false);
@@ -28,11 +28,6 @@ export function UpdateList({ searchTerm, setShowAccountInfo, selectedId, setSele
     // created
 
     useEffect(() => {
-        const loadDir = async () => {
-            let dirSet = await getConfigValue("accounts_dir");
-            setAccountsDir(`${dirSet}/accounts.json`);
-        };
-
         const loadLang = async () => {
             setLangSet(await getConfigValue("lang"));
         }
@@ -41,7 +36,6 @@ export function UpdateList({ searchTerm, setShowAccountInfo, selectedId, setSele
             // setSortFilter(await getConfigValue("sort_filter"));
         }
 
-        loadDir();
         loadLang();
         loadFilter();
     }, [])
@@ -53,25 +47,7 @@ export function UpdateList({ searchTerm, setShowAccountInfo, selectedId, setSele
         sortAccounts();
     }, [sortFilter]);
 
-    useEffect(() => {
-        const loadAccounts = async () => {
-            let accountsFile;
-            try {
-                accountsFile = await readTextFile(accountsDir);
-            } catch {
-                accountsFile = "{}";
-            }
-
-            if (!accountsFile) {
-                accountsFile = "{}";
-            }
-
-            setAccounts(await JSON.parse(accountsFile));
-        }
-        loadAccounts();
-    }, [accountsDir])
-
-    useEffect(() => {
+    const setFilter = () => {
         let newFilteredAccounts = [];
         for (const service in accounts) {
             newFilteredAccounts = [
@@ -86,11 +62,15 @@ export function UpdateList({ searchTerm, setShowAccountInfo, selectedId, setSele
 
         setFilteredAccounts(newFilteredAccounts);
         setDefaultFilteredAccounts(newFilteredAccounts);
-    }, [searchTerm, accounts]);
+    }
 
-    // useEffect(() => {
-    //     sortAccounts();
-    // }, [filteredAccounts, defaultFilteredAccounts])
+    useEffect(() => {
+        setFilter();
+    }, [accounts]);
+
+    useEffect(() => {
+        setFilter();
+    }, [searchTerm]);
 
     const jmpFilter = async () => {
         const sorters = [ "accountName", "serviceName", "lastModified", "created", "noFilter" ]
@@ -131,7 +111,10 @@ export function UpdateList({ searchTerm, setShowAccountInfo, selectedId, setSele
 
     const accountSelected = (accountId) => {
         if (selectedId) {
-            document.getElementById(selectedId).style = "";
+            let accountDiv = document.getElementById(selectedId);
+            if (accountDiv)
+                accountDiv.style = "";
+
             if (accountId === selectedId) {
                 setSelectedId("");
                 setShowAccountInfo(false);
@@ -143,6 +126,51 @@ export function UpdateList({ searchTerm, setShowAccountInfo, selectedId, setSele
         setShowAccountInfo(true);
         document.getElementById(accountId).style = "border-bottom: 5px solid #196aff;";
     }
+    
+    useEffect(() => {
+        if (!showAccountInfo && selectedId) {
+            document.getElementById(selectedId).style = "";
+            setSelectedId("");
+        }
+    }, [showAccountInfo])
+
+    const updateFavoriteIcon = (accountId=null) => {
+        if (!accountId && !selectedId) return;
+
+        if (!accountId) {
+            accountId = selectedId;
+        }
+
+        const account = getAccount(accounts, accountId );
+        const accountListed = document.getElementById(`${account.id}btn`);
+
+        const newClass = account.favorite ? "favorite" : "not-favorite";
+        newClass === "favorite" ? accountListed.classList.remove("not-favorite") : accountListed.classList.remove("favorite");
+
+        accountListed.classList.add(newClass);
+    }
+
+    const setFavoriteFromList = async (accountId, newFavorite) => {
+        await setAccountFavorite(accounts, accountId, newFavorite);
+        if (accountId === selectedId) setFavorite(newFavorite);
+        updateFavoriteIcon(accountId);
+    }
+
+    useEffect(() => {
+        filteredAccounts.map(async (acc) => {
+            await setFavoriteFromList(acc.id, acc.favorite);
+        })
+    }, [filteredAccounts]);
+
+    useEffect(() => {
+        const updateFavoriteChangedId = async () => {
+            let account = getAccount(accounts, selectedId);
+            setFavoriteFromList(account.id, favorite);
+        }
+
+        if (!selectedId) return;
+        updateFavoriteChangedId();
+    }, [favorite]);
 
     // ------------------------------ //
 
@@ -160,21 +188,31 @@ export function UpdateList({ searchTerm, setShowAccountInfo, selectedId, setSele
                  onClick={ () => jmpFilter() }
                 ></button>
             </div>
+
             <ul id="accounts-list">
                 {filteredAccounts.map((account) => (
-                    <div className="account-list-item" id={account.id} key={account.id}
-                     onClick={ () => {
-                        accountSelected(account.id);
-                     } }>
-                        <h3 className="account-item-info" id="service">
-                            {account.service}
-                        </h3>
-                        <p className="account-item-info" id="username">
-                            {account.username}
-                        </p>
-                        <p className="account-item-info" id="notes">
-                            {account.notes}
-                        </p>
+                    <div className="account-list-item" id={account.id} key={account.id}>
+                        <div id="account-list-info"
+                         onClick={ () => {
+                             accountSelected(account.id);
+                         } }>
+                            <h3 className="account-item-info" id="service">
+                                {account.service}
+                            </h3>
+                            <p className="account-item-info" id="username">
+                                {account.username}
+                            </p>
+                            <p className="account-item-info" id="notes">
+                                {account.notes}
+                            </p>
+                        </div>
+
+                        <div id="div-favorite-button">
+                            <button className="favorite-button not-favorite" id={`${account.id}btn`}
+                             onClick={ async () => {
+                                await setFavoriteFromList(account.id, !account.favorite);
+                             } }></button>
+                        </div>
                     </div>
                 ))}
             </ul>

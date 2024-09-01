@@ -11,6 +11,7 @@ import { AccountsInfo } from "./components/AccountInfo/AccountInfo";
 // configurations
 import { getConfigValue } from "./components/Config/config";
 import { getMsgLang } from "./components/Config/lang";
+import { getAccounts } from "./components/Config/accountsManager/manager";
 
 
 function App() {
@@ -19,6 +20,8 @@ function App() {
     const [settingsPopup, setSettingsPopup] = useState(false);
     const [showAccountInfo, setShowAccountInfo] = useState(false);
     const [selectedId, setSelectedId] = useState("");
+    const [accounts, setAccounts] = useState({});
+    const [favorite, setFavorite] = useState(false);
 
     useEffect(() => {
         const loadLang = async () => {
@@ -26,7 +29,12 @@ function App() {
             setLangSet(langSaved);
         }
 
+        const loadAccounts = async () => {
+            setAccounts(await getAccounts());
+        }
+
         loadLang();
+        loadAccounts();
     }, []);
 
     useEffect(() => {
@@ -35,7 +43,7 @@ function App() {
         } else {
             document.body.style.overflow = "auto";
         }
-    });
+    }, [settingsPopup]);
 
     return (
         <div id="content">
@@ -43,8 +51,9 @@ function App() {
                 searchTerm={searchTerm} setSearchTerm={setSearchTerm}
                 settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
             />
-            <UpdateList searchTerm={searchTerm} setShowAccountInfo={setShowAccountInfo} selectedId={selectedId} setSelectedId={setSelectedId} />
-            <AccountsInfo showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo} selectedId={selectedId} setSelectedId={setSelectedId} />
+            <UpdateList accounts={accounts} setAccounts={setAccounts} searchTerm={searchTerm} setSearchTerm={setSearchTerm} showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo}
+             selectedId={selectedId} setSelectedId={setSelectedId} favorite={favorite} setFavorite={setFavorite} />
+            <AccountsInfo accounts={accounts} setAccounts={setAccounts} showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo} selectedId={selectedId} setSelectedId={setSelectedId} favorite={favorite} setFavorite={setFavorite} setSearchTerm={setSearchTerm} />
             <Settings settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup} />
         </div>
     );

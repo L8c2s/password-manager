@@ -25,6 +25,17 @@ body {
     margin-right: 10px;
 }
 
+#account-list-info {
+    width: 90%;
+}
+
+#div-favorite-button {
+    width: 10%;
+    justify-content: right;
+    display: flex;
+    align-items: center;
+}
+
 .account-item-info {
     margin: 0;
 }
@@ -36,6 +47,7 @@ body {
     border-bottom: 1px #728dc0 solid;
     width: 45%;
     cursor: pointer;
+    display: flex;
 }
 
 .account-list-item:hover {

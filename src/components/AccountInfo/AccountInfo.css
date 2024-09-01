@@ -1,0 +1,79 @@
+#accounts-info-div {
+    width: 46%;
+    height: 87%;
+    position: fixed;
+    top: 11%;
+    left: 52%;
+    background: #181b2c;
+    border-radius: 11px;
+}
+
+#info-nav {
+    height: 10%;
+    width: 100%;
+    display: flex;
+}
+
+#right-nav,
+#left-nav {
+    height: 100%;
+    width: 50%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#right-nav {
+    justify-content: right;
+}
+
+#edit-account {
+    background: url("../../icons/edit.svg") no-repeat center;
+}
+
+#etc {
+    background: url("../../icons/three-dots.svg") no-repeat center;
+    margin-right: 10px;
+}
+
+#close-info {
+    background: url("../../icons/close.svg") no-repeat center;
+    margin-left: 10px;
+}
+
+.favorite {
+    background: url("../../icons/favorite.svg") no-repeat center;
+}
+
+.not-favorite {
+    background: url("../../icons/not-favorite.svg") no-repeat center;
+}
+
+.info-on {
+    animation: slide-in .5s forwards;
+}
+
+.info-off {
+    animation: slide-out .5s forwards;
+}
+
+button {
+    margin-left: 5px;
+}
+
+@keyframes slide-in {
+    from {
+      transform: translate(100%);
+    } to {
+      transform: translate(0);
+    }
+  }
+  
+  @keyframes slide-out {
+    from {
+      transform: translate(0);
+    } to {
+      transform: translate(110%);
+      display: none;
+    }
+  }

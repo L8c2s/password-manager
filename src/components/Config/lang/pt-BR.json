@@ -20,5 +20,8 @@
         "sort-message.created": "Data de Criação",
         "sort-message.last-modified": "Última Modificação",
         "sort-message.no-filter": "Sem Filtro"
+    },
+    "AccountInfo": {
+        "delete.confirmation": "Tem certeza que deseja excluir essa conta?"
     }
 }

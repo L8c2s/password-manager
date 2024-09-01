@@ -29,7 +29,9 @@ button {
 button {
   cursor: pointer;
   background: #2066ec;
-  color: #f6f6f6
+  color: #f6f6f6;
+  width: 37px;
+  height: 37px;
 }
 
 input {
@@ -57,21 +59,4 @@ input:focus {
 input,
 button {
   outline: none;
-}
-
-@keyframes slide-in {
-  from {
-    transform: translate(100%);
-  } to {
-    transform: translate(0);
-  }
-}
-
-@keyframes slide-out {
-  from {
-    transform: translate(0);
-  } to {
-    transform: translate(110%);
-    display: none;
-  }
 }
