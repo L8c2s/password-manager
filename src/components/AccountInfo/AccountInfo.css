@@ -41,6 +41,29 @@
     margin-left: 10px;
 }
 
+#notification {
+    margin: 10px;
+    height: 8%;
+    /* background: url("../../icons/safe.svg") no-repeat 10px center; */
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding-left: 40px;
+    font-weight: bold;
+}
+
+.safe {
+    background: #21ec32 url("../../icons/safe.svg") no-repeat 10px center;
+}
+
+.alert {
+    background: #ff8d23 url("../../icons/alert.svg") no-repeat 10px center;
+}
+
+.warning {
+    background: #ff0000 url("../../icons/warning.svg") no-repeat 10px center;
+}
+
 .favorite {
     background: url("../../icons/favorite.svg") no-repeat center;
 }

@@ -8,7 +8,7 @@
     "Settings": {
         ".title": "Settings",
         "accounts-dir.placeholder": "Directory to save and load all accounts",
-        "change-accounts-dir.text1": "Change",
+        "change-accounts-dir.text": "Change",
         "months-to-update-pass.title": "Months to Update Password",
         "change-accounts-dir.title": "Accounts Directory",
         "app-language-title.title": "Language",
@@ -20,5 +20,8 @@
         "sort-message.created": "Created",
         "sort-message.last-modified": "Last Modified",
         "sort-message.no-filter": "No Filter"
+    },
+    "AccountInfo": {
+        "delete.confirmation": "Are you sure you want to delete this account?"
     }
 }

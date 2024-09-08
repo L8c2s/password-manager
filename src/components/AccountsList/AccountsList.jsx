@@ -7,15 +7,21 @@ import { getMsgLang } from "../Config/lang";
 import { editAccount, editAccountKey, getAccount, getAccounts, setAccountFavorite } from "../Config/accountsManager/manager";
 
 
-export function UpdateList({ accounts, setAccounts, searchTerm, setSearchTerm, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite }) {
-    const [accountsDir, setAccountsDir] = useState("");
+// correct order:
+// when accounts is modified, load defaultFilteredAccounts
+// when defaultFilteredAccounts is modified, load searchTerm
+// when sortFilter is modified, load filteredAccounts and filter using sortFilter
+// when filteredAccounts is modified, move every favorite account to the top of the list
+// when favorite is changed, call the above function again
+
+export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite }) {
     const [filteredAccounts, setFilteredAccounts] = useState([]);
     const [defaultFilteredAccounts, setDefaultFilteredAccounts] = useState([]);
     const [classSortMessage, setClassSortMessage] = useState(false);
     const [sortMessage, setSortMessage] = useState("");
     const [langSet, setLangSet] = useState("");
     const [sortFilter, setSortFilter] = useState("");
-    const [sortedBy, setSortedBy] = useState("");
+    const [fixedFilteredAccounts, setFixedFilteredAccounts] = useState([]);
 
     // service
     // username
@@ -30,146 +36,144 @@ export function UpdateList({ accounts, setAccounts, searchTerm, setSearchTerm, s
     useEffect(() => {
         const loadLang = async () => {
             setLangSet(await getConfigValue("lang"));
-        }
-
-        const loadFilter = async () => {
-            // setSortFilter(await getConfigValue("sort_filter"));
-        }
+        };
 
         loadLang();
-        loadFilter();
-    }, [])
+    }, []);
+
+    const filterAccounts = (accounts, searchTerm) => {
+        return accounts.filter((acc) =>
+            acc.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            acc.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            acc.notes.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    };
 
     useEffect(() => {
-        if (!sortFilter) {
-            setSortFilter("default");
-        }
-        sortAccounts();
-    }, [sortFilter]);
-
-    const setFilter = () => {
         let newFilteredAccounts = [];
         for (const service in accounts) {
-            newFilteredAccounts = [
-                ...newFilteredAccounts,
-                ...accounts[service].filter((acc) =>
-                    acc.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    acc.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    acc.notes.toLowerCase().includes(searchTerm.toLowerCase())
-                ),
-            ];
+            newFilteredAccounts.push(...accounts[service]);
         }
 
-        setFilteredAccounts(newFilteredAccounts);
-        setDefaultFilteredAccounts(newFilteredAccounts);
+        setDefaultFilteredAccounts([...newFilteredAccounts]);
+
+        const loadSortFilter = async () => {
+            setSortFilter(await getConfigValue("sort_filter"));
+        }
+
+        loadSortFilter();
+    }, [accounts]);
+
+    const favoriteFirst = () => {
+        let favoriteAccounts = filteredAccounts.filter((acc) => acc.favorite);
+        let nonFavoriteAccounts = filteredAccounts.filter((acc) => !acc.favorite);
+        setFilteredAccounts([...favoriteAccounts, ...nonFavoriteAccounts]);
+    }
+
+    const sortAccounts = async () => {
+        let newFilteredAccounts = [...defaultFilteredAccounts];
+
+        if (sortFilter === "accountName") {
+            newFilteredAccounts.sort((a, b) => a.username.localeCompare(b.username));
+            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.username"));
+        } else if (sortFilter === "serviceName") {
+            newFilteredAccounts.sort((a, b) => a.service.localeCompare(b.service));
+            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.service"));
+        } else if (sortFilter === "created") {
+            newFilteredAccounts.sort((a, b) => new Date(a.created) - new Date(b.created));
+            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.created"));
+        } else if (sortFilter === "lastModified") {
+            newFilteredAccounts.sort((a, b) => new Date(a.last_modified) - new Date(b.last_modified));
+            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.last-modified"));
+        } else {
+            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.no-filter"))
+        }
+
+        let favoriteAccounts = newFilteredAccounts.filter((acc) => acc.favorite);
+        let nonFavoriteAccounts = newFilteredAccounts.filter((acc) => !acc.favorite);
+
+        setFilteredAccounts([...favoriteAccounts, ...nonFavoriteAccounts]);
+        setFixedFilteredAccounts([...favoriteAccounts, ...nonFavoriteAccounts]);
+
+        let config = await loadConfig();
+        config["sort_filter"] = sortFilter;
+        await saveConfig(config);
     }
 
     useEffect(() => {
-        setFilter();
-    }, [accounts]);
+        if (!sortFilter) return;
+        sortAccounts();
+    }, [sortFilter, defaultFilteredAccounts]);
 
     useEffect(() => {
-        setFilter();
-    }, [searchTerm]);
+        setFilteredAccounts([...filterAccounts(fixedFilteredAccounts, searchTerm)]);
+    }, [searchTerm])
 
     const jmpFilter = async () => {
-        const sorters = [ "accountName", "serviceName", "lastModified", "created", "noFilter" ]
-        const newSorter = sorters.at((sorters.indexOf(sortFilter) + 1) % sorters.length)
+        setSortFilter("");
+        const sorters = [ "accountName", "serviceName", "lastModified", "created", "noFilter" ];
+        const newSorter = sorters.at((sorters.indexOf(sortFilter) + 1) % sorters.length);
         setSortFilter(newSorter);
 
         setClassSortMessage("show");
-        setTimeout(() => {
-            setClassSortMessage("hidden");
-        }, 500);
 
         let config = await loadConfig();
         config["sort_filter"] = newSorter;
         await saveConfig(config);
-    }
-
-    const sortAccounts = async () => {
-        let newFilteredAccounts = [...filteredAccounts];
-        if (sortFilter === "accountName") {
-            newFilteredAccounts.sort((a, b) => a.username.localeCompare(b.username));
-            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.username"))
-        } else if (sortFilter === "serviceName") {
-            newFilteredAccounts.sort((a, b) => a.service.localeCompare(b.service));
-            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.service"))
-        } else if (sortFilter === "created") {
-            newFilteredAccounts.sort((a, b) => new Date(a.created) - new Date(b.created));
-            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.created"))
-        } else if (sortFilter === "lastModified") {
-            newFilteredAccounts.sort((a, b) => new Date(a.last_modified) - new Date(b.last_modified));
-            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.last-modified"))
-        } else {
-            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.no-filter"))
-            newFilteredAccounts = [...defaultFilteredAccounts];
-        }
-        setFilteredAccounts(newFilteredAccounts);
-        setSortedBy(sortFilter);
-    }
+    };
 
     const accountSelected = (accountId) => {
         if (selectedId) {
             let accountDiv = document.getElementById(selectedId);
-            if (accountDiv)
+            if (accountDiv) {
                 accountDiv.style = "";
+            }
 
             if (accountId === selectedId) {
                 setSelectedId("");
                 setShowAccountInfo(false);
-                return null
+                return null;
             }
         }
 
         setSelectedId(accountId);
         setShowAccountInfo(true);
         document.getElementById(accountId).style = "border-bottom: 5px solid #196aff;";
-    }
-    
+    };
+
     useEffect(() => {
         if (!showAccountInfo && selectedId) {
             document.getElementById(selectedId).style = "";
             setSelectedId("");
         }
-    }, [showAccountInfo])
+    }, [showAccountInfo]);
 
-    const updateFavoriteIcon = (accountId=null) => {
-        if (!accountId && !selectedId) return;
+    const updateFavoriteIcon = (accountId = null) => {
+        if (!accountId && !selectedId) {
+            return;
+        }
 
         if (!accountId) {
             accountId = selectedId;
         }
 
-        const account = getAccount(accounts, accountId );
+        const account = getAccount(accounts, accountId);
         const accountListed = document.getElementById(`${account.id}btn`);
 
         const newClass = account.favorite ? "favorite" : "not-favorite";
         newClass === "favorite" ? accountListed.classList.remove("not-favorite") : accountListed.classList.remove("favorite");
 
         accountListed.classList.add(newClass);
-    }
-
-    const setFavoriteFromList = async (accountId, newFavorite) => {
-        await setAccountFavorite(accounts, accountId, newFavorite);
-        if (accountId === selectedId) setFavorite(newFavorite);
-        updateFavoriteIcon(accountId);
-    }
+    };
 
     useEffect(() => {
         filteredAccounts.map(async (acc) => {
-            await setFavoriteFromList(acc.id, acc.favorite);
-        })
+            updateFavoriteIcon(acc.id);
+        });
     }, [filteredAccounts]);
 
     useEffect(() => {
-        const updateFavoriteChangedId = async () => {
-            let account = getAccount(accounts, selectedId);
-            setFavoriteFromList(account.id, favorite);
-        }
-
-        if (!selectedId) return;
-        updateFavoriteChangedId();
+        sortAccounts();
     }, [favorite]);
 
     // ------------------------------ //
@@ -186,6 +190,8 @@ export function UpdateList({ accounts, setAccounts, searchTerm, setSearchTerm, s
                 }
                 <button id="sort"
                  onClick={ () => jmpFilter() }
+                 onMouseOver={ () => setClassSortMessage("show") }
+                 onMouseOut={ () => setClassSortMessage("hidden") }
                 ></button>
             </div>
 
@@ -210,7 +216,7 @@ export function UpdateList({ accounts, setAccounts, searchTerm, setSearchTerm, s
                         <div id="div-favorite-button">
                             <button className="favorite-button not-favorite" id={`${account.id}btn`}
                              onClick={ async () => {
-                                await setFavoriteFromList(account.id, !account.favorite);
+                                setFavorite([account.id, !account.favorite]);
                              } }></button>
                         </div>
                     </div>

@@ -56,6 +56,7 @@ export async function editAccount(accounts, accountId, newAccount) {
 }
 
 export async function editAccountKey(accounts, accountId, key, newValue) {
+    console.log(accounts, accountId, key, newValue);
     let account = getAccount(accounts, accountId);
     account[key] = newValue;
     return await editAccount(accounts, accountId, account);

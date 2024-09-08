@@ -46,9 +46,19 @@
     margin-bottom: 40px;
 }
 
-/* #app-language {
-    display: none;
-} */
+#update-language {
+    width: fit-content;
+}
+
+#change-accounts-dir {
+    /* background: #2066ec url("../../icons/switch-dir.svg") no-repeat center; */
+    height: 39px;
+    width: fit-content;
+}
+
+#app-language {
+    /* display: none; */
+}
 
 .settings-content {
     margin-bottom: 50px;

@@ -119,7 +119,6 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
                 </div>
 
                 <div id="content">
-
                     <div id="accounts-directory" className="settings-content">
                         <h3 id="change-accounts-dir-title">{accountsDirTitle}</h3>
                         <input type="text" id="accounts-dir" readOnly placeholder={accountsDirPlhd} value={accountsDirValue} />

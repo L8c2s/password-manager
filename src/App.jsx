@@ -21,7 +21,8 @@ function App() {
     const [showAccountInfo, setShowAccountInfo] = useState(false);
     const [selectedId, setSelectedId] = useState("");
     const [accounts, setAccounts] = useState({});
-    const [favorite, setFavorite] = useState(false);
+    const [favorite, setFavorite] = useState([]);
+    const [updatedFavorite, setUpdatedFavorite] = useState(false);
 
     useEffect(() => {
         const loadLang = async () => {
@@ -51,10 +52,26 @@ function App() {
                 searchTerm={searchTerm} setSearchTerm={setSearchTerm}
                 settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
             />
-            <UpdateList accounts={accounts} setAccounts={setAccounts} searchTerm={searchTerm} setSearchTerm={setSearchTerm} showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo}
-             selectedId={selectedId} setSelectedId={setSelectedId} favorite={favorite} setFavorite={setFavorite} />
-            <AccountsInfo accounts={accounts} setAccounts={setAccounts} showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo} selectedId={selectedId} setSelectedId={setSelectedId} favorite={favorite} setFavorite={setFavorite} setSearchTerm={setSearchTerm} />
-            <Settings settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup} />
+
+            <UpdateList 
+                accounts={accounts} setAccounts={setAccounts}
+                searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+                showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo}
+                selectedId={selectedId} setSelectedId={setSelectedId}
+                favorite={favorite} setFavorite={setFavorite}
+            />
+
+            <AccountsInfo
+                accounts={accounts} setAccounts={setAccounts}
+                showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo}
+                selectedId={selectedId} setSelectedId={setSelectedId}
+                favorite={favorite} setFavorite={setFavorite}
+                setSearchTerm={setSearchTerm}
+            />
+
+            <Settings
+                settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
+            />
         </div>
     );
 }
