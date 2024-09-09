@@ -46,7 +46,7 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
 
         let config = await loadConfig();
         config["accounts_dir"] = accountsDirPath
-        await saveConfig(config);
+        await saveConfig(config, "changeAccountsDir");
         location.reload();
     }
 
@@ -56,7 +56,7 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
 
         let config = await loadConfig();
         config["lang"] = language;
-        await saveConfig(config);
+        await saveConfig(config, "changeLanguage");
         location.reload();
     }
 

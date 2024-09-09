@@ -6,8 +6,9 @@ const DEBUGCONFIGPATH = "D:/OtherProjects/Tauri/password-manager/src/components/
 
 // todo: create a verification for important folders and files that the program needs to work properly, like ./config/config.json
 
-export async function saveConfig(newConfig) {
+export async function saveConfig(newConfig, func) {
     newConfig = JSON.stringify(newConfig);
+    console.log(`Saving ${newConfig}. Called by ${func}.`)
     try {
         await writeTextFile(CONFIGPATH, newConfig);
     } catch {
@@ -29,7 +30,7 @@ export async function loadConfig() {
 
     if (!config || !config.hasOwnProperty("accounts_dir") || !config.hasOwnProperty("lang")) {
         config = { accounts_dir: "", lang: "pt-BR", sort_filter: "noFilter" }
-        await saveConfig(config);
+        await saveConfig(config, "loadConfig");
     }
 
     return config;
@@ -37,8 +38,6 @@ export async function loadConfig() {
 
 export async function getConfigValue(key) {
     let config = await loadConfig();
-    if (!config.hasOwnProperty(key)) {
-        return null;
-    }
-    return config[key];
+    if (config.hasOwnProperty(key))
+        return config[key];
 }

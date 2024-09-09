@@ -22,6 +22,12 @@
         "sort-message.no-filter": "Sem Filtro"
     },
     "AccountInfo": {
-        "delete.confirmation": "Tem certeza que deseja excluir essa conta?"
+        "delete.confirmation": "Tem certeza que deseja excluir essa conta?",
+        "service.title": "Serviço",
+        "username.title": "Nome de Usuário",
+        "password.title": "Senha",
+        "notes.title": "Notas/Observações",
+        "additional-info.last_modified": "Última modificação:",
+        "additional-info.created": "Criado em:"
     }
 }

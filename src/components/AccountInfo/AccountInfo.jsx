@@ -85,14 +85,14 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
         const updateFavorite = async () => {
             const acc = getAccount(accounts, favorite[0]);
 
-            if (favorite[1] === acc.favorite) {
-                return;
+            if (favorite[1] !== acc.favorite) {
+                setAccounts(await editAccountKey(accounts, favorite[0], "favorite", favorite[1]));                
             }
 
-            setAccounts(await editAccountKey(accounts, favorite[0], "favorite", favorite[1]));
             // change the favorite icon
             const favoriteButton = document.getElementById("favorite");
             if (favorite[1]) {
+                console.log("updating favorite icon")
                 favoriteButton.className = "favorite";
             } else {
                 favoriteButton.className = "not-favorite";
@@ -105,6 +105,12 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
 
     const [langSet, setLangSet] = useState("");
     const [confirmDeleteMsg, setConfirmDeleteMsg] = useState("");
+    const [serviceTitle, setServiceTitle] = useState("");
+    const [usernameTitle, setUsernameTitle] = useState("");
+    const [passwordTitle, setPasswordTitle] = useState("");
+    const [notesTitle, setNotesTitle] = useState("");
+    const [lastModifiedText, setLastModifiedText] = useState("");
+    const [createdText, setCreatedText] = useState("");
 
     useEffect(() => {
         const loadLang = async () => {
@@ -112,18 +118,48 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
         }
 
         loadLang();
-    }, [])
+    }, []);
 
-    const removeAccount = async () => {
-        if (!selectedId) return;
+    useEffect(() => {
+        const setLangMsg = async () => {
+            setServiceTitle(await getMsgLang(langSet, "AccountInfo", "service.title"));
+            setUsernameTitle(await getMsgLang(langSet, "AccountInfo", "username.title"));
+            setPasswordTitle(await getMsgLang(langSet, "AccountInfo", "password.title"));
+            setNotesTitle(await getMsgLang(langSet, "AccountInfo", "notes.title"));
+            setLastModifiedText(await getMsgLang(langSet, "AccountInfo", "additional-info.last_modified"));
+            setCreatedText(await getMsgLang(langSet, "AccountInfo", "additional-info.created"));
+        }
 
-        const confirmDelete = await window.confirm(await getMsgLang(langSet, "AccountInfo", "delete.confirmation"));
-        if (!confirmDelete) return;
+        setLangMsg();
+    }, [langSet]);
 
-        setAccounts(await deleteAccount(accounts, selectedId));
-        setSearchTerm("");
-        setShowAccountInfo(false);
-        setSelectedId("");
+    const copy = (elementId) => {
+        const element = document.getElementById(elementId);
+        if (!element.value) return false;
+
+        navigator.clipboard.writeText(element.value);
+    }
+
+    const [passwordTimeout, setPasswordTimeout] = useState();
+
+    const turnPassVisibility = () => {        
+        const password = document.getElementById("show-password-info");
+        password.type = "text";
+        const showPassBtn = document.getElementById("show-password");
+        showPassBtn.setAttribute("disabled", true);
+
+        const visibilityButton = document.getElementById("show-password");
+        visibilityButton.className = "visibility";
+
+        if (passwordTimeout) {
+            clearTimeout(passwordTimeout);
+        }
+
+        setPasswordTimeout(setTimeout(() => {
+            password.type = "password";
+            showPassBtn.removeAttribute("disabled");
+            visibilityButton.className = "no-visibility";
+        }, 2000));
     }
 
     return (
@@ -138,7 +174,7 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
                     <button id="favorite" className="not-favorite"
                      onClick={ () => setFavorite([account.id, !account.favorite]) }></button>
                     <button id="edit-account"></button>
-                    <button id="etc" onClick={ () => removeAccount() }></button>
+                    <button id="etc"></button>
                 </div>
             </div>
 
@@ -146,10 +182,38 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
                 {securityMessage}
             </div>
 
-            <p>{service}</p>
-            <p>{username}</p>
-            <p>{password}</p>
-            <p>{notes}</p>
+            <div id="account-info">
+                <div id="service-info">
+                    <p id="service-title" className="info-title">{serviceTitle}</p>
+                    <input type="text" className="info-input" id="show-service-info" placeholder="Service Info" value={service} readOnly />
+                </div>
+
+                <div id="username-info">
+                    <p id="username-title" className="info-title">{usernameTitle}</p>
+                    <input type="text" id="show-username-info" className="info-input" placeholder="Username Info" value={username} readOnly />
+                    <button id="copy-username"
+                    onClick={ () => copy('show-username-info') } className="copy-button"></button>
+                </div>
+
+                <div id="password-info">
+                    <p id="password-title" className="info-title">{passwordTitle}</p>
+                    <input type="password" id="show-password-info" className="info-input" placeholder="Password Info" value={password} readOnly />
+                    <button id="copy-password"
+                    onClick={ () => copy("show-password-info") } className="copy-button"></button>
+                    <button id="show-password"
+                    onClick={ () => turnPassVisibility() } className="no-visibility"></button>
+                </div>
+
+                <div id="notes-info">
+                    <p id="notes-title" className="info-title">{notesTitle}</p>
+                    <input type="text" id="show-notes-info" className="info-input" placeholder="Notes Info" value={notes} readOnly />
+                </div>
+
+                <div id="additional-info">
+                    <p id="last-modified">{lastModifiedText} {account.last_modified}</p>
+                    <p id="created-date">{createdText} {account.created}</p>
+                </div>
+            </div>
         </div>
     );
 }

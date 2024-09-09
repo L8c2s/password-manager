@@ -64,12 +64,6 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         loadSortFilter();
     }, [accounts]);
 
-    const favoriteFirst = () => {
-        let favoriteAccounts = filteredAccounts.filter((acc) => acc.favorite);
-        let nonFavoriteAccounts = filteredAccounts.filter((acc) => !acc.favorite);
-        setFilteredAccounts([...favoriteAccounts, ...nonFavoriteAccounts]);
-    }
-
     const sortAccounts = async () => {
         let newFilteredAccounts = [...defaultFilteredAccounts];
 
@@ -92,12 +86,12 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         let favoriteAccounts = newFilteredAccounts.filter((acc) => acc.favorite);
         let nonFavoriteAccounts = newFilteredAccounts.filter((acc) => !acc.favorite);
 
-        setFilteredAccounts([...favoriteAccounts, ...nonFavoriteAccounts]);
+        setFilteredAccounts([...filterAccounts([...favoriteAccounts, ...nonFavoriteAccounts], searchTerm)]);
         setFixedFilteredAccounts([...favoriteAccounts, ...nonFavoriteAccounts]);
 
         let config = await loadConfig();
         config["sort_filter"] = sortFilter;
-        await saveConfig(config);
+        await saveConfig(config, "sortAccounts");
     }
 
     useEffect(() => {
@@ -110,7 +104,6 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
     }, [searchTerm])
 
     const jmpFilter = async () => {
-        setSortFilter("");
         const sorters = [ "accountName", "serviceName", "lastModified", "created", "noFilter" ];
         const newSorter = sorters.at((sorters.indexOf(sortFilter) + 1) % sorters.length);
         setSortFilter(newSorter);
@@ -119,7 +112,7 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
 
         let config = await loadConfig();
         config["sort_filter"] = newSorter;
-        await saveConfig(config);
+        await saveConfig(config, "jmpFilter");
     };
 
     const accountSelected = (accountId) => {
@@ -165,18 +158,24 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
 
         accountListed.classList.add(newClass);
     };
+    
+    const favoriteFirst = () => {
+        let favoriteAccounts = filteredAccounts.filter((acc) => acc.favorite);
+        let nonFavoriteAccounts = filteredAccounts.filter((acc) => !acc.favorite);
+        setFilteredAccounts([...favoriteAccounts, ...nonFavoriteAccounts]);
+    }
+
+    useEffect(() => {   
+        // favoriteFirst();
+        sortAccounts();
+        setFilteredAccounts([...filterAccounts(filteredAccounts, searchTerm)]);
+    }, [favorite]);
 
     useEffect(() => {
-        filteredAccounts.map(async (acc) => {
+        filteredAccounts.map((acc) => {
             updateFavoriteIcon(acc.id);
         });
     }, [filteredAccounts]);
-
-    useEffect(() => {
-        sortAccounts();
-    }, [favorite]);
-
-    // ------------------------------ //
 
     return (
         <div id="accounts-list-div">

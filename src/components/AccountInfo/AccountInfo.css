@@ -52,6 +52,41 @@
     font-weight: bold;
 }
 
+#account-info {
+    padding: 50px 20px;
+}
+
+#additional-info {
+    font-size: 15px;
+    color: #6b6e8f;
+    position: fixed;
+    top: 85%;
+}
+
+.visibility {
+    background: url("../../icons/visibility.svg") no-repeat center;
+}
+
+.no-visibility {
+    background: url("../../icons/visibility-off.svg") no-repeat center;
+}
+
+.copy-button {
+    background: url("../../icons/copy.svg") no-repeat center;
+}
+
+.info-title {
+    margin: 0px;
+    font-size: 16px;
+    color: #6b6e8f;
+    font-weight: bold;
+}
+
+.info-input {
+    width: 70%;
+    margin-bottom: 25px;
+}
+
 .safe {
     background: #21ec32 url("../../icons/safe.svg") no-repeat 10px center;
 }

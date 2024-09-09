@@ -22,6 +22,12 @@
         "sort-message.no-filter": "No Filter"
     },
     "AccountInfo": {
-        "delete.confirmation": "Are you sure you want to delete this account?"
+        "delete.confirmation": "Are you sure you want to delete this account?",
+        "service.title": "Service",
+        "username.title": "Username",
+        "password.title": "Password",
+        "notes.title": "Notes/Observations",
+        "additional-info.last_modified": "Last modified:",
+        "additional-info.created": "Created:"
     }
 }

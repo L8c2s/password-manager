@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "Password Manager",
-    "version": "0.7.0-REBUILD.6a"
+    "version": "0.7.0-REBUILD.7a"
   },
   "tauri": {
     "allowlist": {
@@ -26,10 +26,12 @@
     },
     "windows": [
       {
-        "title": "Gerenciador de Senhas v0.7.0-REBUILD.6a",
+        "title": "Gerenciador de Senhas v0.7.0-REBUILD.7a",
         "width": 1100,
         "height": 750,
-        "center": true
+        "center": true,
+        "resizable": false,
+        "maximizable": false
       }
     ],
     "security": {
