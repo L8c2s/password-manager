@@ -1,6 +1,6 @@
 [package]
 name = "password-manager"
-version = "0.7.0-REBUILD.7a"
+version = "0.7.0-REBUILD.81a"
 description = "Password Manager"
 authors = ["Lucas Ferreira"]
 edition = "2021"
