@@ -10,7 +10,7 @@ import { getConfigValue } from "../Config/config";
 import { getMsgLang } from "../Config/lang";
 import { checkPasswordSecurity, checkPasswordUnique } from "../Config/security";
 
-export function Notification({ accounts, account, notificationId }) {
+export function Notification({ accounts, account, notificationId, setUpdatePassWarn=(a) => {} }) {
     const [securityLevel, setSecurityLevel] = useState(0);
     const [securityMessage, setSecurityMessage] = useState("");
     const [langSet, setLangSet] = useState("");
@@ -35,6 +35,8 @@ export function Notification({ accounts, account, notificationId }) {
             notificationStatus.classList.add("no-notification");
             notificationStatus.classList.remove("safe", "warning", "alert")
         }
+
+        setUpdatePassWarn(true);
     }, [securityLevel]);
 
     const [noPasswordText, setNoPasswordText] = useState("");

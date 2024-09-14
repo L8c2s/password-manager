@@ -117,6 +117,18 @@
     justify-content: center;
 }
 
+.safe-value {
+    border-bottom: 3px solid #21ec32;
+}
+
+.not-safe-value {
+    border-bottom: 3px solid #ff0000;
+}
+
+.not-safe-password {
+    border-bottom: 3px solid #ff8d23;
+}
+
 .appear {
     animation: fade-in .5s forwards;
 }

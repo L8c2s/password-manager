@@ -5,6 +5,7 @@ import { getMsgLang } from "../Config/lang";
 import { getAccount, getAccounts, saveAccounts } from "../Config/accountsManager/manager";
 
 import { Notification } from "../notification/notification";
+import { save } from "@tauri-apps/api/dialog";
 
 // como vai funcionar
 // quando clicar em nova conta:
@@ -19,6 +20,7 @@ export function AddEditAccount({ accounts, setAccounts, editAccount, setEditAcco
     const [lastRandomUsed, setLastRandomUsed] = useState("");
     const [lengthNumber, setLengthNumber] = useState(12);
     const [accountIndex, setAccountIndex] = useState(-1);
+    const [updatePassWarn, setUpdatePassWarn] = useState(false);
 
     const generatePassword = (length=8) => {
         const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-={}[]\:;'<>,.?/~`";
@@ -50,8 +52,6 @@ export function AddEditAccount({ accounts, setAccounts, editAccount, setEditAcco
             acc.favorite = false;
         } if (!acc.hasOwnProperty("id")) {
             acc.id = generatePassword(6);
-        } if (!acc.hasOwnProperty("editing")) {
-            acc.editing = true;
         }
 
         return acc;
@@ -86,19 +86,80 @@ export function AddEditAccount({ accounts, setAccounts, editAccount, setEditAcco
     }
 
     const updateAccount = () => {
-        const service = document.getElementById("edit-service").value;
-        const username = document.getElementById("edit-username").value;
-        const password = document.getElementById("edit-password").value;
-        const notes = document.getElementById("edit-notes").value;
+        const service = document.getElementById("edit-service");
+        const username = document.getElementById("edit-username");
+        const password = document.getElementById("edit-password");
+        const notes = document.getElementById("edit-notes");
+
+        updateWarnStyle(service, username);
 
         let updater = {...account};
 
-        updater.service = service;
-        updater.username = username;
-        updater.password = password;
-        updater.notes = notes;
+        updater.service = service.value;
+        updater.username = username.value;
+        updater.password = password.value;
+        updater.notes = notes.value;
 
         setAccount(updater);
+    }
+
+    const updateWarnStyle = (service, username) => {
+        let safeService = false;
+
+        if (!service.value) {
+            service.classList.remove("safe-value");
+            service.classList.add("not-safe-value");
+        } else {
+            service.classList.remove("not-safe-value");
+            service.classList.add("safe-value");
+            safeService = true;
+        }
+
+        let safeUsername = false;
+        // check if the account already exists
+        const exists = checkAccount(service.value, username.value);
+        if (!username.value || exists) {
+            username.classList.remove("safe-value");
+            username.classList.add("not-safe-value");
+        } else {
+            username.classList.remove("not-safe-value");
+            username.classList.add("safe-value");
+            safeUsername = true;
+        }
+
+        const saveButton = document.getElementById("save-account");
+        if (safeService && safeUsername)
+            saveButton.removeAttribute("disabled");
+        else
+            saveButton.setAttribute("disabled", "true");
+    }
+
+    useEffect(() => {
+        const password = document.getElementById("edit-password");
+
+        const currentPassWarn = document.getElementById("edit-account-notification").classList;
+        if (currentPassWarn.contains("safe")) {
+            password.classList.remove("not-safe-value", "not-safe-password");
+            password.classList.add("safe-value");
+        } else if (currentPassWarn.contains("alert")) {
+            password.classList.remove("not-safe-value", "safe-value");
+            password.classList.add("not-safe-password");
+        } else if (currentPassWarn.contains("warning")) {
+            password.classList.remove("not-safe-password", "safe-value");
+            password.classList.add("not-safe-value");
+        }
+
+        setUpdatePassWarn(false);
+    }, [updatePassWarn])
+
+    const checkAccount = (accountService, accountUsername) => {
+        for (const service in accounts)
+            if (service === accountService)
+                for (let i = 0; i < accounts[service].length; i++)
+                    if (accounts[service][i].username === accountUsername)
+                        if (accounts[service][i].id !== account.id)
+                            return true;
+        return false;
     }
 
     const enableLengthDisplay = (enable) => {
@@ -222,16 +283,7 @@ export function AddEditAccount({ accounts, setAccounts, editAccount, setEditAcco
             setLoaded(false);
             return;
         }
-
     }, [editAccount, addAccount]);
-
-    useEffect(() => {
-        if (account.service && account.username) {
-            document.getElementById("save-account").removeAttribute("disabled");
-        } else {
-            document.getElementById("save-account").setAttribute("disabled", "true");
-        }
-    }, [account])
 
     const [title, setTitle] = useState("");
     const [usernamePlaceHld, setUsernamePlaceHld] = useState("");
@@ -277,6 +329,11 @@ export function AddEditAccount({ accounts, setAccounts, editAccount, setEditAcco
 
         if (!langSet) return;
         loadLangText();
+
+        const service = document.getElementById("edit-service");
+        const username = document.getElementById("edit-username");
+
+        updateWarnStyle(service, username);
     }, [langSet, loaded]);
 
     return (
@@ -296,13 +353,7 @@ export function AddEditAccount({ accounts, setAccounts, editAccount, setEditAcco
                     </div>
 
                     <h2 id="notification-preview-title" className="info-title">{notificationPreviewTitle}</h2>
-                    <Notification accounts={accounts} account={account} notificationId={"edit-account-notification"} />
-
-                    {/*
-                        // todo: add a small border bottom at every info-input and use it to tell the user about the status of the value
-                        // todo: if the service is empty, the border will be red and when hover above the service input a message on the right side of the service title
-                        // todo: between "()" will tell the user the problem will appear like the length message or the sortFilter message. Do this to every input, the notes input will always be green
-                    */}
+                    <Notification accounts={accounts} account={account} notificationId={"edit-account-notification"} setUpdatePassWarn={setUpdatePassWarn} />
 
                     <div id="edit-account-info">
                         <div id="edit-service-div">
@@ -332,7 +383,7 @@ export function AddEditAccount({ accounts, setAccounts, editAccount, setEditAcco
 
                         <div id="edit-notes-div">
                             <p id="notes-title" className="info-title">{notesTitle}</p>
-                            <input type="text" id="edit-notes" className="info-input" placeholder={notesPlaceHld} onChange={ () => updateAccount() } />
+                            <input type="text" id="edit-notes" className="info-input safe-value" placeholder={notesPlaceHld} onChange={ () => updateAccount() } />
                         </div>
 
                         <div id="form-buttons">
