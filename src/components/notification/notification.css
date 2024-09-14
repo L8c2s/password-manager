@@ -1,0 +1,26 @@
+.notification {
+    margin: 10px;
+    height: 8%;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding-left: 40px;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.safe {
+    background: #21ec32 url("../../icons/safe.svg") no-repeat 10px center;
+}
+
+.alert {
+    background: #ff8d23 url("../../icons/alert.svg") no-repeat 10px center;
+}
+
+.warning {
+    background: #ff0000 url("../../icons/warning.svg") no-repeat 10px center;
+}
+
+.no-notification {
+    background: #747474 url("../../icons/undefined-password.svg") no-repeat 10px center;
+}

@@ -1,0 +1,143 @@
+#add-edit-account-full-window {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+}
+
+#add-edit-account-blur {
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(3px);
+}
+
+#add-edit-account {
+    height: 80%;
+    width: 50%;
+    position: fixed;
+    top: 5%;
+    left: 24%;
+    background: #050414;
+    border-radius: 11px;
+    border: #728dc0 1px solid;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+#add-account-button {
+    position: fixed;
+    top: 85%;
+    left: 5%;
+    border-radius: 50px;
+    height: 75px;
+    width: 75px;
+    background: #2066ec url("../../icons/new.svg") no-repeat center;
+}
+
+#generate-password {
+    background: url("../../icons/generate-password.svg") no-repeat center;
+    width: 39px;
+    height: 39px;
+    margin-left: 20px;
+}
+
+#save-account,
+#cancel-operation {
+    width: fit-content;
+}
+
+#align-items {
+    display: flex;
+    vertical-align: center;
+}
+
+#title-bar {
+    margin-bottom: 40px;
+}
+
+#inline-length-display {
+    display: flex;
+}
+
+#display-length {
+    color: #747474;
+    margin: 9px 0 0 10px;
+    opacity: 0;
+}
+
+#password-length {
+    width: 27%;
+    margin-left: 35px;
+}
+
+/* #password-length::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    background: transparent;
+    cursor: pointer;
+} */
+
+/* #password-length::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    height: 5px;
+    background: #ddd;
+    border-radius: 10px;
+} */
+
+#edit-service {
+    background: #1e1d2b url("../../icons/website.svg") no-repeat 10px center;
+}
+
+#edit-username {
+    background: #1e1d2b url("../../icons/username.svg") no-repeat 10px center;
+}
+
+#edit-password {
+    margin-bottom: 0;
+    background: #1e1d2b url("../../icons/password.svg") no-repeat 10px center;
+}
+
+#edit-notes {
+    margin-bottom: 30px;
+    background: #1e1d2b url("../../icons/notes.svg") no-repeat 10px center;
+}
+
+#info-input {
+    width: auto;
+}
+
+#edit-account-notification {
+    margin-bottom: 30px;
+}
+
+#form-buttons {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.appear {
+    animation: fade-in .5s forwards;
+}
+
+.hide {
+    animation: fade-out .5s forwards;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    } to {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+    } to {
+        opacity: 0;
+        display: none;
+    }
+}

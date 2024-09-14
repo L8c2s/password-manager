@@ -97,7 +97,7 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
         const off = () => {
             let settings_full_window = document.getElementById("settings-full-window");
             settings_full_window.className = "zoom-out";
-            settings_full_window.style.display = "none";
+            setTimeout(() => settings_full_window.style.display = "none", 500);
         }
 
         if (settingsPopup) {

@@ -56,10 +56,6 @@
     width: fit-content;
 }
 
-#app-language {
-    /* display: none; */
-}
-
 .settings-content {
     margin-bottom: 50px;
 }
@@ -68,8 +64,8 @@
     animation: zoom-in .5s forwards;
 }
 
-.slide-out {
-    animation: zoom-out .5s forwards;
+.zoom-out {
+    animation: zoom-out .05s forwards;
 }
 
 @keyframes zoom-in {
@@ -84,7 +80,7 @@
     from {
         transform: scale(1);
     } to {
-        transform: scale(.10);
+        transform: scale(.99);
         display: none;
     }
 }

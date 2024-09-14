@@ -29,5 +29,21 @@
         "notes.title": "Notas/Observações",
         "additional-info.last_modified": "Última modificação:",
         "additional-info.created": "Criado em:"
+    },
+    "AddEditAccount": {
+        "add_account.title": "Adicionar Conta",
+        "edit_account.title": "Editar Conta",
+        "edit_username.placeholder": "exemplo@gmail.com",
+        "edit_notes.placeholder": "Opcional",
+        "save_button.text": "Salvar",
+        "cancel_button.text": "Cancelar",
+        "notification_preview.title": "Prévia da Notificação",
+        "password_length.display": "Comprimento:"
+    },
+    "notification": {
+        "level_security.no_password": "Sua conta não possui uma senha.",
+        "level_security.not_safe_enough": "A senha não é segura o suficiente.",
+        "level_security.repeated_password": "Mais de uma conta possuem a mesma senha.",
+        "level_security.safe": "Sua conta está segura."
     }
 }

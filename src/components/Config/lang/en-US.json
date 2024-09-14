@@ -29,5 +29,21 @@
         "notes.title": "Notes/Observations",
         "additional-info.last_modified": "Last modified:",
         "additional-info.created": "Created:"
+    },
+    "AddEditAccount": {
+        "add_account.title": "Add Account",
+        "edit_account.title": "Edit Account",
+        "edit_username.placeholder": "example@gmail.com",
+        "edit_notes.placeholder": "Optional",
+        "save_button.text": "Save",
+        "cancel_button.text": "Cancel",
+        "notification_preview.title": "Notification Preview",
+        "password_length.display": "Password length:"
+    },
+    "notification": {
+        "level_security.no_password": "Your account doesn't have a password.",
+        "level_security.not_safe_enough": "The password isn't safe enough.",
+        "level_security.repeated_password": "More than one account has the same password.",
+        "level_security.safe": "Your account is safe."
     }
 }

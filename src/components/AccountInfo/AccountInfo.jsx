@@ -4,17 +4,17 @@ import "./AccountInfo.css";
 import { getConfigValue } from "../Config/config";
 import { getMsgLang } from "../Config/lang";
 import { deleteAccount, editAccountKey, getAccount } from "../Config/accountsManager/manager";
-import { checkPasswordSecurity, checkPasswordUnique } from "../Config/security";
+
+import { Notification } from "../notification/notification";
 
 
-export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite, setSearchTerm }) {
+export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAccountInfo, selectedId, favorite, setFavorite, setEditAccount }) {
     const [account, setAccount] = useState({});
     const [service, setService] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [notes, setNotes] = useState("");
-    const [securityLevel, setSecurityLevel] = useState(0);
-    const [securityMessage, setSecurityMessage] = useState("");
+    const [accountLoaded, setAccountLoaded] = useState(false);
 
     useEffect(() => {
         const infoWindow = document.getElementById("accounts-info-div");
@@ -44,42 +44,18 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
         setUsername(account.username);
         setPassword(account.password);
         setNotes(account.notes);
-
-        // test security
-        if (!account.password) {
-            setSecurityLevel(0);
-            setSecurityMessage("Sua conta não possui uma senha.")
-            return;
-        }
-
-        const isSecure = checkPasswordSecurity(account.password);
-        if (!isSecure) {
-            setSecurityLevel(1);
-            setSecurityMessage("A senha não é segura o suficiente.")
-            return;
-        }
-
-        const isUnique = checkPasswordUnique(accounts, account.password);
-        if (!isUnique) {
-            setSecurityLevel(1);
-            setSecurityMessage("Mais de uma conta possuem a mesma senha.");
-            return;
-        }
-
-        setSecurityLevel(2);
-        setSecurityMessage("Sua conta está segura.");
+        setAccountLoaded(true);
     }, [account]);
 
     useEffect(() => {
-        const notificationStatus = document.getElementById("notification");
-        if (securityLevel === 0) {
-            notificationStatus.className = "warning";
-        } else if (securityLevel === 1) {
-            notificationStatus.className = "alert";
-        } else if (securityLevel === 2) {
-            notificationStatus.className = "safe";
-        }
-    }, [securityLevel])
+        if (!accountLoaded) return;
+
+        document.getElementById("show-service-info").value = service;
+        document.getElementById("show-username-info").value = username;
+        document.getElementById("show-password-info").value = password;
+        document.getElementById("show-notes-info").value = notes;
+        setAccountLoaded(false);
+    }, [accountLoaded]);
 
     useEffect(() => {
         const updateFavorite = async () => {
@@ -173,31 +149,30 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
                 <div id="right-nav">
                     <button id="favorite" className="not-favorite"
                      onClick={ () => setFavorite([account.id, !account.favorite]) }></button>
-                    <button id="edit-account"></button>
+                    <button id="edit-account"
+                     onClick={ () => { setEditAccount(true) } }></button>
                     <button id="etc"></button>
                 </div>
             </div>
 
-            <div id="notification">
-                {securityMessage}
-            </div>
+            <Notification accounts={accounts} account={account} notificationId={"account-info-notification"} />
 
             <div id="account-info">
                 <div id="service-info">
                     <p id="service-title" className="info-title">{serviceTitle}</p>
-                    <input type="text" className="info-input" id="show-service-info" placeholder="Service Info" value={service} readOnly />
+                    <input type="text" className="info-input" id="show-service-info" placeholder="Service Info" readOnly />
                 </div>
 
                 <div id="username-info">
                     <p id="username-title" className="info-title">{usernameTitle}</p>
-                    <input type="text" id="show-username-info" className="info-input" placeholder="Username Info" value={username} readOnly />
+                    <input type="text" id="show-username-info" className="info-input" placeholder="Username Info" readOnly />
                     <button id="copy-username"
                     onClick={ () => copy('show-username-info') } className="copy-button"></button>
                 </div>
 
                 <div id="password-info">
                     <p id="password-title" className="info-title">{passwordTitle}</p>
-                    <input type="password" id="show-password-info" className="info-input" placeholder="Password Info" value={password} readOnly />
+                    <input type="password" id="show-password-info" className="info-input" placeholder="Password Info" readOnly />
                     <button id="copy-password"
                     onClick={ () => copy("show-password-info") } className="copy-button"></button>
                     <button id="show-password"
@@ -206,7 +181,7 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
 
                 <div id="notes-info">
                     <p id="notes-title" className="info-title">{notesTitle}</p>
-                    <input type="text" id="show-notes-info" className="info-input" placeholder="Notes Info" value={notes} readOnly />
+                    <input type="text" id="show-notes-info" className="info-input" placeholder="Notes Info" readOnly />
                 </div>
 
                 <div id="additional-info">

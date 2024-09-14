@@ -12,25 +12,16 @@ export function checkPasswordSecurity(password) {
     return true;
 }
 
-export function checkPasswordUnique(accounts, password) {
-    let allPasswords = [];
+export function checkPasswordUnique(accounts, account) {
+    let occurrences = 0;
 
     for (const service in accounts) {
         accounts[service].forEach((acc) => {
-            allPasswords.push(acc.password);
+            if (acc.password === account.password && acc.id !== account.id) {
+                occurrences++;
+            }
         })
     }
 
-    let ocorrencias = 0;
-    for (const item of allPasswords) {
-        if (item === password) {
-            ocorrencias++;
-        }
-    }
-
-    if (ocorrencias > 1) {
-        return false;
-    }
-
-    return true;
+    return occurrences;
 }

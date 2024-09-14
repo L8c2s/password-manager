@@ -23,12 +23,12 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
     const [sortFilter, setSortFilter] = useState("");
     const [fixedFilteredAccounts, setFixedFilteredAccounts] = useState([]);
 
+    // id
     // service
     // username
     // password
     // notes
     // favorite
-    // id
     // password_history
     // last_modified
     // created
@@ -95,7 +95,6 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
     }
 
     useEffect(() => {
-        if (!sortFilter) return;
         sortAccounts();
     }, [sortFilter, defaultFilteredAccounts]);
 
@@ -142,12 +141,8 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
     }, [showAccountInfo]);
 
     const updateFavoriteIcon = (accountId = null) => {
-        if (!accountId && !selectedId) {
-            return;
-        }
-
         if (!accountId) {
-            accountId = selectedId;
+            return updateFavoriteIcon(selectedId);
         }
 
         const account = getAccount(accounts, accountId);

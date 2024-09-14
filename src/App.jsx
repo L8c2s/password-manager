@@ -7,6 +7,7 @@ import { Header } from "./components/Header/Header";
 import { UpdateList } from "./components/AccountsList/AccountsList";
 import { Settings } from "./components/Settings/Settings";
 import { AccountsInfo } from "./components/AccountInfo/AccountInfo";
+import { AddEditAccount } from "./components/AddEditAccount/AddEditAccount";
 
 // configurations
 import { getConfigValue } from "./components/Config/config";
@@ -23,6 +24,8 @@ function App() {
     const [accounts, setAccounts] = useState({});
     const [favorite, setFavorite] = useState([]);
     const [updatedFavorite, setUpdatedFavorite] = useState(false);
+    const [addAccount, setAddAccount] = useState(false);
+    const [editAccount, setEditAccount] = useState(false);
 
     useEffect(() => {
         const loadLang = async () => {
@@ -39,12 +42,12 @@ function App() {
     }, []);
 
     useEffect(() => {
-        if (settingsPopup) {
+        if (settingsPopup || addAccount || editAccount) {
             document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "auto";
         }
-    }, [settingsPopup]);
+    }, [settingsPopup, addAccount, editAccount]);
 
     return (
         <div id="content">
@@ -67,10 +70,23 @@ function App() {
                 selectedId={selectedId} setSelectedId={setSelectedId}
                 favorite={favorite} setFavorite={setFavorite}
                 setSearchTerm={setSearchTerm}
+                editAccount={editAccount}
+                setEditAccount={setEditAccount}
             />
 
             <Settings
                 settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
+            />
+
+            <AddEditAccount 
+                accounts={accounts}
+                setAccounts={setAccounts}
+                addAccount={addAccount}
+                setAddAccount={setAddAccount}
+                editAccount={editAccount}
+                setEditAccount={setEditAccount}
+                selectedId={selectedId}
+                setShowAccountInfo={setShowAccountInfo}
             />
         </div>
     );

@@ -41,17 +41,6 @@
     margin-left: 10px;
 }
 
-#notification {
-    margin: 10px;
-    height: 8%;
-    /* background: url("../../icons/safe.svg") no-repeat 10px center; */
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    padding-left: 40px;
-    font-weight: bold;
-}
-
 #account-info {
     padding: 50px 20px;
 }
@@ -61,6 +50,22 @@
     color: #6b6e8f;
     position: fixed;
     top: 85%;
+}
+
+#show-service-info {
+    background: url("../../icons/website.svg") no-repeat 10px center;
+}
+
+#show-username-info {
+    background: url("../../icons/username.svg") no-repeat 10px center;
+}
+
+#show-password-info {
+    background: url("../../icons/password.svg") no-repeat 10px center;
+}
+
+#show-notes-info {
+    background: url("../../icons/notes.svg") no-repeat 10px center;
 }
 
 .visibility {
@@ -76,27 +81,16 @@
 }
 
 .info-title {
-    margin: 0px;
+    margin: 0;
     font-size: 16px;
     color: #6b6e8f;
     font-weight: bold;
 }
 
 .info-input {
-    width: 70%;
+    width: 65%;
     margin-bottom: 25px;
-}
-
-.safe {
-    background: #21ec32 url("../../icons/safe.svg") no-repeat 10px center;
-}
-
-.alert {
-    background: #ff8d23 url("../../icons/alert.svg") no-repeat 10px center;
-}
-
-.warning {
-    background: #ff0000 url("../../icons/warning.svg") no-repeat 10px center;
+    padding-left: 40px;
 }
 
 .favorite {
