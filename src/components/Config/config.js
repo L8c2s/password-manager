@@ -1,4 +1,4 @@
-import { readTextFile, writeTextFile, exists } from "@tauri-apps/api/fs";
+import { readTextFile, writeTextFile } from "@tauri-apps/api/fs";
 
 
 const CONFIGPATH = "./config/config.json"
@@ -6,9 +6,8 @@ const DEBUGCONFIGPATH = "D:/OtherProjects/Tauri/password-manager/src/components/
 
 // todo: create a verification for important folders and files that the program needs to work properly, like ./config/config.json
 
-export async function saveConfig(newConfig, func) {
+export async function saveConfig(newConfig) {
     newConfig = JSON.stringify(newConfig);
-    console.log(`Saving ${newConfig}. Called by ${func}.`)
     try {
         await writeTextFile(CONFIGPATH, newConfig);
     } catch {
@@ -16,21 +15,29 @@ export async function saveConfig(newConfig, func) {
     }
 }
 
+export async function editConfigKey(key, value) {
+    let config = await loadConfig();
+    config[key] = value;
+    await saveConfig(config);
+}
+
 export async function loadConfig() {
     let config;
     try {
-        config = JSON.parse(await readTextFile(CONFIGPATH));
-    } catch {
+        let textFile = await readTextFile(CONFIGPATH);
+        config = JSON.parse(textFile);
+    } catch (error) {
         try {
-            config = JSON.parse(await readTextFile(DEBUGCONFIGPATH));
-        } catch {
+            let textFile = await readTextFile(DEBUGCONFIGPATH);
+            config = JSON.parse(textFile);
+        } catch (debugerror) {
             config = false;
         }
     }
 
     if (!config || !config.hasOwnProperty("accounts_dir") || !config.hasOwnProperty("lang")) {
-        config = { accounts_dir: "", lang: "pt-BR", sort_filter: "noFilter" }
-        await saveConfig(config, "loadConfig");
+        config = { accounts_dir: "", lang: "pt-BR", sort_filter: "created" }
+        await saveConfig(config);
     }
 
     return config;

@@ -1,5 +1,4 @@
-import { React, useEffect, useState } from "react";
-import { readTextFile, writeTextFile } from "@tauri-apps/api/fs";
+import { exists, createDir, readTextFile, writeFile } from "@tauri-apps/api/fs";
 
 import { getConfigValue } from "../config";
 
@@ -7,7 +6,7 @@ import { getConfigValue } from "../config";
 export async function getAccounts() {
     let accounts;
     try {
-        accounts = await readTextFile(`${await getConfigValue("accounts_dir")}/accounts.json`);
+        accounts = await readTextFile(`${await getConfigValue("accounts_dir")}\\accounts.json`);
     } catch { 
         accounts = "{}";
     }
@@ -21,7 +20,14 @@ export async function getAccounts() {
 
 export async function saveAccounts(accounts) {
     if (!accounts) return;
-    await writeTextFile(`${await getConfigValue("accounts_dir")}/accounts.json`, JSON.stringify(accounts));
+    const accountsDir = `${await getConfigValue("accounts_dir")}`;
+    const accountsFile = `${accountsDir}\\accounts.json`;
+
+    if (!await exists(accountsDir)) {
+        await createDir(accountsDir);
+    }
+
+    await writeFile({ path: accountsFile, contents: JSON.stringify(accounts) });
 }
 
 export function getAccount(accounts, accountId) {
@@ -56,7 +62,7 @@ export async function editAccount(accounts, accountId, newAccount) {
 }
 
 export async function editAccountKey(accounts, accountId, key, newValue) {
-    console.log(accounts, accountId, key, newValue);
+    // console.log(accounts, accountId, key, newValue);
     let account = getAccount(accounts, accountId);
     account[key] = newValue;
     return await editAccount(accounts, accountId, account);
@@ -65,8 +71,6 @@ export async function editAccountKey(accounts, accountId, key, newValue) {
 export async function deleteAccount(accounts, accountId) {
     for (const service in accounts) {
         for (let i = 0; i < accounts[service].length; i++) {
-            console.log(accounts[service][i])
-            console.log(accountId);
             if (accounts[service][i].id === accountId) {
                 accounts[service].splice(i, 1);
             }

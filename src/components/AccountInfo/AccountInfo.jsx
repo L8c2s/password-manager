@@ -3,12 +3,12 @@ import "./AccountInfo.css";
 
 import { getConfigValue } from "../Config/config";
 import { getMsgLang } from "../Config/lang";
-import { deleteAccount, editAccountKey, getAccount } from "../Config/accountsManager/manager";
+import { deleteAccount, editAccountKey, getAccount, getAccounts, saveAccounts } from "../Config/accountsManager/manager";
 
 import { Notification } from "../notification/notification";
 
 
-export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAccountInfo, selectedId, favorite, setFavorite, setEditAccount }) {
+export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite, setEditAccount }) {
     const [account, setAccount] = useState({});
     const [service, setService] = useState("");
     const [username, setUsername] = useState("");
@@ -68,7 +68,6 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
             // change the favorite icon
             const favoriteButton = document.getElementById("favorite");
             if (favorite[1]) {
-                console.log("updating favorite icon")
                 favoriteButton.className = "favorite";
             } else {
                 favoriteButton.className = "not-favorite";
@@ -78,6 +77,33 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
         if (!favorite[0]) return;
         updateFavorite();
     }, [favorite]);
+
+    const deleteAccount = async (accountId) => {
+        let accountIndex = -1;
+        // gets the account index in the accounts object, removes it from the list and apply the changes
+        for (const service in accounts) {
+            for (let i = 0; i < accounts[service].length; i++) {
+                if (accounts[service][i].id === accountId)
+                    accountIndex = i;
+            }
+        }
+
+        if (accountIndex === -1) {
+            await window.alert(await getMsgLang(langSet, "AccountInfo", "delete_account.no_id"));
+            return;
+        }
+
+        const confirmation = await window.confirm(confirmDeleteMsg);
+        if (!confirmation) return;
+
+        let newAccounts = accounts;
+        newAccounts[service].splice(accountIndex, 1);
+        await saveAccounts(newAccounts);
+        setAccounts(await getAccounts());
+
+        setShowAccountInfo(false);
+        setSelectedId("");
+    };
 
     const [langSet, setLangSet] = useState("");
     const [confirmDeleteMsg, setConfirmDeleteMsg] = useState("");
@@ -104,6 +130,7 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
             setNotesTitle(await getMsgLang(langSet, "AccountInfo", "notes.title"));
             setLastModifiedText(await getMsgLang(langSet, "AccountInfo", "additional-info.last_modified"));
             setCreatedText(await getMsgLang(langSet, "AccountInfo", "additional-info.created"));
+            setConfirmDeleteMsg(await getMsgLang(langSet, "AccountInfo", "delete_account.confirmation"));
         }
 
         setLangMsg();
@@ -151,7 +178,8 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
                      onClick={ () => setFavorite([account.id, !account.favorite]) }></button>
                     <button id="edit-account"
                      onClick={ () => { setEditAccount(true) } }></button>
-                    <button id="etc"></button>
+                    <button id="delete"
+                     onClick={ () => deleteAccount(account.id) }></button>
                 </div>
             </div>
 

@@ -31,8 +31,8 @@
     background: url("../../icons/edit.svg") no-repeat center;
 }
 
-#etc {
-    background: url("../../icons/three-dots.svg") no-repeat center;
+#delete {
+    background: url("../../icons/delete.svg") no-repeat center;
     margin-right: 10px;
 }
 
@@ -66,6 +66,7 @@
 
 #show-notes-info {
     background: url("../../icons/notes.svg") no-repeat 10px center;
+    width: 85%;
 }
 
 .visibility {

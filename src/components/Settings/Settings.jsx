@@ -2,7 +2,7 @@ import { React, useEffect, useMemo, useState } from "react";
 import { open } from "@tauri-apps/api/dialog";
 import "./Settings.css";
 
-import { getConfigValue, loadConfig, saveConfig } from "../Config/config";
+import { editConfigKey, getConfigValue, saveConfig } from "../Config/config";
 import { getMsgLang } from "../Config/lang";
 
 
@@ -44,9 +44,8 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
 
         accountsDirPath += "\\PasswordManager";
 
-        let config = await loadConfig();
-        config["accounts_dir"] = accountsDirPath
-        await saveConfig(config, "changeAccountsDir");
+        await editConfigKey("accounts_dir", accountsDirPath);
+        await new Promise(resolve => setTimeout(resolve, 100));
         location.reload();
     }
 
@@ -54,9 +53,7 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
         if (language === langSet)
             return null;
 
-        let config = await loadConfig();
-        config["lang"] = language;
-        await saveConfig(config, "changeLanguage");
+        await editConfigKey("lang", language);
         location.reload();
     }
 
@@ -84,8 +81,6 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
         update();
         setUpdateLangSet(langSet);
     }, [langSet]);
-
-    // ------------------------------ //
 
     useEffect(() => {
         const on = () => {

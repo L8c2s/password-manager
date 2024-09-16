@@ -1,22 +1,13 @@
-import { React, useState, useEffect } from "react";
+import { React, useState, useEffect, useRef } from "react";
 import "./Header.css"
 
-import { getConfigValue } from "../Config/config";
 import { getMsgLang } from "../Config/lang";
 
 
-export function Header({ searchTerm, setSearchTerm, settingsPopup, setSettingsPopup }) {
-    const [langSet, setLangSet] = useState("");
+export function Header({ langSet, searchTerm, setSearchTerm, settingsPopup, setSettingsPopup, setAddAccount, setEditAccount }) {
+    const searchRef = useRef(null);
 
-    useEffect(() => {
-        const loadLang = async () => {
-            let langSaved = await getConfigValue("lang");
-            setLangSet(langSaved);
-        }
-
-        loadLang();
-    }, []);
-
+    // set the text using the current language
     useEffect(() => {
         const updateSearchPlHd = async () => {
             let placeholder = await getMsgLang(langSet, "Header", "search.placeholder");
@@ -24,7 +15,26 @@ export function Header({ searchTerm, setSearchTerm, settingsPopup, setSettingsPo
         }
 
         updateSearchPlHd();
-    }, [langSet])
+    }, [langSet]);
+
+    useEffect(() => {
+        window.addEventListener("keydown", startSearch);
+        return () => window.removeEventListener("keydown", startSearch);
+    }, []);
+
+    const startSearch = (event) => {
+        if (event.key === "/") {
+            if (!searchRef.current.focused) {
+                event.preventDefault();
+            }
+            searchRef.current.focus();
+        } else if (event.key === "Escape") {
+            searchRef.current.blur();
+            setSettingsPopup(false);
+            setAddAccount(false);
+            setEditAccount(false);
+        }
+    };
 
     return (
         <div id="header">
@@ -34,7 +44,8 @@ export function Header({ searchTerm, setSearchTerm, settingsPopup, setSettingsPo
                     id="search-bar"
                     value={searchTerm}
                     onChange={(e) => { setSearchTerm(e.target.value) }}
-                    autoFocus="autofocus"
+                    autoFocus
+                    ref={searchRef}
                 />
                 <button id="clear-search-bar"
                     onClick={() => { setSearchTerm("") }}

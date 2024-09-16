@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { invoke } from "@tauri-apps/api/tauri";
 import "./App.css";
 
 // components
@@ -11,7 +10,6 @@ import { AddEditAccount } from "./components/AddEditAccount/AddEditAccount";
 
 // configurations
 import { getConfigValue } from "./components/Config/config";
-import { getMsgLang } from "./components/Config/lang";
 import { getAccounts } from "./components/Config/accountsManager/manager";
 
 
@@ -23,7 +21,6 @@ function App() {
     const [selectedId, setSelectedId] = useState("");
     const [accounts, setAccounts] = useState({});
     const [favorite, setFavorite] = useState([]);
-    const [updatedFavorite, setUpdatedFavorite] = useState(false);
     const [addAccount, setAddAccount] = useState(false);
     const [editAccount, setEditAccount] = useState(false);
 
@@ -54,6 +51,8 @@ function App() {
             <Header
                 searchTerm={searchTerm} setSearchTerm={setSearchTerm}
                 settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
+                langSet={langSet}
+                setAddAccount={setAddAccount} setEditAccount={setEditAccount}
             />
 
             <UpdateList 
@@ -62,6 +61,7 @@ function App() {
                 showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo}
                 selectedId={selectedId} setSelectedId={setSelectedId}
                 favorite={favorite} setFavorite={setFavorite}
+                langSet={langSet}
             />
 
             <AccountsInfo
@@ -70,23 +70,22 @@ function App() {
                 selectedId={selectedId} setSelectedId={setSelectedId}
                 favorite={favorite} setFavorite={setFavorite}
                 setSearchTerm={setSearchTerm}
-                editAccount={editAccount}
-                setEditAccount={setEditAccount}
+                editAccount={editAccount} setEditAccount={setEditAccount}
+                langSet={langSet}
             />
 
             <Settings
                 settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
+                langSet={langSet} setLangSet={langSet}
             />
 
             <AddEditAccount 
-                accounts={accounts}
-                setAccounts={setAccounts}
-                addAccount={addAccount}
-                setAddAccount={setAddAccount}
-                editAccount={editAccount}
-                setEditAccount={setEditAccount}
+                accounts={accounts} setAccounts={setAccounts}
+                addAccount={addAccount} setAddAccount={setAddAccount}
+                editAccount={editAccount} setEditAccount={setEditAccount}
                 selectedId={selectedId}
                 setShowAccountInfo={setShowAccountInfo}
+                langSet={langSet}
             />
         </div>
     );

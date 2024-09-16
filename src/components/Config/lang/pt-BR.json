@@ -1,6 +1,6 @@
 {
     "Header": {
-        "search.placeholder": "Pesquise por uma conta"
+        "search.placeholder": "Use \"/\" para pesquisar"
     },
     "App": {
         "helloWorld": "Olá Mundo!"
@@ -28,7 +28,10 @@
         "password.title": "Senha",
         "notes.title": "Notas/Observações",
         "additional-info.last_modified": "Última modificação:",
-        "additional-info.created": "Criado em:"
+        "additional-info.created": "Criado em:",
+        "delete_account.no_id": "Não foi possível excluir a conta.",
+        "delete_account.success": "A conta foi excluída.",
+        "delete_account.confirmation": "Tem certeza que deseja excluir essa conta?"
     },
     "AddEditAccount": {
         "add_account.title": "Adicionar Conta",

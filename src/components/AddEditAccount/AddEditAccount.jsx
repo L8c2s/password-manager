@@ -12,8 +12,7 @@ import { save } from "@tauri-apps/api/dialog";
 // o componente vai carregar um objeto de conta, gerar um id e adicionar no objeto
 // os campos são preenchidos com placeholders traduzidos
 
-export function AddEditAccount({ accounts, setAccounts, editAccount, setEditAccount, addAccount, setAddAccount, selectedId, setShowAccountInfo }) {
-    const [langSet, setLangSet] = useState("");
+export function AddEditAccount({ langSet, accounts, setAccounts, editAccount, setEditAccount, addAccount, setAddAccount, selectedId, setShowAccountInfo }) {
     const [loaded, setLoaded] = useState(false);
     const [account, setAccount] = useState({});
     const [randomPassword, setRandomPassword] = useState("");
@@ -21,6 +20,7 @@ export function AddEditAccount({ accounts, setAccounts, editAccount, setEditAcco
     const [lengthNumber, setLengthNumber] = useState(12);
     const [accountIndex, setAccountIndex] = useState(-1);
     const [updatePassWarn, setUpdatePassWarn] = useState(false);
+    const [isButtonVisible, setIsButtonVisible] = useState(true);
 
     const generatePassword = (length=8) => {
         const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-={}[]\:;'<>,.?/~`";
@@ -60,13 +60,25 @@ export function AddEditAccount({ accounts, setAccounts, editAccount, setEditAcco
     const getDateTime = () => {
         const date = new Date();
 
-        const day = date.getDate();
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
+        let day = date.getDate();
+        let month = date.getMonth() + 1;
+        let year = date.getFullYear();
         
-        const hour = date.getHours();
-        const minute = date.getMinutes();
-        const second = date.getSeconds();
+        let hour = date.getHours();
+        let minute = date.getMinutes();
+        let second = date.getSeconds();
+
+        if (day < 10)
+            day = `0${day}`;
+        if (month < 10)
+            month = `0${month}`;
+
+        if (hour < 10)
+            hour = `0${hour}`;
+        if (minute < 10)
+            minute = `0${minute}`;
+        if (second < 10)
+            second = `0${second}`;
 
         return `${day}/${month}/${year} ${hour}:${minute}:${second}`;
     }
@@ -204,11 +216,26 @@ export function AddEditAccount({ accounts, setAccounts, editAccount, setEditAcco
     }
 
     useEffect(() => {
-        const loadLang = async () => {
-            setLangSet(await getConfigValue("lang"));
+        const handleScroll = () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+                setIsButtonVisible(false);
+            } else {
+                setIsButtonVisible(true);
+            }
         }
 
-        loadLang();
+        const addAccountShortcut = (event) => {
+            if (event.ctrlKey && event.key === "n") {
+                setAddAccount(true);
+            }
+        }
+
+        window.addEventListener("scroll", handleScroll);
+        window.addEventListener("keydown", addAccountShortcut);
+        return () => {
+            window.removeEventListener("scroll", handleScroll)
+            window.removeEventListener("keydown", addAccountShortcut);
+        };
     }, []);
 
     useEffect(() => {
@@ -340,7 +367,8 @@ export function AddEditAccount({ accounts, setAccounts, editAccount, setEditAcco
         <div id="add-edit-account-main">
             <div id="add-account-space">
                 <button id="add-account-button"
-                 onClick={ () => { setAddAccount(true) } }></button>
+                 onClick={ () => { setAddAccount(true) } }
+                 style={{ display: isButtonVisible ? "block" : "none" }}></button>
             </div>
 
             <div id="add-edit-account-full-window">

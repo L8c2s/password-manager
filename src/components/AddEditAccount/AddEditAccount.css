@@ -15,7 +15,7 @@
 
 #add-edit-account {
     height: 80%;
-    width: 50%;
+    width: 45%;
     position: fixed;
     top: 5%;
     left: 24%;
@@ -23,7 +23,7 @@
     border-radius: 11px;
     border: #728dc0 1px solid;
     padding: 40px;
-    overflow-y: auto;
+    overflow-y: hidden;
 }
 
 #add-account-button {
