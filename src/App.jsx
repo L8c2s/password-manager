@@ -77,6 +77,7 @@ function App() {
             <Settings
                 settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
                 langSet={langSet} setLangSet={langSet}
+                accounts={accounts}
             />
 
             <AddEditAccount 

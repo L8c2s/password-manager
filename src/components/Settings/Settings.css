@@ -56,6 +56,19 @@
     width: fit-content;
 }
 
+#create-text-file {
+    width: fit-content;
+}
+
+#creation-area {
+    display: flex;
+    align-items: center;
+}
+
+#created-confirmation {
+    margin-left: 20px;
+}
+
 .settings-content {
     margin-bottom: 50px;
 }
@@ -66,6 +79,12 @@
 
 .zoom-out {
     animation: zoom-out .05s forwards;
+}
+
+a,
+a:visited {
+    color: inherit;
+    font-style: italic;
 }
 
 @keyframes zoom-in {

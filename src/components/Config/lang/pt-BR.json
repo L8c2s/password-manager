@@ -12,7 +12,11 @@
         "months-to-update-pass.title": "Meses para Atualizar Senhas",
         "change-accounts-dir.title": "Diretório de Contas",
         "app-language-title.title": "Idioma",
-        "update-language.text": "Aplicar"
+        "update-language.text": "Aplicar",
+        "create-text-file.title": "Criar arquivo de texto",
+        "create-text-file.created": "Arquivo criado em",
+        "create-text-file.explanation": "Crie um arquivo de texto simples com suas contas para fácil leitura e compartilhamento.",
+        "create-text-file.select_folder": "Selecionar pasta"
     },
     "AccountsList": {
         "sort-message.username": "Nome de Usuário",

@@ -1,22 +1,20 @@
-import { React, useEffect, useMemo, useState } from "react";
+import { React, useEffect, useRef, useState } from "react";
 import { open } from "@tauri-apps/api/dialog";
+import { writeFile } from "@tauri-apps/api/fs";
+
 import "./Settings.css";
 
-import { editConfigKey, getConfigValue, saveConfig } from "../Config/config";
+import { editConfigKey, getConfigValue } from "../Config/config";
 import { getMsgLang } from "../Config/lang";
 
 
-export function Settings({ settingsPopup, setSettingsPopup }) {
-    const [langSet, setLangSet] = useState("");
+export function Settings({ settingsPopup, setSettingsPopup, langSet, accounts }) {
     const [updateLangSet, setUpdateLangSet] = useState("");
     const [accountsDirValue, setAccountsDirValue] = useState("");
-    const [monthsToUpdateValue, setMonthsToUpdateValue] = useState(0);
+    const [textFilePath, setTextFilePath] = useState("");
+    const createdConfirmation = useRef(null);
 
     useEffect(() => {
-        const loadLang = async () => {
-            setLangSet(await getConfigValue("lang"));
-        }
-
         const loadAccountsDir = async () => {
             let dir = await getConfigValue("accounts_dir");
             let dirValue = "";
@@ -29,7 +27,6 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
             setAccountsDirValue(dirValue);
         }
 
-        loadLang();
         loadAccountsDir();
     }, []);
 
@@ -57,6 +54,57 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
         location.reload();
     }
 
+    const generateTextFileContent = async () => {
+        const username = await getMsgLang(langSet, "AccountInfo", "username.title");
+        const password = await getMsgLang(langSet, "AccountInfo", "password.title");
+        const notes = await getMsgLang(langSet, "AccountInfo", "notes.title");
+        
+        let content = "";
+
+        for (const service in accounts) {
+            if (accounts[service].length <= 0) continue;
+            content += service.toUpperCase();
+
+            for (let i = 0; i < accounts[service].length; i++) {
+                const acc = accounts[service][i]
+                content += `\n  ${username.toLowerCase()}: ${acc.username}`;
+                content += `\n  ${password.toLowerCase()}: ${acc.password}`;
+                if (acc.notes) {
+                    content += `\n  ${notes.toLowerCase()}: ${acc.notes}`;
+                }
+
+                content += "\n";
+            }
+
+            content += "\n";
+        }
+
+        // todo: finish the language file
+        // todo: this function already works, send it to git and start encryption process
+
+        return content;
+    }
+
+    const createTextFile = async () => {
+        let accountsDirPath = await open({
+            multiple: false,
+            directory: true,
+            defaultPath: "$DOCUMENT"
+        });
+
+        if (!accountsDirPath) return;
+
+        const filePath = accountsDirPath + "\\accounts.txt";
+        setTextFilePath(filePath);
+
+        const textFileContent = await generateTextFileContent();
+
+        try {
+            await writeFile(filePath, textFileContent);
+            createdConfirmation.current.style = "display: block;";
+        } catch {}
+    }
+
     // ------------------------------ //
 
     const [title, setTitle] = useState("");
@@ -66,6 +114,10 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
     const [accountsDirTitle, setChangeAccDirTitle] = useState("");
     const [appLangTitle, setAppLangTitle] = useState("");
     const [updateLangText, setUpdateLangText] = useState("");
+    const [createTextFileTitle, setCreateTextFileTitle] = useState("");
+    const [fileCreatedText, setFileCreatedText] = useState("");
+    const [textFileExplanation, setTextFileExplanation] = useState("");
+    const [selectFolderText, setSelectFolderText] = useState("");
 
     useEffect(() => {
         const update = async () => {
@@ -76,6 +128,10 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
             setChangeAccDirTitle(await getMsgLang(langSet, "Settings", "change-accounts-dir.title"));
             setAppLangTitle(await getMsgLang(langSet, "Settings", "app-language-title.title"));
             setUpdateLangText(await getMsgLang(langSet, "Settings", "update-language.text"));
+            setCreateTextFileTitle(await getMsgLang(langSet, "Settings", "create-text-file.title"));
+            setFileCreatedText(await getMsgLang(langSet, "Settings", "create-text-file.created"));
+            setTextFileExplanation(await getMsgLang(langSet, "Settings", "create-text-file.explanation"));
+            setSelectFolderText(await getMsgLang(langSet, "Settings", "create-text-file.select_folder"));
         }
 
         update();
@@ -93,6 +149,7 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
             let settings_full_window = document.getElementById("settings-full-window");
             settings_full_window.className = "zoom-out";
             setTimeout(() => settings_full_window.style.display = "none", 500);
+            createdConfirmation.current.style = "display: none;";
         }
 
         if (settingsPopup) {
@@ -120,7 +177,7 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
                         <button id="change-accounts-dir" onClick={changeAccountsDir}>{changeAccDirText}</button>
                     </div>
 
-                    <div id="app-language" className="settings-content">
+                    <div id="app-language" style={{ display: "none" }} className="settings-content">
                         <h3 id="app-language-title">{appLangTitle}</h3>
                         <ul id="language-list">
                             <input type="radio" name="language-option" id="en-us" value="en-US" className="lang-option" checked={updateLangSet === "en-US"}
@@ -144,13 +201,19 @@ export function Settings({ settingsPopup, setSettingsPopup }) {
                         >{updateLangText}</button>
                     </div>
 
-                    {/* <div id="months-notification" className="settings-content">
-                        <h3 id="months-notification-title">{monthsToUpdateTitle}</h3>
-                        <p id="months-to-update-pass">
-                            Notify me in <input type="text" id="months-update-pass" readOnly value={monthsToUpdateValue} /> months
+                    <div id="create-text-file-div">
+                        <h3 id="create-text-file-title">
+                            {createTextFileTitle}
+                        </h3>
+                        <p id="create-text-file-explanation">
+                            {textFileExplanation}
                         </p>
-                        <input type="range" max={6} min={0} id="months-to-update-number" onChange={(e) => {setMonthsToUpdateValue(e.target.value)}} />
-                    </div> */}
+                        <div id="creation-area">
+                            <button id="create-text-file"
+                             onClick={ () => { createTextFile() } }>{selectFolderText}</button>
+                            <p id="created-confirmation" ref={createdConfirmation} style={{ display: "none" }}>{fileCreatedText} <a href="#">{textFilePath}</a></p>
+                        </div>
+                    </div>
 
                 </div>
             </div>

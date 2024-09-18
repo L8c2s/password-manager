@@ -12,7 +12,11 @@
         "months-to-update-pass.title": "Months to Update Password",
         "change-accounts-dir.title": "Accounts Directory",
         "app-language-title.title": "Language",
-        "update-language.text": "Apply"
+        "update-language.text": "Apply",
+        "create-text-file.title": "Create text file",
+        "create-text-file.created": "File created in",
+        "create-text-file.explanation": "Create a simple to read and share text file with all your accounts.",
+        "create-text-file.select_folder": "Select folder"
     },
     "AccountsList": {
         "sort-message.username": "Username",
