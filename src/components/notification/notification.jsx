@@ -7,13 +7,13 @@ import { React, useState, useEffect } from "react";
 import "./notification.css";
 
 import { getConfigValue } from "../Config/config";
-import { getMsgLang } from "../Config/lang";
 import { checkPasswordSecurity, checkPasswordUnique } from "../Config/security";
 
-export function Notification({ accounts, account, notificationId, setUpdatePassWarn=(a) => {} }) {
+import { getMsg } from "./../Config/lang";
+
+export function Notification({ langFile, accounts, account, notificationId, setUpdatePassWarn=(a) => {} }) {
     const [securityLevel, setSecurityLevel] = useState(0);
     const [securityMessage, setSecurityMessage] = useState("");
-    const [langSet, setLangSet] = useState("");
 
     useEffect(() => {
         testPassword();
@@ -76,23 +76,15 @@ export function Notification({ accounts, account, notificationId, setUpdatePassW
     }
 
     useEffect(() => {
-        const loadLang = async () => {
-            setLangSet(await getConfigValue("lang"));
-        }
-
-        loadLang();
-    }, []);
-
-    useEffect(() => {
         const loadMessages = async () => {
-            setNoPasswordText(await getMsgLang(langSet, "notification", "level_security.no_password"));
-            setNotSafeEnough(await getMsgLang(langSet, "notification", "level_security.not_safe_enough"));
-            setIsNotUnique(await getMsgLang(langSet, "notification", "level_security.repeated_password"));
-            setSafeAccount(await getMsgLang(langSet, "notification", "level_security.safe"));
+            setNoPasswordText(getMsg(langFile, "notification", "level_security.no_password"));
+            setNotSafeEnough(getMsg(langFile, "notification", "level_security.not_safe_enough"));
+            setIsNotUnique(getMsg(langFile, "notification", "level_security.repeated_password"));
+            setSafeAccount(getMsg(langFile, "notification", "level_security.safe"));
         }
 
         loadMessages();
-    }, [langSet]);
+    }, [langFile]);
 
     return (
         <div id={notificationId} className="notification">

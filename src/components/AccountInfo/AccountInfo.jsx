@@ -2,13 +2,13 @@ import { React, useEffect, useState } from "react";
 import "./AccountInfo.css";
 
 import { getConfigValue } from "../Config/config";
-import { getMsgLang } from "../Config/lang";
+import { getMsg } from "../Config/lang";
 import { deleteAccount, editAccountKey, getAccount, getAccounts, saveAccounts } from "../Config/accountsManager/manager";
 
 import { Notification } from "../notification/notification";
 
 
-export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite, setEditAccount }) {
+export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite, setEditAccount }) {
     const [account, setAccount] = useState({});
     const [service, setService] = useState("");
     const [username, setUsername] = useState("");
@@ -45,6 +45,23 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
         setPassword(account.password);
         setNotes(account.notes);
         setAccountLoaded(true);
+
+        const lastModified = document.getElementById("last-modified");
+        const created = document.getElementById("created-date");
+
+        if (account.created) {
+            let displayableCreate = account.created.displayable;
+            if (!displayableCreate)
+                displayableCreate = "-";
+
+            created.innerHTML = `${createdText} ${displayableCreate}`;
+        } if (account.last_modified) {
+            let displayableModified = account.last_modified.displayable;
+            if (!displayableModified)
+                displayableModified = "-";
+
+            lastModified.innerHTML = `${lastModifiedText} ${displayableModified}`;
+        }
     }, [account]);
 
     useEffect(() => {
@@ -89,7 +106,7 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
         }
 
         if (accountIndex === -1) {
-            await window.alert(await getMsgLang(langSet, "AccountInfo", "delete_account.no_id"));
+            await window.alert(getMsg(langFile, "AccountInfo", "delete_account.no_id"));
             return;
         }
 
@@ -105,7 +122,6 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
         setSelectedId("");
     };
 
-    const [langSet, setLangSet] = useState("");
     const [confirmDeleteMsg, setConfirmDeleteMsg] = useState("");
     const [serviceTitle, setServiceTitle] = useState("");
     const [usernameTitle, setUsernameTitle] = useState("");
@@ -115,26 +131,18 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
     const [createdText, setCreatedText] = useState("");
 
     useEffect(() => {
-        const loadLang = async () => {
-            setLangSet(await getConfigValue("lang"));
-        }
-
-        loadLang();
-    }, []);
-
-    useEffect(() => {
         const setLangMsg = async () => {
-            setServiceTitle(await getMsgLang(langSet, "AccountInfo", "service.title"));
-            setUsernameTitle(await getMsgLang(langSet, "AccountInfo", "username.title"));
-            setPasswordTitle(await getMsgLang(langSet, "AccountInfo", "password.title"));
-            setNotesTitle(await getMsgLang(langSet, "AccountInfo", "notes.title"));
-            setLastModifiedText(await getMsgLang(langSet, "AccountInfo", "additional-info.last_modified"));
-            setCreatedText(await getMsgLang(langSet, "AccountInfo", "additional-info.created"));
-            setConfirmDeleteMsg(await getMsgLang(langSet, "AccountInfo", "delete_account.confirmation"));
+            setServiceTitle(getMsg(langFile, "AccountInfo", "service.title"));
+            setUsernameTitle(getMsg(langFile, "AccountInfo", "username.title"));
+            setPasswordTitle(getMsg(langFile, "AccountInfo", "password.title"));
+            setNotesTitle(getMsg(langFile, "AccountInfo", "notes.title"));
+            setLastModifiedText(getMsg(langFile, "AccountInfo", "additional-info.last_modified"));
+            setCreatedText(getMsg(langFile, "AccountInfo", "additional-info.created"));
+            setConfirmDeleteMsg(getMsg(langFile, "AccountInfo", "delete_account.confirmation"));
         }
 
         setLangMsg();
-    }, [langSet]);
+    }, [langFile]);
 
     const copy = (elementId) => {
         const element = document.getElementById(elementId);
@@ -165,6 +173,14 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
         }, 2000));
     }
 
+    const openEditAccount = () => {
+        const openEditAccountButton = document.getElementById("edit-account");
+        openEditAccountButton.setAttribute("disabled", "true");
+
+        setEditAccount(true);
+        setTimeout(() => openEditAccountButton.removeAttribute("disabled"), 670);
+    }
+
     return (
         <div id="accounts-info-div">
             <div id="info-nav">
@@ -177,13 +193,13 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
                     <button id="favorite" className="not-favorite"
                      onClick={ () => setFavorite([account.id, !account.favorite]) }></button>
                     <button id="edit-account"
-                     onClick={ () => { setEditAccount(true) } }></button>
+                     onClick={ () => { openEditAccount() } }></button>
                     <button id="delete"
                      onClick={ () => deleteAccount(account.id) }></button>
                 </div>
             </div>
 
-            <Notification accounts={accounts} account={account} notificationId={"account-info-notification"} />
+            <Notification langFile={langFile} accounts={accounts} account={account} notificationId={"account-info-notification"} />
 
             <div id="account-info">
                 <div id="service-info">
@@ -213,8 +229,8 @@ export function AccountsInfo({ accounts, setAccounts, showAccountInfo, setShowAc
                 </div>
 
                 <div id="additional-info">
-                    <p id="last-modified">{lastModifiedText} {account.last_modified}</p>
-                    <p id="created-date">{createdText} {account.created}</p>
+                    <p id="last-modified">{lastModifiedText}</p>
+                    <p id="created-date">{createdText} </p>
                 </div>
             </div>
         </div>

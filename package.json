@@ -1,7 +1,7 @@
 {
   "name": "password-manager",
   "private": true,
-  "version": "0.7.1-REBUILD.0a",
+  "version": "0.7.1-REBUILD.1a",
   "type": "module",
   "scripts": {
     "dev": "vite",

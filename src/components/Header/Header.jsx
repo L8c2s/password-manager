@@ -1,21 +1,21 @@
 import { React, useState, useEffect, useRef } from "react";
 import "./Header.css"
 
-import { getMsgLang } from "../Config/lang";
+import { getMsg } from "../Config/lang";
 
 
-export function Header({ langSet, searchTerm, setSearchTerm, settingsPopup, setSettingsPopup, setAddAccount, setEditAccount }) {
+export function Header({ langFile, searchTerm, setSearchTerm, settingsPopup, setSettingsPopup, setAddAccount, setEditAccount }) {
     const searchRef = useRef(null);
 
     // set the text using the current language
     useEffect(() => {
         const updateSearchPlHd = async () => {
-            let placeholder = await getMsgLang(langSet, "Header", "search.placeholder");
+            let placeholder = getMsg(langFile, "Header", "search.placeholder");
             document.getElementById("search-bar").setAttribute("placeholder", placeholder);
         }
 
         updateSearchPlHd();
-    }, [langSet]);
+    }, [langFile]);
 
     useEffect(() => {
         window.addEventListener("keydown", startSearch);
@@ -54,7 +54,7 @@ export function Header({ langSet, searchTerm, setSearchTerm, settingsPopup, setS
 
             <div id="utils">
                 <button id="open-settings"
-                    onClick={() => { setSettingsPopup(!settingsPopup) }}
+                    onClick={() => { setSettingsPopup(true) }}
                 ></button>
             </div>
         </div>

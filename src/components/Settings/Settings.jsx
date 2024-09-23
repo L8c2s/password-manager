@@ -5,10 +5,10 @@ import { writeFile } from "@tauri-apps/api/fs";
 import "./Settings.css";
 
 import { editConfigKey, getConfigValue } from "../Config/config";
-import { getMsgLang } from "../Config/lang";
+import { getMsg } from "../Config/lang";
 
 
-export function Settings({ settingsPopup, setSettingsPopup, langSet, accounts }) {
+export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }) {
     const [updateLangSet, setUpdateLangSet] = useState("");
     const [accountsDirValue, setAccountsDirValue] = useState("");
     const [textFilePath, setTextFilePath] = useState("");
@@ -42,12 +42,11 @@ export function Settings({ settingsPopup, setSettingsPopup, langSet, accounts })
         accountsDirPath += "\\PasswordManager";
 
         await editConfigKey("accounts_dir", accountsDirPath);
-        await new Promise(resolve => setTimeout(resolve, 100));
         location.reload();
     }
 
     const changeLanguage = async (language) => {
-        if (language === langSet)
+        if (language === langFile)
             return null;
 
         await editConfigKey("lang", language);
@@ -55,9 +54,9 @@ export function Settings({ settingsPopup, setSettingsPopup, langSet, accounts })
     }
 
     const generateTextFileContent = async () => {
-        const username = await getMsgLang(langSet, "AccountInfo", "username.title");
-        const password = await getMsgLang(langSet, "AccountInfo", "password.title");
-        const notes = await getMsgLang(langSet, "AccountInfo", "notes.title");
+        const username = getMsg(langFile, "AccountInfo", "username.title");
+        const password = getMsg(langFile, "AccountInfo", "password.title");
+        const notes = getMsg(langFile, "AccountInfo", "notes.title");
         
         let content = "";
 
@@ -78,9 +77,6 @@ export function Settings({ settingsPopup, setSettingsPopup, langSet, accounts })
 
             content += "\n";
         }
-
-        // todo: finish the language file
-        // todo: this function already works, send it to git and start encryption process
 
         return content;
     }
@@ -120,23 +116,20 @@ export function Settings({ settingsPopup, setSettingsPopup, langSet, accounts })
     const [selectFolderText, setSelectFolderText] = useState("");
 
     useEffect(() => {
-        const update = async () => {
-            setTitle(await getMsgLang(langSet, "Settings", ".title"));
-            setAccountsDirPlhd(await getMsgLang(langSet, "Settings", "accounts-dir.placeholder"))
-            setChangeAccDirText(await getMsgLang(langSet, "Settings", "change-accounts-dir.text"));
-            setMonthsToUpdatePassTitle(await getMsgLang(langSet, "Settings", "months-to-update-pass.title"));
-            setChangeAccDirTitle(await getMsgLang(langSet, "Settings", "change-accounts-dir.title"));
-            setAppLangTitle(await getMsgLang(langSet, "Settings", "app-language-title.title"));
-            setUpdateLangText(await getMsgLang(langSet, "Settings", "update-language.text"));
-            setCreateTextFileTitle(await getMsgLang(langSet, "Settings", "create-text-file.title"));
-            setFileCreatedText(await getMsgLang(langSet, "Settings", "create-text-file.created"));
-            setTextFileExplanation(await getMsgLang(langSet, "Settings", "create-text-file.explanation"));
-            setSelectFolderText(await getMsgLang(langSet, "Settings", "create-text-file.select_folder"));
-        }
+        setTitle(getMsg(langFile, "Settings", ".title"));
+        setAccountsDirPlhd(getMsg(langFile, "Settings", "accounts-dir.placeholder"))
+        setChangeAccDirText(getMsg(langFile, "Settings", "change-accounts-dir.text"));
+        setMonthsToUpdatePassTitle(getMsg(langFile, "Settings", "months-to-update-pass.title"));
+        setChangeAccDirTitle(getMsg(langFile, "Settings", "change-accounts-dir.title"));
+        setAppLangTitle(getMsg(langFile, "Settings", "app-language-title.title"));
+        setUpdateLangText(getMsg(langFile, "Settings", "update-language.text"));
+        setCreateTextFileTitle(getMsg(langFile, "Settings", "create-text-file.title"));
+        setFileCreatedText(getMsg(langFile, "Settings", "create-text-file.created"));
+        setTextFileExplanation(getMsg(langFile, "Settings", "create-text-file.explanation"));
+        setSelectFolderText(getMsg(langFile, "Settings", "create-text-file.select_folder"));
 
-        update();
-        setUpdateLangSet(langSet);
-    }, [langSet]);
+        setUpdateLangSet(langFile);
+    }, [langFile]);
 
     useEffect(() => {
         const on = () => {
@@ -145,11 +138,13 @@ export function Settings({ settingsPopup, setSettingsPopup, langSet, accounts })
             settings_full_window.className = "zoom-in";
         }
 
+        let disableSettings;
         const off = () => {
-            let settings_full_window = document.getElementById("settings-full-window");
-            settings_full_window.className = "zoom-out";
-            setTimeout(() => settings_full_window.style.display = "none", 500);
-            createdConfirmation.current.style = "display: none;";
+            let settingsFullWindow = document.getElementById("settings-full-window");
+            settingsFullWindow.className = "zoom-out";
+            disableSettings = setTimeout(() => settingsFullWindow.style.display = "none", 500);
+            // settingsFullWindow.style.display = "none"
+            createdConfirmation.current.style.display = "none";
         }
 
         if (settingsPopup) {
@@ -157,6 +152,8 @@ export function Settings({ settingsPopup, setSettingsPopup, langSet, accounts })
         } else {
             off()
         }
+
+        return () => clearTimeout(disableSettings);
     }, [settingsPopup])
 
     return (

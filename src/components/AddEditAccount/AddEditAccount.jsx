@@ -1,7 +1,7 @@
 import { React, useEffect, useState } from "react";
 import "./AddEditAccount.css";
 import { getConfigValue } from "../Config/config";
-import { getMsgLang } from "../Config/lang";
+import { getMsg } from "../Config/lang";
 import { getAccount, getAccounts, saveAccounts } from "../Config/accountsManager/manager";
 
 import { Notification } from "../notification/notification";
@@ -12,7 +12,7 @@ import { save } from "@tauri-apps/api/dialog";
 // o componente vai carregar um objeto de conta, gerar um id e adicionar no objeto
 // os campos são preenchidos com placeholders traduzidos
 
-export function AddEditAccount({ langSet, accounts, setAccounts, editAccount, setEditAccount, addAccount, setAddAccount, selectedId, setShowAccountInfo }) {
+export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, setEditAccount, addAccount, setAddAccount, selectedId, setShowAccountInfo }) {
     const [loaded, setLoaded] = useState(false);
     const [account, setAccount] = useState({});
     const [randomPassword, setRandomPassword] = useState("");
@@ -47,7 +47,10 @@ export function AddEditAccount({ langSet, accounts, setAccounts, editAccount, se
         if (!acc.hasOwnProperty("password_history")) {
             acc.password_history = [acc.password];
         } if (!acc.hasOwnProperty("created")) {
-            acc.created = "-";
+            acc.created = {
+                displayable: "-",
+                real_date: ""
+            };
         } if (!acc.hasOwnProperty("favorite")) {
             acc.favorite = false;
         } if (!acc.hasOwnProperty("id")) {
@@ -59,28 +62,25 @@ export function AddEditAccount({ langSet, accounts, setAccounts, editAccount, se
 
     const getDateTime = () => {
         const date = new Date();
+        const localHour = date.getUTCHours();
+        let utc3 = localHour - 3;
 
-        let day = date.getDate();
-        let month = date.getMonth() + 1;
-        let year = date.getFullYear();
+        if (utc3 < 0) {
+            utc3 = 24 + utc3;
+        }
+
+        let year = date.getUTCFullYear();
+        let day = ("0" + date.getUTCDate()).slice(-2);
+        let month = ("0" + (date.getUTCMonth() + 1)).slice(-2);
         
-        let hour = date.getHours();
-        let minute = date.getMinutes();
-        let second = date.getSeconds();
+        let hour = ("0" + utc3).slice(-2);
+        let minute = ("0" + date.getUTCMinutes()).slice(-2);
+        let second = ("0" + date.getUTCSeconds()).slice(-2);
 
-        if (day < 10)
-            day = `0${day}`;
-        if (month < 10)
-            month = `0${month}`;
-
-        if (hour < 10)
-            hour = `0${hour}`;
-        if (minute < 10)
-            minute = `0${minute}`;
-        if (second < 10)
-            second = `0${second}`;
-
-        return `${day}/${month}/${year} ${hour}:${minute}:${second}`;
+        return {
+            displayable: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
+            real_date: `${year}-${month}-${day}T${hour}:${minute}:${second}.000Z`
+        };
     }
 
     const updateRandomPassword = () => {
@@ -245,10 +245,11 @@ export function AddEditAccount({ langSet, accounts, setAccounts, editAccount, se
             fullWindow.className = "zoom-in";
         }
 
+        let disableWindow;
         const off = () => {
             const fullWindow = document.getElementById("add-edit-account-full-window");
             fullWindow.className = "zoom-out";
-            setTimeout(() => fullWindow.style = "display: none;", 500);
+            disableWindow = setTimeout(() => fullWindow.style = "display: none;", 500);
             setAddAccount(false);
             setEditAccount(false);
         }
@@ -310,6 +311,8 @@ export function AddEditAccount({ langSet, accounts, setAccounts, editAccount, se
             setLoaded(false);
             return;
         }
+
+        return () => clearTimeout(disableWindow);
     }, [editAccount, addAccount]);
 
     const [title, setTitle] = useState("");
@@ -338,36 +341,44 @@ export function AddEditAccount({ langSet, accounts, setAccounts, editAccount, se
 
         const loadLangText = async () => {
             if (addAccount)
-                setTitle(await getMsgLang(langSet, "AddEditAccount", "add_account.title"));
+                setTitle(getMsg(langFile, "AddEditAccount", "add_account.title"));
             else if (editAccount)
-                setTitle(await getMsgLang(langSet, "AddEditAccount", "edit_account.title"));
-            setUsernamePlaceHld(await getMsgLang(langSet, "AddEditAccount", "edit_username.placeholder"));
-            setNotesPlaceHld(await getMsgLang(langSet, "AddEditAccount", "edit_notes.placeholder"));
-            setSaveButton(await getMsgLang(langSet, "AddEditAccount", "save_button.text"));
-            setCancelButton(await getMsgLang(langSet, "AddEditAccount", "cancel_button.text"));
-            setGeneratePasswordText(await getMsgLang(langSet, "AddEditAccount", "generate_password.text"));
-            setServiceTitle(await getMsgLang(langSet, "AccountInfo", "service.title"));
-            setUsernameTitle(await getMsgLang(langSet, "AccountInfo", "username.title"));
-            setPasswordTitle(await getMsgLang(langSet, "AccountInfo", "password.title"));
-            setNotesTitle(await getMsgLang(langSet, "AccountInfo", "notes.title"));
-            setNotificationPreviewTitle(await getMsgLang(langSet, "AddEditAccount", "notification_preview.title"));
-            setPasswordLengthDisplay(await getMsgLang(langSet, "AddEditAccount", "password_length.display"));
+                setTitle(getMsg(langFile, "AddEditAccount", "edit_account.title"));
+            setUsernamePlaceHld(getMsg(langFile, "AddEditAccount", "edit_username.placeholder"));
+            setNotesPlaceHld(getMsg(langFile, "AddEditAccount", "edit_notes.placeholder"));
+            setSaveButton(getMsg(langFile, "AddEditAccount", "save_button.text"));
+            setCancelButton(getMsg(langFile, "AddEditAccount", "cancel_button.text"));
+            setGeneratePasswordText(getMsg(langFile, "AddEditAccount", "generate_password.text"));
+            setServiceTitle(getMsg(langFile, "AccountInfo", "service.title"));
+            setUsernameTitle(getMsg(langFile, "AccountInfo", "username.title"));
+            setPasswordTitle(getMsg(langFile, "AccountInfo", "password.title"));
+            setNotesTitle(getMsg(langFile, "AccountInfo", "notes.title"));
+            setNotificationPreviewTitle(getMsg(langFile, "AddEditAccount", "notification_preview.title"));
+            setPasswordLengthDisplay(getMsg(langFile, "AddEditAccount", "password_length.display"));
         }
 
-        if (!langSet) return;
+        if (!langFile) return;
         loadLangText();
 
         const service = document.getElementById("edit-service");
         const username = document.getElementById("edit-username");
 
         updateWarnStyle(service, username);
-    }, [langSet, loaded]);
+    }, [langFile, loaded]);
+
+    const openAddAccount = async () => {
+        const addAccountButton = document.getElementById("add-account-button");
+        addAccountButton.setAttribute("disabled", "true");
+
+        setAddAccount(true);
+        setTimeout(() => addAccountButton.removeAttribute("disabled"), 670);
+    }
 
     return (
         <div id="add-edit-account-main">
             <div id="add-account-space">
                 <button id="add-account-button"
-                 onClick={ () => { setAddAccount(true) } }
+                 onClick={ async () => { openAddAccount() } }
                  style={{ display: isButtonVisible ? "block" : "none" }}></button>
             </div>
 
@@ -381,7 +392,7 @@ export function AddEditAccount({ langSet, accounts, setAccounts, editAccount, se
                     </div>
 
                     <h2 id="notification-preview-title" className="info-title">{notificationPreviewTitle}</h2>
-                    <Notification accounts={accounts} account={account} notificationId={"edit-account-notification"} setUpdatePassWarn={setUpdatePassWarn} />
+                    <Notification langFile={langFile} accounts={accounts} account={account} notificationId={"edit-account-notification"} setUpdatePassWarn={setUpdatePassWarn} />
 
                     <div id="edit-account-info">
                         <div id="edit-service-div">

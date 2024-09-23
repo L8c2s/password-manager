@@ -1,13 +1,12 @@
-import { readTextFile } from "@tauri-apps/api/fs";
 import React, { useState, useEffect } from "react";
 import "./AccountsList.css";
 
-import { editConfigKey, getConfigValue, saveConfig } from "../Config/config";
-import { getMsgLang } from "../Config/lang";
+import { editConfigKey, getConfigValue } from "../Config/config";
+import { getMsg } from "../Config/lang";
 import { getAccount } from "../Config/accountsManager/manager";
 
 
-export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite, langSet }) {
+export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite, langFile }) {
     const [defaultFilteredAccounts, setDefaultFilteredAccounts] = useState([]);
     const [sortFilter, setSortFilter] = useState("");
     const [filteredAccounts, setFilteredAccounts] = useState([]);
@@ -40,21 +39,21 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         // use both to create fixedFilteredAccounts
         // it's basically all accounts listed in a different order
         // sortFilter determines this order
-        const sort = async () => {
-            await sortAccounts();
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+        const saveSortFilter = async () => {
             // since the useEffect is also called when sortFilter changes, save the new filter in the config file
             await editConfigKey("sort_filter", sortFilter);
+
         }
 
-        sort();
+        sortAccounts();
+        if (!sortFilter) return
+        saveSortFilter();
     }, [defaultFilteredAccounts, sortFilter, favorite]);
 
     useEffect(() => {
         // when fixedFilteredAccounts finished loading the filteredAccounts list must
         // load too so it can be rendered
         // also applies the searchTerm here
-        console.log(fixedFilteredAccounts);
         setFilteredAccounts([...filterAccounts([...fixedFilteredAccounts], searchTerm)]);
     }, [searchTerm, fixedFilteredAccounts]);
 
@@ -67,31 +66,41 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
     }, [filteredAccounts]);
 
     useEffect(() => {
+        // if the AccountInfo component is closed using the x button,
+        // change the account selected in the list to be unselected
         if (!showAccountInfo && selectedId) {
             document.getElementById(selectedId).style = "";
             setSelectedId("");
         }
     }, [showAccountInfo]);
 
+    const sortByDate = (date1, date2) => {
+        // checks the dates to find the greater
+        const firstDate = new Date(date1);
+        const secondDate = new Date(date2);
+
+        return secondDate - firstDate;
+    }
+
     const sortAccounts = async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
         // use defaultFilteredAccounts as reference to filter all accounts
-        // also, it's the noFilter order
         let newFilteredAccounts = [...defaultFilteredAccounts];
 
         if (sortFilter === "accountName") {
             newFilteredAccounts.sort((a, b) => a.username.localeCompare(b.username));
-            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.username"));
+            setSortMessage(getMsg(langFile, "AccountsList", "sort-message.username"));
         } else if (sortFilter === "serviceName") {
             newFilteredAccounts.sort((a, b) => a.service.localeCompare(b.service));
-            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.service"));
+            setSortMessage(getMsg(langFile, "AccountsList", "sort-message.service"));
         } else if (sortFilter === "created") {
-            newFilteredAccounts.sort((a, b) => {new Date(a.created) - new Date(b.created)});
-            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.created"));
+            newFilteredAccounts.sort((a, b) => sortByDate(a.created.real_date, b.created.real_date));
+            setSortMessage(getMsg(langFile, "AccountsList", "sort-message.created"));
         } else if (sortFilter === "lastModified") {
-            newFilteredAccounts.sort((a, b) => new Date(a.last_modified) - new Date(b.last_modified));
-            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.last-modified"));
+            newFilteredAccounts.sort((a, b) => sortByDate(a.last_modified.real_date, b.last_modified.real_date));
+            setSortMessage(getMsg(langFile, "AccountsList", "sort-message.last-modified"));
         } else {
-            setSortMessage(await getMsgLang(langSet, "AccountsList", "sort-message.no-filter"))
+            setSortMessage(getMsg(langFile, "AccountsList", "sort-message.no-filter"))
         }
 
         let favoriteAccounts = newFilteredAccounts.filter((acc) => acc.favorite);

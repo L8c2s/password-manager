@@ -26,16 +26,10 @@ export async function loadLangFile(langSet) {
     return JSON.parse(langFile);
 }
 
-export async function getMsgLang(lang, key, sub=null) {
-    const langFile = await loadLangFile(lang);
+export function getMsg(langFile, key, sub) {
+    if (!langFile) return null;
 
-    if (sub) {
-        try {
-            return langFile[key][sub];
-        } catch {
-            return null;
-        }
-    }
-
-    return langFile[key] ? langFile.hasOwnProperty(key) : null;
+    if (!langFile.hasOwnProperty(key)) return null;
+    if (!langFile[key].hasOwnProperty(sub)) return null;
+    return langFile[key][sub];
 }

@@ -11,10 +11,11 @@ import { AddEditAccount } from "./components/AddEditAccount/AddEditAccount";
 // configurations
 import { getConfigValue } from "./components/Config/config";
 import { getAccounts } from "./components/Config/accountsManager/manager";
+import { loadLangFile } from "./components/Config/lang";
 
 
 function App() {
-    const [langSet, setLangSet] = useState("");
+    const [langFile, setLangFile] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [settingsPopup, setSettingsPopup] = useState(false);
     const [showAccountInfo, setShowAccountInfo] = useState(false);
@@ -27,7 +28,7 @@ function App() {
     useEffect(() => {
         const loadLang = async () => {
             let langSaved = await getConfigValue("lang");
-            setLangSet(langSaved);
+            setLangFile(await loadLangFile(langSaved));
         }
 
         const loadAccounts = async () => {
@@ -51,7 +52,7 @@ function App() {
             <Header
                 searchTerm={searchTerm} setSearchTerm={setSearchTerm}
                 settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
-                langSet={langSet}
+                langFile={langFile}
                 setAddAccount={setAddAccount} setEditAccount={setEditAccount}
             />
 
@@ -61,7 +62,7 @@ function App() {
                 showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo}
                 selectedId={selectedId} setSelectedId={setSelectedId}
                 favorite={favorite} setFavorite={setFavorite}
-                langSet={langSet}
+                langFile={langFile}
             />
 
             <AccountsInfo
@@ -71,12 +72,12 @@ function App() {
                 favorite={favorite} setFavorite={setFavorite}
                 setSearchTerm={setSearchTerm}
                 editAccount={editAccount} setEditAccount={setEditAccount}
-                langSet={langSet}
+                langFile={langFile}
             />
 
             <Settings
                 settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
-                langSet={langSet} setLangSet={langSet}
+                langFile={langFile} setlangFile={langFile}
                 accounts={accounts}
             />
 
@@ -86,7 +87,7 @@ function App() {
                 editAccount={editAccount} setEditAccount={setEditAccount}
                 selectedId={selectedId}
                 setShowAccountInfo={setShowAccountInfo}
-                langSet={langSet}
+                langFile={langFile}
             />
         </div>
     );

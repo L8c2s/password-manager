@@ -35,8 +35,10 @@ export async function loadConfig() {
         }
     }
 
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     if (!config || !config.hasOwnProperty("accounts_dir") || !config.hasOwnProperty("lang")) {
-        config = { accounts_dir: "", lang: "pt-BR", sort_filter: "created" }
+        config = { accounts_dir: "", lang: "pt-BR", sort_filter: "serviceName" }
         await saveConfig(config);
     }
 
