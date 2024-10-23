@@ -11,6 +11,7 @@ export default defineConfig(async () => ({
     rollupOptions: {
       external: ['fs'],
     },
+    target: "esnext"
   },
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //

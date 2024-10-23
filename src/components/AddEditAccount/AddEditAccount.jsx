@@ -1,11 +1,9 @@
 import { React, useEffect, useState } from "react";
 import "./AddEditAccount.css";
-import { getConfigValue } from "../Config/config";
 import { getMsg } from "../Config/lang";
-import { getAccount, getAccounts, saveAccounts } from "../Config/accountsManager/manager";
+import { getAccount, getAccounts, saveAccounts, getDateTime, generatePassword } from "../Config/accountsManager/manager";
 
 import { Notification } from "../notification/notification";
-import { save } from "@tauri-apps/api/dialog";
 
 // como vai funcionar
 // quando clicar em nova conta:
@@ -21,27 +19,6 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     const [accountIndex, setAccountIndex] = useState(-1);
     const [updatePassWarn, setUpdatePassWarn] = useState(false);
     const [isButtonVisible, setIsButtonVisible] = useState(true);
-
-    const generatePassword = (length=8) => {
-        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-={}[]\:;'<>,.?/~`";
-        let password = "";
-
-        for (let i = 0; i < length; i++) {
-            const randomIndex = Math.floor(Math.random() * chars.length);
-            password += chars.charAt(randomIndex);
-        }
-
-        const lower = /[a-z]/.test(password);
-        const upper = /[A-Z]/.test(password);
-        const number = /[0-9]/.test(password);
-        const symbol = /[^a-zA-Z0-9]/.test(password);
-
-        if (!lower && !upper) return generatePassword(length);
-        if (!number) return generatePassword(length);
-        if (!symbol) return generatePassword(length);
-
-        return password;
-    }
 
     const checkKeys = (acc) => {
         if (!acc.hasOwnProperty("password_history")) {
@@ -60,28 +37,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         return acc;
     }
 
-    const getDateTime = () => {
-        const date = new Date();
-        const localHour = date.getUTCHours();
-        let utc3 = localHour - 3;
-
-        if (utc3 < 0) {
-            utc3 = 24 + utc3;
-        }
-
-        let year = date.getUTCFullYear();
-        let day = ("0" + date.getUTCDate()).slice(-2);
-        let month = ("0" + (date.getUTCMonth() + 1)).slice(-2);
-        
-        let hour = ("0" + utc3).slice(-2);
-        let minute = ("0" + date.getUTCMinutes()).slice(-2);
-        let second = ("0" + date.getUTCSeconds()).slice(-2);
-
-        return {
-            displayable: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
-            real_date: `${year}-${month}-${day}T${hour}:${minute}:${second}.000Z`
-        };
-    }
+    
 
     const updateRandomPassword = () => {
         let randomPass = "";
@@ -243,6 +199,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             const fullWindow = document.getElementById("add-edit-account-full-window");
             fullWindow.style = "display: block;";
             fullWindow.className = "zoom-in";
+            document.getElementById("edit-service").focus();
         }
 
         let disableWindow;

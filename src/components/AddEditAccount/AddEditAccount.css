@@ -23,7 +23,7 @@
     border-radius: 11px;
     border: #728dc0 1px solid;
     padding: 40px;
-    overflow-y: hidden;
+    overflow-y: auto;
 }
 
 #add-account-button {

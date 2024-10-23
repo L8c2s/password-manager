@@ -1,53 +1,39 @@
 {
+  "identifier": "l8c2s.password-manager.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build",
-    "devPath": "http://localhost:1420",
-    "distDir": "../dist"
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "../dist"
   },
-  "package": {
-    "productName": "Password Manager",
-    "version": "0.7.1-REBUILD.1a"
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
   },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true
-      },
-      "fs": {
-        "all": true,
-        "scope": ["**"]
-      },
-      "dialog": {
-        "all": true
-      }
-    },
-    "windows": [
-      {
-        "title": "Gerenciador de Senhas v0.7.1-REBUILD.1a",
-        "width": 1100,
-        "height": 750,
-        "center": true,
-        "resizable": false,
-        "maximizable": false
-      }
-    ],
+  "productName": "Password Manager",
+  "mainBinaryName": "Password Manager",
+  "version": "0.7.3",
+  "plugins": {},
+  "app": {
     "security": {
       "csp": null
     },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.password-manager.app",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ]
-    }
+    "windows": [
+      {
+        "title": "Gerenciador de Senhas v0.7.3",
+        "width": 1100,
+        "height": 750,
+        "center": true,
+        "resizable": true,
+        "maximizable": true
+      }
+    ]
   }
 }

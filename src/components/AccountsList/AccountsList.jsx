@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import "./AccountsList.css";
 
 import { editConfigKey, getConfigValue } from "../Config/config";
-import { getMsg } from "../Config/lang";
 import { getAccount } from "../Config/accountsManager/manager";
 
+import { getMsg } from "../Config/lang";
 
 export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite, langFile }) {
     const [defaultFilteredAccounts, setDefaultFilteredAccounts] = useState([]);
@@ -63,6 +63,10 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         filteredAccounts.forEach(acc => {
             updateFavoriteIcon(acc.id);
         });
+        if (!selectedId) return;
+        if (searchTerm === "" || !searchTerm) {
+            // window.scrollTo({ top: document.getElementById(selectedId).offsetHeight })
+        } // todo
     }, [filteredAccounts]);
 
     useEffect(() => {

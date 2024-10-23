@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import "./App.css";
 
 // components
+import { Login } from "./components/Login/Login";
 import { Header } from "./components/Header/Header";
 import { UpdateList } from "./components/AccountsList/AccountsList";
 import { Settings } from "./components/Settings/Settings";
@@ -24,11 +25,12 @@ function App() {
     const [favorite, setFavorite] = useState([]);
     const [addAccount, setAddAccount] = useState(false);
     const [editAccount, setEditAccount] = useState(false);
+    const [loginSuccess, setLoginSuccess] = useState(true);
 
     useEffect(() => {
         const loadLang = async () => {
             let langSaved = await getConfigValue("lang");
-            setLangFile(await loadLangFile(langSaved));
+            setLangFile(loadLangFile(langSaved));
         }
 
         const loadAccounts = async () => {
@@ -49,46 +51,52 @@ function App() {
 
     return (
         <div id="content">
-            <Header
-                searchTerm={searchTerm} setSearchTerm={setSearchTerm}
-                settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
-                langFile={langFile}
-                setAddAccount={setAddAccount} setEditAccount={setEditAccount}
-            />
+            { !loginSuccess && (<Login langFile={langFile} setLoginSuccess={setLoginSuccess} />) }
 
-            <UpdateList 
-                accounts={accounts} setAccounts={setAccounts}
-                searchTerm={searchTerm} setSearchTerm={setSearchTerm}
-                showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo}
-                selectedId={selectedId} setSelectedId={setSelectedId}
-                favorite={favorite} setFavorite={setFavorite}
-                langFile={langFile}
-            />
+            { loginSuccess && (
+                <div>
+                    <Header
+                        searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+                        settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
+                        langFile={langFile}
+                        setAddAccount={setAddAccount} setEditAccount={setEditAccount}
+                    />
 
-            <AccountsInfo
-                accounts={accounts} setAccounts={setAccounts}
-                showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo}
-                selectedId={selectedId} setSelectedId={setSelectedId}
-                favorite={favorite} setFavorite={setFavorite}
-                setSearchTerm={setSearchTerm}
-                editAccount={editAccount} setEditAccount={setEditAccount}
-                langFile={langFile}
-            />
+                    <UpdateList 
+                        accounts={accounts} setAccounts={setAccounts}
+                        searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+                        showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo}
+                        selectedId={selectedId} setSelectedId={setSelectedId}
+                        favorite={favorite} setFavorite={setFavorite}
+                        langFile={langFile}
+                    />
 
-            <Settings
-                settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
-                langFile={langFile} setlangFile={langFile}
-                accounts={accounts}
-            />
+                    <AccountsInfo
+                        accounts={accounts} setAccounts={setAccounts}
+                        showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo}
+                        selectedId={selectedId} setSelectedId={setSelectedId}
+                        favorite={favorite} setFavorite={setFavorite}
+                        setSearchTerm={setSearchTerm}
+                        editAccount={editAccount} setEditAccount={setEditAccount}
+                        langFile={langFile}
+                    />
 
-            <AddEditAccount 
-                accounts={accounts} setAccounts={setAccounts}
-                addAccount={addAccount} setAddAccount={setAddAccount}
-                editAccount={editAccount} setEditAccount={setEditAccount}
-                selectedId={selectedId}
-                setShowAccountInfo={setShowAccountInfo}
-                langFile={langFile}
-            />
+                    <Settings
+                        settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
+                        langFile={langFile} setLangFile={langFile}
+                        accounts={accounts}
+                    />
+
+                    <AddEditAccount 
+                        accounts={accounts} setAccounts={setAccounts}
+                        addAccount={addAccount} setAddAccount={setAddAccount}
+                        editAccount={editAccount} setEditAccount={setEditAccount}
+                        selectedId={selectedId}
+                        setShowAccountInfo={setShowAccountInfo}
+                        langFile={langFile}
+                    />
+                </div>
+            )}
         </div>
     );
 }

@@ -1,6 +1,6 @@
 import { React, useEffect, useRef, useState } from "react";
-import { open } from "@tauri-apps/api/dialog";
-import { writeFile } from "@tauri-apps/api/fs";
+import { open } from "@tauri-apps/plugin-dialog";
+import { writeTextFile } from "@tauri-apps/plugin-fs";
 
 import "./Settings.css";
 
@@ -27,7 +27,12 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
             setAccountsDirValue(dirValue);
         }
 
+        const getLangSet = async () => {
+            setUpdateLangSet(await getConfigValue("lang"));
+        }
+
         loadAccountsDir();
+        getLangSet();
     }, []);
 
     const changeAccountsDir = async () => {
@@ -96,9 +101,14 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
         const textFileContent = await generateTextFileContent();
 
         try {
-            await writeFile(filePath, textFileContent);
+            await writeTextFile(filePath, textFileContent);
             createdConfirmation.current.style = "display: block;";
         } catch {}
+    }
+
+    const pathToClipboard = () => {
+        navigator.clipboard.writeText(textFilePath);
+        setTextFilePath(textFilePath + " (copied)");
     }
 
     // ------------------------------ //
@@ -168,13 +178,14 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
                 </div>
 
                 <div id="content">
-                    <div id="accounts-directory" className="settings-content">
+                    {/* this doesn't work anymore */}
+                    <div id="accounts-directory" className="settings-content" style={{ display: "none" }}>
                         <h3 id="change-accounts-dir-title">{accountsDirTitle}</h3>
                         <input type="text" id="accounts-dir" readOnly placeholder={accountsDirPlhd} value={accountsDirValue} />
                         <button id="change-accounts-dir" onClick={changeAccountsDir}>{changeAccDirText}</button>
                     </div>
 
-                    <div id="app-language" style={{ display: "none" }} className="settings-content">
+                    <div id="app-language" className="settings-content">
                         <h3 id="app-language-title">{appLangTitle}</h3>
                         <ul id="language-list">
                             <input type="radio" name="language-option" id="en-us" value="en-US" className="lang-option" checked={updateLangSet === "en-US"}
@@ -208,7 +219,7 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
                         <div id="creation-area">
                             <button id="create-text-file"
                              onClick={ () => { createTextFile() } }>{selectFolderText}</button>
-                            <p id="created-confirmation" ref={createdConfirmation} style={{ display: "none" }}>{fileCreatedText} <a href="#">{textFilePath}</a></p>
+                            <p id="created-confirmation" ref={createdConfirmation} style={{ display: "none" }}>{fileCreatedText} <a href="#" onClick={ () => pathToClipboard() }>{textFilePath}</a></p>
                         </div>
                     </div>
 

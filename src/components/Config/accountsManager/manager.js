@@ -1,33 +1,128 @@
-import { exists, createDir, readTextFile, writeFile } from "@tauri-apps/api/fs";
+import { exists, mkdir, readTextFile, writeTextFile, BaseDirectory } from "@tauri-apps/plugin-fs";
+import { appDataDir } from "@tauri-apps/api/path";
 
-import { getConfigValue } from "../config";
 
+const MAINPATH = await appDataDir();
+const ACCOUNTSPATH = "accounts.json";
+
+
+export function getDateTime() {
+    const date = new Date();
+    const localHour = date.getUTCHours();
+    let utc3 = localHour - 3;
+
+    if (utc3 < 0) {
+        utc3 = 24 + utc3;
+    }
+
+    let year = date.getUTCFullYear();
+    let day = ("0" + date.getUTCDate()).slice(-2);
+    let month = ("0" + (date.getUTCMonth() + 1)).slice(-2);
+    
+    let hour = ("0" + utc3).slice(-2);
+    let minute = ("0" + date.getUTCMinutes()).slice(-2);
+    let second = ("0" + date.getUTCSeconds()).slice(-2);
+
+    return {
+        displayable: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
+        real_date: `${year}-${month}-${day}T${hour}:${minute}:${second}.000Z`
+    };
+}
+
+export function generatePassword(length=8) {
+    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-={}[]\:;'<>,.?/~`";
+        let password = "";
+
+        for (let i = 0; i < length; i++) {
+            const randomIndex = Math.floor(Math.random() * chars.length);
+            password += chars.charAt(randomIndex);
+        }
+
+        const lower = /[a-z]/.test(password);
+        const upper = /[A-Z]/.test(password);
+        const number = /[0-9]/.test(password);
+        const symbol = /[^a-zA-Z0-9]/.test(password);
+
+        if (!lower && !upper) return generatePassword(length);
+        if (!number) return generatePassword(length);
+        if (!symbol) return generatePassword(length);
+
+        return password;
+}
+
+export async function verifyAccounts(accounts) {
+    if (!accounts) return false;
+
+    /*
+    "Google": [
+        {
+            "id": "7'JDm4",
+            "service": "Google",
+            "username": "luhluizferreira@gmail.com", 
+            "password": "~Amy<3Rikka~",
+            "notes": "main account",
+            "favorite": false,
+            "password_history": ["~Amy<3Rikka~"],
+            "last_modified": {
+                "displayable": "20/10/2024 11:58:27",
+                "real_date": "2024-10-20T11:58:27.000Z"
+            },
+            "created": {
+                "displayable": "20/10/2024 11:58:27",
+                "real_date": "2024-10-20T11:58:27.000Z"
+            }
+        }
+    */
+
+    for (const service in accounts) {
+        for (let i = 0; i < accounts[service].length; i++) {
+            // all fields:
+            // id: string;
+            // service: string;
+            // username: string;
+            // password: string;
+            // notes: string;
+            // favorite: bool;
+            // password_history: array;
+            // last_modified: object[
+            //  displayable: string
+            //  real_date: string
+            // ]
+            // created: object[
+            //  displayable: string
+            //  real_date: string
+            //]
+        }
+    }
+}
 
 export async function getAccounts() {
     let accounts;
     try {
-        accounts = await readTextFile(`${await getConfigValue("accounts_dir")}\\accounts.json`);
-    } catch { 
-        accounts = "{}";
+        accounts = await readTextFile(ACCOUNTSPATH, { baseDir: BaseDirectory.AppConfig });
+    } catch (error) {
+        console.log("Could not load accounts: ", error);
+        accounts = false;
     }
 
     if (!accounts) {
         accounts = "{}";
     }
 
-    return JSON.parse(accounts);
+    accounts = JSON.parse(accounts);
+    verifyAccounts(accounts);
+
+    return accounts;
 }
 
 export async function saveAccounts(accounts) {
     if (!accounts) return;
-    const accountsDir = `${await getConfigValue("accounts_dir")}`;
-    const accountsFile = `${accountsDir}\\accounts.json`;
 
-    if (!await exists(accountsDir)) {
-        await createDir(accountsDir);
+    if (!await exists(MAINPATH)) {
+        await mkdir(MAINPATH);
     }
 
-    await writeFile({ path: accountsFile, contents: JSON.stringify(accounts) });
+    await writeTextFile(ACCOUNTSPATH, JSON.stringify(accounts), { baseDir: BaseDirectory.AppData });
 }
 
 export function getAccount(accounts, accountId) {

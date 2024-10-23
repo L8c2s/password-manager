@@ -1,0 +1,12 @@
+#login-page {
+    position: fixed;
+    top: 25%;
+    left: 25%;    
+    width: 50%;
+    height: 50%;
+}
+
+#submit-password {
+    width: fit-content;
+    margin-left: 6px;
+}

@@ -1,18 +1,17 @@
-import { readTextFile, writeTextFile } from "@tauri-apps/api/fs";
+import { BaseDirectory, mkdir, exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import { appDataDir } from "@tauri-apps/api/path";
 
 
-const CONFIGPATH = "./config/config.json"
-const DEBUGCONFIGPATH = "D:/OtherProjects/Tauri/password-manager/src/components/Config/config/config.json"
+const MAINPATH = await appDataDir();
+const CONFIGPATH = `config.json`;
 
-// todo: create a verification for important folders and files that the program needs to work properly, like ./config/config.json
+if (!await exists(MAINPATH)) {
+    await mkdir(MAINPATH);
+}
 
 export async function saveConfig(newConfig) {
     newConfig = JSON.stringify(newConfig);
-    try {
-        await writeTextFile(CONFIGPATH, newConfig);
-    } catch {
-        await writeTextFile(DEBUGCONFIGPATH, newConfig);
-    }
+    await writeTextFile(CONFIGPATH, newConfig, { baseDir: BaseDirectory.AppData });
 }
 
 export async function editConfigKey(key, value) {
@@ -24,20 +23,16 @@ export async function editConfigKey(key, value) {
 export async function loadConfig() {
     let config;
     try {
-        let textFile = await readTextFile(CONFIGPATH);
+        let textFile = await readTextFile(CONFIGPATH, { baseDir: BaseDirectory.AppData });
         config = JSON.parse(textFile);
     } catch (error) {
-        try {
-            let textFile = await readTextFile(DEBUGCONFIGPATH);
-            config = JSON.parse(textFile);
-        } catch (debugerror) {
-            config = false;
-        }
+        config = false;
+        console.log("Could not load config file: ", error);
     }
 
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    if (!config || !config.hasOwnProperty("accounts_dir") || !config.hasOwnProperty("lang")) {
+    if (!config || !config.hasOwnProperty("lang")) {
         config = { accounts_dir: "", lang: "pt-BR", sort_filter: "serviceName" }
         await saveConfig(config);
     }
