@@ -23,77 +23,28 @@ export function getDateTime() {
     let minute = ("0" + date.getUTCMinutes()).slice(-2);
     let second = ("0" + date.getUTCSeconds()).slice(-2);
 
-    return {
-        displayable: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
-        real_date: `${year}-${month}-${day}T${hour}:${minute}:${second}.000Z`
-    };
+    return `${year}-${month}-${day}T${hour}:${minute}:${second}.000Z`;
 }
 
 export function generatePassword(length=8) {
     const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-={}[]\:;'<>,.?/~`";
-        let password = "";
+    let password = "";
 
-        for (let i = 0; i < length; i++) {
-            const randomIndex = Math.floor(Math.random() * chars.length);
-            password += chars.charAt(randomIndex);
-        }
-
-        const lower = /[a-z]/.test(password);
-        const upper = /[A-Z]/.test(password);
-        const number = /[0-9]/.test(password);
-        const symbol = /[^a-zA-Z0-9]/.test(password);
-
-        if (!lower && !upper) return generatePassword(length);
-        if (!number) return generatePassword(length);
-        if (!symbol) return generatePassword(length);
-
-        return password;
-}
-
-export async function verifyAccounts(accounts) {
-    if (!accounts) return false;
-
-    /*
-    "Google": [
-        {
-            "id": "7'JDm4",
-            "service": "Google",
-            "username": "luhluizferreira@gmail.com", 
-            "password": "~Amy<3Rikka~",
-            "notes": "main account",
-            "favorite": false,
-            "password_history": ["~Amy<3Rikka~"],
-            "last_modified": {
-                "displayable": "20/10/2024 11:58:27",
-                "real_date": "2024-10-20T11:58:27.000Z"
-            },
-            "created": {
-                "displayable": "20/10/2024 11:58:27",
-                "real_date": "2024-10-20T11:58:27.000Z"
-            }
-        }
-    */
-
-    for (const service in accounts) {
-        for (let i = 0; i < accounts[service].length; i++) {
-            // all fields:
-            // id: string;
-            // service: string;
-            // username: string;
-            // password: string;
-            // notes: string;
-            // favorite: bool;
-            // password_history: array;
-            // last_modified: object[
-            //  displayable: string
-            //  real_date: string
-            // ]
-            // created: object[
-            //  displayable: string
-            //  real_date: string
-            //]
-        }
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * chars.length);
+        password += chars.charAt(randomIndex);
     }
+
+    const lower = /[a-z]/.test(password);
+    const upper = /[A-Z]/.test(password);
+    const number = /[0-9]/.test(password);
+    const symbol = /[^a-zA-Z0-9]/.test(password);
+
+    if (!lower && !upper) return generatePassword(length);
+    if (!number) return generatePassword(length);
+    if (!symbol) return generatePassword(length);
+
+    return password;
 }
 
 export async function getAccounts() {
@@ -110,8 +61,6 @@ export async function getAccounts() {
     }
 
     accounts = JSON.parse(accounts);
-    verifyAccounts(accounts);
-
     return accounts;
 }
 

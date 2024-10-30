@@ -49,16 +49,29 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
         const lastModified = document.getElementById("last-modified");
         const created = document.getElementById("created-date");
 
+        const getDisplayable = (createdDate) => {
+            let [date, time] = createdDate.split("T");
+
+            let [year, month, day] = date.split("-");
+            date = `${day}/${month}/${year}`;
+
+            return `${date} ${time.split(".")[0]}`;
+        }
+
         if (account.created) {
-            let displayableCreate = account.created.displayable;
-            if (!displayableCreate)
-                displayableCreate = "-";
+            let createdDate = account.created;
+            let displayableCreate = "-";
+
+            if (createdDate)
+                displayableCreate = getDisplayable(createdDate);
 
             created.innerHTML = `${createdText} ${displayableCreate}`;
         } if (account.last_modified) {
-            let displayableModified = account.last_modified.displayable;
-            if (!displayableModified)
-                displayableModified = "-";
+            let modifiedDate = account.last_modified;
+            let displayableModified = "-";
+
+            if (modifiedDate)
+                displayableModified = getDisplayable(modifiedDate);
 
             lastModified.innerHTML = `${lastModifiedText} ${displayableModified}`;
         }
@@ -230,7 +243,7 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
 
                 <div id="additional-info">
                     <p id="last-modified">{lastModifiedText}</p>
-                    <p id="created-date">{createdText} </p>
+                    <p id="created-date">{createdText}</p>
                 </div>
             </div>
         </div>

@@ -21,23 +21,14 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     const [isButtonVisible, setIsButtonVisible] = useState(true);
 
     const checkKeys = (acc) => {
-        if (!acc.hasOwnProperty("password_history")) {
-            acc.password_history = [acc.password];
-        } if (!acc.hasOwnProperty("created")) {
-            acc.created = {
-                displayable: "-",
-                real_date: ""
-            };
-        } if (!acc.hasOwnProperty("favorite")) {
-            acc.favorite = false;
-        } if (!acc.hasOwnProperty("id")) {
-            acc.id = generatePassword(6);
-        }
+        acc.password_history = acc.password_history ?? [acc.password];
+        acc.created = acc.created ?? "";
+        acc.last_modified = acc.last_modified ?? "";
+        acc.favorite = acc.favorite ?? false;
+        acc.id = acc.id ?? generatePassword(6);
 
         return acc;
     }
-
-    
 
     const updateRandomPassword = () => {
         let randomPass = "";

@@ -18,6 +18,7 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         // load the last list filter used in the previous interaction with the program
         const loadSortFilter = async () => {
             const filter = await getConfigValue("sort_filter");
+            await new Promise((resolve) => setTimeout(resolve, 100));
             setSortFilter(filter);
         };
 
@@ -42,7 +43,6 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         const saveSortFilter = async () => {
             // since the useEffect is also called when sortFilter changes, save the new filter in the config file
             await editConfigKey("sort_filter", sortFilter);
-
         }
 
         sortAccounts();
@@ -98,10 +98,10 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
             newFilteredAccounts.sort((a, b) => a.service.localeCompare(b.service));
             setSortMessage(getMsg(langFile, "AccountsList", "sort-message.service"));
         } else if (sortFilter === "created") {
-            newFilteredAccounts.sort((a, b) => sortByDate(a.created.real_date, b.created.real_date));
+            newFilteredAccounts.sort((a, b) => sortByDate(a.created, b.created));
             setSortMessage(getMsg(langFile, "AccountsList", "sort-message.created"));
         } else if (sortFilter === "lastModified") {
-            newFilteredAccounts.sort((a, b) => sortByDate(a.last_modified.real_date, b.last_modified.real_date));
+            newFilteredAccounts.sort((a, b) => sortByDate(a.last_modified, b.last_modified));
             setSortMessage(getMsg(langFile, "AccountsList", "sort-message.last-modified"));
         } else {
             setSortMessage(getMsg(langFile, "AccountsList", "sort-message.no-filter"))
