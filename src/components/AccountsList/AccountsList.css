@@ -20,6 +20,12 @@ body {
     width: 50%;
 }
 
+@media (max-width: 870px) {
+    #settings-utils {
+        width: 90%;
+    }
+}
+
 #sort-message {
     color: #747474;
     margin-right: 10px;
@@ -48,6 +54,12 @@ body {
     width: 45%;
     cursor: pointer;
     display: flex;
+}
+
+@media (max-width: 870px) {
+    .account-list-item {
+        width: 87%;
+    }
 }
 
 .account-list-item:hover {

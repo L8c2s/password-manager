@@ -17,6 +17,9 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
     const [accountLoaded, setAccountLoaded] = useState(false);
 
     useEffect(() => {
+    }, [])
+
+    useEffect(() => {
         const infoWindow = document.getElementById("accounts-info-div");
         if (showAccountInfo) {
             infoWindow.className = "info-on";

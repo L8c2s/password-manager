@@ -1,4 +1,4 @@
-import { React, useEffect, useState } from "react";
+import { React, useEffect, useState, useRef } from "react";
 import "./Login.css";
 
 import { getMsg } from "../Config/lang";
@@ -16,16 +16,22 @@ export function Login({ langFile, setLoginSuccess }) {
     // the access is not granted, else the access is granted.
 
     const [loginTitle, setLoginTitle] = useState("");
+    const password = useRef(null);
 
     useEffect(() => {
         setLoginTitle()
     }, []);
 
+    const submitPassword = () => {
+        let userPassword = password.current.value;
+        
+    }
+
     return (
         <div id="login-page">
             <h1 id="login-title">Bem-vindo</h1>
-            <input type="text" id="login-password" placeholder="Esta será a única senha que você precisará se lembrar :)" />
-            <button id="submit-password">Continuar</button>
+            <input type="text" ref={password} id="login-password" placeholder="Esta será a única senha que você precisará se lembrar :)" />
+            <button id="submit-password" onClick={ () => { submitPassword } }>Continuar</button>
 
             <p id="secure-password-tips">Digite uma senha que não seja difícil de lembrar, mas que seja segura para proteger todas as suas contas.</p>
         </div>

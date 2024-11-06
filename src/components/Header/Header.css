@@ -7,7 +7,7 @@
     display: flex;
     flex-direction: row;
     z-index: 1;
-    background: #050414;
+    /* background: #050414; */
 }
 
 #search,
@@ -24,10 +24,22 @@
     justify-content: right;
 }
 
+@media (max-width: 870px) {
+    #utils {
+        justify-content: center;
+        width: 10%;
+    }
+
+    #search {
+        width: 90%;
+    }
+}
+
 #search-bar {
     width: 260px;
     background: #1e1d2b url("../../icons/search.svg") no-repeat 10px center;
     padding-left: 40px;
+    margin-left: 10%;
 }
 
 #clear-search-bar {

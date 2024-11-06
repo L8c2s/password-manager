@@ -95,8 +95,8 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
     useEffect(() => {
         const password = document.getElementById("edit-password");
-
         const currentPassWarn = document.getElementById("edit-account-notification").classList;
+
         if (currentPassWarn.contains("safe")) {
             password.classList.remove("not-safe-value", "not-safe-password");
             password.classList.add("safe-value");
@@ -284,6 +284,8 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     }
 
     useEffect(() => {
+        if (!loaded) return;
+
         updateEditorValues();
         setRandomPassword(generatePassword(12));
 
@@ -345,18 +347,18 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
                     <div id="edit-account-info">
                         <div id="edit-service-div">
                             <h2 id="service-title" className="info-title">{serviceTitle}</h2>
-                            <input type="text" id="edit-service" className="info-input" placeholder="Website[.com]" onChange={ () => updateAccount() } />
+                            <input type="text" id="edit-service" className="input-info" placeholder="Website[.com]" onChange={ () => updateAccount() } />
                         </div>
 
                         <div id="edit-username-div">
                             <p id="username-title" className="info-title">{usernameTitle}</p>
-                            <input type="text" id="edit-username" className="info-input" placeholder={usernamePlaceHld} onChange={ () => updateAccount() } />
+                            <input type="text" id="edit-username" className="input-info" placeholder={usernamePlaceHld} onChange={ () => updateAccount() } />
                         </div>
 
                         <div id="edit-password-div">
                             <p id="password-title" className="info-title">{passwordTitle}</p>
                             <div id="align-items">
-                                <input type="text" id="edit-password" className="info-input" placeholder={randomPassword}
+                                <input type="text" id="edit-password" className="input-info" placeholder={randomPassword}
                                  onChange={ () => updateAccount() } />
                                 <button id="generate-password"
                                  onClick={ () => { updateRandomPassword(); updateAccount() } }></button>
@@ -370,7 +372,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
                         <div id="edit-notes-div">
                             <p id="notes-title" className="info-title">{notesTitle}</p>
-                            <input type="text" id="edit-notes" className="info-input safe-value" placeholder={notesPlaceHld} onChange={ () => updateAccount() } />
+                            <input type="text" id="edit-notes" className="input-info safe-value" placeholder={notesPlaceHld} onChange={ () => updateAccount() } />
                         </div>
 
                         <div id="form-buttons">

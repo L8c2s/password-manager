@@ -54,6 +54,12 @@ const PTBRLANG = {
         "level_security.not_safe_enough": "A senha não é segura o suficiente.",
         "level_security.repeated_password": "Mais de uma conta possuem a mesma senha.",
         "level_security.safe": "Sua conta está segura."
+    },
+    "Login": {
+        ".title": "Bem Vindo",
+        "login_password.placeholder": "Esta será a última senha que você precisará lembrar :)",
+        "login.submit": "Continuar",
+        "login.tip": "Digite uma senha que não seja difícil de lembrar, mas que seja segura para proteger todas as suas contas."
     }
 }
 

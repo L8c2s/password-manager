@@ -39,6 +39,14 @@ function App() {
 
         loadLang();
         loadAccounts();
+
+        let getHeightTimeout = setTimeout(() => console.log("Window Height: ", window.innerHeight), 5000)
+        let getWidthTimeout = setTimeout(() => console.log("Window Width: ", window.innerWidth), 5000)
+
+        return () => {
+            clearTimeout(getHeightTimeout);
+            clearTimeout(getWidthTimeout);
+        }
     }, []);
 
     useEffect(() => {

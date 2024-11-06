@@ -15,15 +15,22 @@
 
 #add-edit-account {
     height: 80%;
-    width: 45%;
+    width: 42%;
     position: fixed;
     top: 5%;
-    left: 24%;
+    left: 26%;
     background: #050414;
     border-radius: 11px;
     border: #728dc0 1px solid;
     padding: 40px;
     overflow-y: auto;
+}
+
+@media (max-width: 870px) {
+    #add-edit-account {
+        width: 70%;
+        left: 10%
+    }
 }
 
 #add-account-button {
@@ -72,19 +79,6 @@
     margin-left: 35px;
 }
 
-/* #password-length::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    background: transparent;
-    cursor: pointer;
-} */
-
-/* #password-length::-webkit-slider-runnable-track {
-    -webkit-appearance: none;
-    height: 5px;
-    background: #ddd;
-    border-radius: 10px;
-} */
-
 #edit-service {
     background: #1e1d2b url("../../icons/website.svg") no-repeat 10px center;
 }
@@ -103,10 +97,6 @@
     background: #1e1d2b url("../../icons/notes.svg") no-repeat 10px center;
 }
 
-#info-input {
-    width: auto;
-}
-
 #edit-account-notification {
     margin-bottom: 30px;
 }
@@ -115,6 +105,12 @@
     width: 100%;
     display: flex;
     justify-content: center;
+}
+
+.input-info {
+    width: 80%;
+    padding-left: 40px;
+    margin-bottom: 20px;
 }
 
 .safe-value {

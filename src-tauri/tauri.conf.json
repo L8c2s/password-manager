@@ -19,7 +19,7 @@
   },
   "productName": "Password Manager",
   "mainBinaryName": "Password Manager",
-  "version": "0.7.3",
+  "version": "0.8.0",
   "plugins": {},
   "app": {
     "security": {
@@ -27,9 +27,8 @@
     },
     "windows": [
       {
-        "title": "Gerenciador de Senhas v0.7.3",
+        "title": "Gerenciador de Senhas v0.8.0",
         "width": 1100,
-        "height": 750,
         "center": true,
         "resizable": true,
         "maximizable": true
