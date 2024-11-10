@@ -57,9 +57,13 @@ const PTBRLANG = {
     },
     "Login": {
         ".title": "Bem Vindo",
-        "login_password.placeholder": "Esta será a última senha que você precisará lembrar :)",
+        "login_password.placeholder": "Sua senha",
         "login.submit": "Continuar",
-        "login.tip": "Digite uma senha que não seja difícil de lembrar, mas que seja segura para proteger todas as suas contas."
+        "login.tip00": "Digite uma senha que não seja difícil de lembrar, mas que seja segura para proteger todas as suas contas.",
+        "login.tip01": "Esta será a única senha que você precisará lembrar.",
+        "login.tip02": "Digite sua senha para continuar.",
+        "login.verifying": "Verificando",
+        "login.success": "Sucesso"
     }
 }
 

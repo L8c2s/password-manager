@@ -1,7 +1,10 @@
 import { React, useEffect, useState, useRef } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { appDataDir } from "@tauri-apps/api/path";
 import "./Login.css";
 
 import { getMsg } from "../Config/lang";
+import { getConfigValue } from "../Config/config";
 
 
 export function Login({ langFile, setLoginSuccess }) {
@@ -15,25 +18,85 @@ export function Login({ langFile, setLoginSuccess }) {
     // will be sent to rust and compared with the hash saved, if it is not equal
     // the access is not granted, else the access is granted.
 
-    const [loginTitle, setLoginTitle] = useState("");
+    const [firstTime, setFirstTime] = useState(true);
     const password = useRef(null);
 
     useEffect(() => {
-        setLoginTitle()
+        const checkFirstTime = async () => {
+            let password_hash = await getConfigValue("password_hash");
+            if (!password_hash) {
+                setFirstTime(true)
+                return;
+            };
+
+            setFirstTime(false);
+        }
+
+        checkFirstTime();
     }, []);
 
-    const submitPassword = () => {
+    useEffect(() => {
+        const tip01 = document.getElementById("secure-password-tips-01");
+
+        if (!firstTime) {
+            tip01.style.display = "none";
+        } else {
+            tip01.style.display = "block";
+        }
+
+        console.log(firstTime);
+    }, [firstTime]);
+
+    const submitPassword = async () => {
+        let submitButton = document.getElementById("submit-password");
         let userPassword = password.current.value;
-        
+        if (!userPassword) return;
+
+        let configDirectory = await appDataDir() + "/config.json";
+
+        setSubmitText(getMsg(langFile, "Login", "login.verifying"));
+        submitButton.setAttribute("disabled", "true");
+
+        // console.log(`receive_user_password arguments: ${userPassword}, ${firstTime}, ${configDirectory}`);
+        invoke("receive_user_password", { userPassword: userPassword, firstTime: firstTime, configDirectory: configDirectory }).then(
+            (success) => {
+                if (success) {
+                    setSecureTip00(getMsg(langFile, "Login", "login.success"));
+                }
+                setLoginSuccess(success);
+                setSubmitText(getMsg(langFile, "Login", "login.submit"));
+                submitButton.removeAttribute("disabled");
+            }
+        );
     }
+
+    const [loginTitle, setLoginTitle] = useState("");
+    const [loginPasswordPlhd, setLoginPasswordPlhd] = useState("");
+    const [submitText, setSubmitText] = useState("");
+    const [secureTip00, setSecureTip00] = useState("");
+    const [secureTip01, setSecureTip01] = useState("");
+
+    useEffect(() => {
+        setLoginTitle(getMsg(langFile, "Login", ".title"));
+        setLoginPasswordPlhd(getMsg(langFile, "Login", "login_password.placeholder"));
+        setSubmitText(getMsg(langFile, "Login", "login.submit"));
+
+        if (firstTime) {
+            setSecureTip00(getMsg(langFile, "Login", "login.tip00"));
+            setSecureTip01(getMsg(langFile, "Login", "login.tip01"));
+        } else {
+            setSecureTip00(getMsg(langFile, "Login", "login.tip02"));
+        }
+    }, [langFile, firstTime]);
 
     return (
         <div id="login-page">
-            <h1 id="login-title">Bem-vindo</h1>
-            <input type="text" ref={password} id="login-password" placeholder="Esta será a única senha que você precisará se lembrar :)" />
-            <button id="submit-password" onClick={ () => { submitPassword } }>Continuar</button>
+            <h1 id="login-title">{loginTitle}</h1>
+            <input type="text" autoComplete="off" ref={password} id="login-password" placeholder={loginPasswordPlhd} />
+            <button id="submit-password" onClick={ () => { submitPassword() } }>{submitText}</button>
 
-            <p id="secure-password-tips">Digite uma senha que não seja difícil de lembrar, mas que seja segura para proteger todas as suas contas.</p>
+            <p id="secure-password-tips-00" className="tips">{secureTip00}</p>
+            <p id="secure-password-tips-01" className="tips">{secureTip01}</p>
         </div>
     );
 }

@@ -32,9 +32,13 @@ export async function loadConfig() {
 
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    if (!config || !config.hasOwnProperty("lang")) {
-        config = { accounts_dir: "", lang: "pt-BR", sort_filter: "serviceName" }
+    if (!config) {
+        config = { lang: "pt-BR", sort_filter: "serviceName", password_hash: "" }
         await saveConfig(config);
+    } else {
+        config["lang"] = config["lang"] ?? "pt-BR";
+        config["sort_filter"] = config["sort_filter"] ?? "serviceName";
+        config["password_hash"] = config["password_hash"] ?? "";
     }
 
     return config;

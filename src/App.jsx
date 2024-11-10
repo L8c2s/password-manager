@@ -25,7 +25,7 @@ function App() {
     const [favorite, setFavorite] = useState([]);
     const [addAccount, setAddAccount] = useState(false);
     const [editAccount, setEditAccount] = useState(false);
-    const [loginSuccess, setLoginSuccess] = useState(true);
+    const [loginSuccess, setLoginSuccess] = useState(false);
 
     useEffect(() => {
         const loadLang = async () => {
@@ -56,6 +56,16 @@ function App() {
             document.body.style.overflow = "auto";
         }
     }, [settingsPopup, addAccount, editAccount]);
+
+    function logWindowSize() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        console.log("Window width: ", width);
+        console.log("Window height: ", height);
+    }
+
+    window.addEventListener("resize", logWindowSize);
 
     return (
         <div id="content">

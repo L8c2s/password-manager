@@ -47,7 +47,7 @@ body {
 }
 
 .account-list-item {
-    margin: 20px;
+    margin: 20px 20px 20px 10px;
     border-radius: 8px;
     padding: 7px;
     border-bottom: 1px #728dc0 solid;

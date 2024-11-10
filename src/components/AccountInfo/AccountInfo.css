@@ -57,6 +57,10 @@
     #additional-info {
         display: none;
     }
+
+    #show-password-info {
+        width: 50%;
+    }
 }
 
 #additional-info {

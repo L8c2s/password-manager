@@ -317,11 +317,8 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     }, [langFile, loaded]);
 
     const openAddAccount = async () => {
-        const addAccountButton = document.getElementById("add-account-button");
-        addAccountButton.setAttribute("disabled", "true");
-
+        document.getElementById("add-account-button");
         setAddAccount(true);
-        const disableButtonTimer = setTimeout(() => addAccountButton.removeAttribute("disabled"), 670);
     }
 
     return (
