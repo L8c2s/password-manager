@@ -18,7 +18,7 @@ const PTBRLANG = {
         "create-text-file.title": "Criar arquivo de texto",
         "create-text-file.created": "Arquivo criado em",
         "create-text-file.explanation": "Crie um arquivo de texto simples com suas contas para fácil leitura e compartilhamento.",
-        "create-text-file.select_folder": "Selecionar pasta"
+        "create-text-file.select_folder": "Selecionar"
     },
     "AccountsList": {
         "sort-message.username": "Nome de Usuário",

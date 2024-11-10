@@ -197,7 +197,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         const off = () => {
             const fullWindow = document.getElementById("add-edit-account-full-window");
             fullWindow.className = "zoom-out";
-            disableWindow = setTimeout(() => fullWindow.style = "display: none;", 500);
+            // disableWindow = setTimeout(() => fullWindow.style = "display: none;", 500);
             setAddAccount(false);
             setEditAccount(false);
         }
@@ -321,7 +321,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         addAccountButton.setAttribute("disabled", "true");
 
         setAddAccount(true);
-        setTimeout(() => addAccountButton.removeAttribute("disabled"), 670);
+        const disableButtonTimer = setTimeout(() => addAccountButton.removeAttribute("disabled"), 670);
     }
 
     return (
@@ -347,18 +347,18 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
                     <div id="edit-account-info">
                         <div id="edit-service-div">
                             <h2 id="service-title" className="info-title">{serviceTitle}</h2>
-                            <input type="text" id="edit-service" className="input-info" placeholder="Website[.com]" onChange={ () => updateAccount() } />
+                            <input type="text" autoComplete="off" id="edit-service" className="input-info" placeholder="Website[.com]" onChange={ () => updateAccount() } />
                         </div>
 
                         <div id="edit-username-div">
                             <p id="username-title" className="info-title">{usernameTitle}</p>
-                            <input type="text" id="edit-username" className="input-info" placeholder={usernamePlaceHld} onChange={ () => updateAccount() } />
+                            <input type="text" autoComplete="off" id="edit-username" className="input-info" placeholder={usernamePlaceHld} onChange={ () => updateAccount() } />
                         </div>
 
                         <div id="edit-password-div">
                             <p id="password-title" className="info-title">{passwordTitle}</p>
                             <div id="align-items">
-                                <input type="text" id="edit-password" className="input-info" placeholder={randomPassword}
+                                <input type="text" autoComplete="off" id="edit-password" className="input-info" placeholder={randomPassword}
                                  onChange={ () => updateAccount() } />
                                 <button id="generate-password"
                                  onClick={ () => { updateRandomPassword(); updateAccount() } }></button>
@@ -372,7 +372,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
                         <div id="edit-notes-div">
                             <p id="notes-title" className="info-title">{notesTitle}</p>
-                            <input type="text" id="edit-notes" className="input-info safe-value" placeholder={notesPlaceHld} onChange={ () => updateAccount() } />
+                            <input type="text" autoComplete="off" id="edit-notes" className="input-info safe-value" placeholder={notesPlaceHld} onChange={ () => updateAccount() } />
                         </div>
 
                         <div id="form-buttons">

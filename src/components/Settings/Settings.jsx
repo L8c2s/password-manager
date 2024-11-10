@@ -62,7 +62,7 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
         const username = getMsg(langFile, "AccountInfo", "username.title");
         const password = getMsg(langFile, "AccountInfo", "password.title");
         const notes = getMsg(langFile, "AccountInfo", "notes.title");
-        
+
         let content = "";
 
         for (const service in accounts) {
@@ -101,9 +101,11 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
         const textFileContent = await generateTextFileContent();
 
         try {
-            await writeTextFile(filePath, textFileContent);
+            await writeTextFile(encodeURI(filePath), textFileContent);
             createdConfirmation.current.style = "display: block;";
-        } catch {}
+        } catch (error) {
+            console.log("Could not create the file: ", error)
+        }
     }
 
     const pathToClipboard = () => {
