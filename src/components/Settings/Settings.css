@@ -20,12 +20,18 @@
     height: 70%;
     position: fixed;
     top: 8%;
-    left: 10%;
     padding: 50px;
     background: #050414;
     border-radius: 11px;
     border: #728dc0 1px solid;
     overflow-y: auto;
+}
+
+@media (max-width: 871px) {
+    #settings-window {
+        /* left: 7%; */
+        width: 72%;        
+    }
 }
 
 #settings-title {

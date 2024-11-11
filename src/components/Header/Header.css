@@ -49,6 +49,12 @@
     margin-left: 10px;
 }
 
+@media (max-width: 590px) {
+    #clear-search-bar {
+        display: none;
+    }
+}
+
 #open-settings {
     background: url("../../icons/settings.svg") no-repeat center;
     width: 37px;

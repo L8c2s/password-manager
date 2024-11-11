@@ -1,7 +1,9 @@
 import { React, useEffect, useState } from "react";
 import "./AddEditAccount.css";
+
 import { getMsg } from "../Config/lang";
 import { getAccount, getAccounts, saveAccounts, getDateTime, generatePassword } from "../Config/accountsManager/manager";
+import { findCorrectLeft } from "../Config/config";
 
 import { Notification } from "../notification/notification";
 
@@ -185,12 +187,18 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         };
     }, []);
 
+    const correctLeft = (e) => {
+        findCorrectLeft(document.getElementById("add-edit-account"));
+    }
+    window.addEventListener("resize", correctLeft);
+
     useEffect(() => {
         const on = () => {
             const fullWindow = document.getElementById("add-edit-account-full-window");
             fullWindow.style = "display: block;";
             fullWindow.className = "zoom-in";
             document.getElementById("edit-service").focus();
+            findCorrectLeft(document.getElementById("add-edit-account"));
         }
 
         let disableWindow;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./AccountsList.css";
 
-import { editConfigKey, getConfigValue } from "../Config/config";
+import { editConfigKey, findCorrectMarginLeft, getConfigValue } from "../Config/config";
 import { getAccount } from "../Config/accountsManager/manager";
 
 import { getMsg } from "../Config/lang";
@@ -63,8 +63,7 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         filteredAccounts.forEach(acc => {
             updateFavoriteIcon(acc.id);
         });
-        if (!selectedId) return;
-        if (searchTerm === "" || !searchTerm) {
+        if (!searchTerm && selectedId) {
             // window.scrollTo({ top: document.getElementById(selectedId).offsetHeight })
         } // todo
     }, [filteredAccounts]);
@@ -182,9 +181,9 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
                 }
 
                 <button id="sort"
-                 onClick={ () => jmpFilter() }
-                 onMouseOver={ () => setClassSortMessage("show") }
-                 onMouseOut={ () => setClassSortMessage("hidden") }
+                    onClick={ () => jmpFilter() }
+                    onMouseOver={ () => setClassSortMessage("show") }
+                    onMouseOut={ () => setClassSortMessage("hidden") }
                 ></button>
             </div>
 

@@ -14,6 +14,8 @@
   -webkit-text-size-adjust: 100%;
 }
 
+input::-ms-reveal { display: none; }
+
 input,
 button {
   border-radius: 8px;

@@ -4,7 +4,7 @@ import { writeTextFile } from "@tauri-apps/plugin-fs";
 
 import "./Settings.css";
 
-import { editConfigKey, getConfigValue } from "../Config/config";
+import { editConfigKey, getConfigValue, findCorrectLeft } from "../Config/config";
 import { getMsg } from "../Config/lang";
 
 
@@ -34,6 +34,12 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
         loadAccountsDir();
         getLangSet();
     }, []);
+
+    const correctLeft = (e) => {
+        findCorrectLeft(document.getElementById("settings-window"));
+    }
+
+    window.addEventListener("resize", correctLeft);
 
     const changeAccountsDir = async () => {
         let accountsDirPath = await open({
@@ -148,6 +154,7 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
             let settings_full_window = document.getElementById("settings-full-window");
             settings_full_window.style.display = "block";
             settings_full_window.className = "zoom-in";
+            findCorrectLeft(document.getElementById("settings-window"));
         }
 
         let disableSettings;

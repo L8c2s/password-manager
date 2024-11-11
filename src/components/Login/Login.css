@@ -1,7 +1,7 @@
 #login-page {
     position: fixed;
-    top: 25%;
-    left: 25%;    
+    top: 35%;
+    /* left: 30%; */
     width: 50%;
     height: 50%;
 }
@@ -16,6 +16,18 @@
     padding-left: 40px;
     background: #1e1d2b url("../../icons/password.svg") no-repeat 10px center;
     margin-bottom: 10px;
+}
+
+.idle {
+    border-bottom: 3px solid #747474;
+}
+
+.wrong-password {
+    border-bottom: #ff0000 3px solid;
+}
+
+.correct-password {
+    border-bottom: #21ec32 3px solid;
 }
 
 @media (max-width: 707px) {

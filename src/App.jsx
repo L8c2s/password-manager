@@ -14,7 +14,6 @@ import { getConfigValue } from "./components/Config/config";
 import { getAccounts } from "./components/Config/accountsManager/manager";
 import { loadLangFile } from "./components/Config/lang";
 
-
 function App() {
     const [langFile, setLangFile] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
@@ -39,14 +38,6 @@ function App() {
 
         loadLang();
         loadAccounts();
-
-        let getHeightTimeout = setTimeout(() => console.log("Window Height: ", window.innerHeight), 5000)
-        let getWidthTimeout = setTimeout(() => console.log("Window Width: ", window.innerWidth), 5000)
-
-        return () => {
-            clearTimeout(getHeightTimeout);
-            clearTimeout(getWidthTimeout);
-        }
     }, []);
 
     useEffect(() => {
@@ -57,15 +48,7 @@ function App() {
         }
     }, [settingsPopup, addAccount, editAccount]);
 
-    function logWindowSize() {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-
-        console.log("Window width: ", width);
-        console.log("Window height: ", height);
-    }
-
-    window.addEventListener("resize", logWindowSize);
+    // window.addEventListener("resize", logWindowSize);
 
     return (
         <div id="content">

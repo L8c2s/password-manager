@@ -49,3 +49,20 @@ export async function getConfigValue(key) {
     if (config.hasOwnProperty(key))
         return config[key];
 }
+
+export function findCorrectLeft(popup) {
+    if (popup) {
+        let leftValue = Math.round((window.innerWidth - popup.offsetWidth) / 2);
+        popup.style.left = `${leftValue}px`;
+    }
+}
+
+export function findCorrectMarginLeft(elementsList, windowPercent) {
+    if (elementsList) {
+        elementsList.forEach(item => {
+            const element = document.getElementById(item.id);
+            let leftValue = Math.round((window.innerWidth * (windowPercent / 100) - element.offsetWidth) / 2);
+            element.style.marginLeft = `${leftValue}px`;
+        })
+    }
+}

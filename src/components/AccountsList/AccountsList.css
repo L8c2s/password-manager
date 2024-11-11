@@ -11,6 +11,7 @@ body {
     background: url("../../icons/sort.svg") no-repeat center;
     width: 40px;
     height: 40px;
+    margin-right: 5%;
 }
 
 #settings-utils {
@@ -20,9 +21,20 @@ body {
     width: 50%;
 }
 
+#accounts-list {
+    padding-left: 25px;
+    display: flex;
+    flex-direction: column;
+}
+
 @media (max-width: 870px) {
+    #accounts-list {
+        align-items: center;
+        padding-left: 0;
+    }
+
     #settings-utils {
-        width: 90%;
+        width: 100%;
     }
 }
 
@@ -47,11 +59,11 @@ body {
 }
 
 .account-list-item {
-    margin: 20px 20px 20px 10px;
+    margin: 10px 0;
     border-radius: 8px;
     padding: 7px;
     border-bottom: 1px #728dc0 solid;
-    width: 45%;
+    width: 48%;
     cursor: pointer;
     display: flex;
 }

@@ -4,7 +4,7 @@ import { appDataDir } from "@tauri-apps/api/path";
 import "./Login.css";
 
 import { getMsg } from "../Config/lang";
-import { getConfigValue } from "../Config/config";
+import { getConfigValue, findCorrectLeft } from "../Config/config";
 
 
 export function Login({ langFile, setLoginSuccess }) {
@@ -44,7 +44,7 @@ export function Login({ langFile, setLoginSuccess }) {
             tip01.style.display = "block";
         }
 
-        console.log(firstTime);
+        // console.log(firstTime);
     }, [firstTime]);
 
     const submitPassword = async () => {
@@ -60,9 +60,14 @@ export function Login({ langFile, setLoginSuccess }) {
         // console.log(`receive_user_password arguments: ${userPassword}, ${firstTime}, ${configDirectory}`);
         invoke("receive_user_password", { userPassword: userPassword, firstTime: firstTime, configDirectory: configDirectory }).then(
             (success) => {
+                // console.log("success: ", success);
                 if (success) {
                     setSecureTip00(getMsg(langFile, "Login", "login.success"));
+                    password.current.className = "correct-password";
+                } else {
+                    password.current.className = "wrong-password";
                 }
+
                 setLoginSuccess(success);
                 setSubmitText(getMsg(langFile, "Login", "login.submit"));
                 submitButton.removeAttribute("disabled");
@@ -89,10 +94,18 @@ export function Login({ langFile, setLoginSuccess }) {
         }
     }, [langFile, firstTime]);
 
+    const correctLeft = (e) => {
+        findCorrectLeft(document.getElementById("login-page"));
+    }
+    window.addEventListener("resize", correctLeft);
+    correctLeft(null);
+    
     return (
         <div id="login-page">
             <h1 id="login-title">{loginTitle}</h1>
-            <input type="text" autoComplete="off" ref={password} id="login-password" placeholder={loginPasswordPlhd} />
+            <input type="password" autoComplete="off" className="idle" ref={password} id="login-password" placeholder={loginPasswordPlhd} autoFocus onChange={ () => {
+                if (!password.current.value) password.current.className = "idle";
+            } } />
             <button id="submit-password" onClick={ () => { submitPassword() } }>{submitText}</button>
 
             <p id="secure-password-tips-00" className="tips">{secureTip00}</p>
