@@ -154,7 +154,6 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
             let settings_full_window = document.getElementById("settings-full-window");
             settings_full_window.style.display = "block";
             settings_full_window.className = "zoom-in";
-            findCorrectLeft(document.getElementById("settings-window"));
         }
 
         let disableSettings;
@@ -168,6 +167,7 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
 
         if (settingsPopup) {
             on()
+            correctLeft(null);
         } else {
             off()
         }

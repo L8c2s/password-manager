@@ -1,7 +1,6 @@
 import { React, useEffect, useState } from "react";
 import "./AccountInfo.css";
 
-import { findCorrectLeft } from "../Config/config";
 import { getMsg } from "../Config/lang";
 import { editAccountKey, getAccount, getAccounts, saveAccounts } from "../Config/accountsManager/manager";
 
@@ -20,22 +19,11 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
         const infoWindow = document.getElementById("accounts-info-div");
         if (showAccountInfo) {
             infoWindow.className = "info-on";
-            correctLeft(null);
         } else {
             infoWindow.className = "info-off";
             setAccount({});
         }
     }, [showAccountInfo]);
-
-    const correctLeft = (e) => {
-        const infoDiv = document.getElementById("accounts-info-div");
-        if (window.innerWidth <= 870) {
-            findCorrectLeft(infoDiv);
-        } else {
-            infoDiv.style.left = "52%";
-        }
-    }
-    window.addEventListener("resize", correctLeft);
 
     useEffect(() => {
         const loadAccount = async () => {

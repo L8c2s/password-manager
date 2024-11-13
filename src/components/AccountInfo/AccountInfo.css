@@ -45,21 +45,27 @@
     padding: 50px 20px;
 }
 
+@media (max-height: 680px) {
+    #additional-info {
+        display: none;
+    }
+}
+
 @media (max-width: 870px) {
     #accounts-info-div {
         left: 10%;
         width: 80%;
         z-index: 2;
     }
+
+    #show-password {
+        display: inline-block;
+    }
 }
 
-@media (max-height: 680px) or (max-width: 607px) {
-    #additional-info {
+@media (max-width: 607px) and (max-width: 1045px) {
+    #show-password {
         display: none;
-    }
-
-    #show-password-info {
-        width: 50%;
     }
 }
 

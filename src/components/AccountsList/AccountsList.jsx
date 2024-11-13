@@ -63,9 +63,6 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         filteredAccounts.forEach(acc => {
             updateFavoriteIcon(acc.id);
         });
-        if (!searchTerm && selectedId) {
-            // window.scrollTo({ top: document.getElementById(selectedId).offsetHeight })
-        } // todo
     }, [filteredAccounts]);
 
     useEffect(() => {

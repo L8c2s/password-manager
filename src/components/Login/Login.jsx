@@ -97,8 +97,8 @@ export function Login({ langFile, setLoginSuccess }) {
     const correctLeft = (e) => {
         findCorrectLeft(document.getElementById("login-page"));
     }
-    window.addEventListener("resize", correctLeft);
-    correctLeft(null);
+    // window.addEventListener("resize", correctLeft);
+    // correctLeft(null);
     
     return (
         <div id="login-page">
