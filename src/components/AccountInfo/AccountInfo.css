@@ -59,11 +59,17 @@
     }
 
     #show-password {
+        display: none;
+    }
+}
+
+@media (max-width: 870px) and (min-width: 608px) {
+    #show-password {
         display: inline-block;
     }
 }
 
-@media (max-width: 607px) and (max-width: 1045px) {
+@media (min-width: 870px) and (max-width: 1045px) {
     #show-password {
         display: none;
     }

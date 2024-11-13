@@ -1,4 +1,5 @@
 import { React, useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import "./AddEditAccount.css";
 
 import { getMsg } from "../Config/lang";
@@ -139,6 +140,8 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             acc.created = getDateTime();
         }
         acc.last_modified = getDateTime();
+
+        acc.password = await invoke("encrypt_password", { password: acc.password });
 
         if (!allAccounts[acc.service]) {
             allAccounts[acc.service] = [];

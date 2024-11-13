@@ -46,6 +46,7 @@ export function Header({ langFile, searchTerm, setSearchTerm, settingsPopup, set
                     onChange={(e) => { setSearchTerm(e.target.value) }}
                     autoFocus
                     ref={searchRef}
+                    autoComplete="off"
                 />
                 <button id="clear-search-bar"
                     onClick={() => { setSearchTerm("") }}

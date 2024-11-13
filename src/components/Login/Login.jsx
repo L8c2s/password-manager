@@ -1,3 +1,4 @@
+
 import { React, useEffect, useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { appDataDir } from "@tauri-apps/api/path";
@@ -60,16 +61,16 @@ export function Login({ langFile, setLoginSuccess }) {
         // console.log(`receive_user_password arguments: ${userPassword}, ${firstTime}, ${configDirectory}`);
         invoke("receive_user_password", { userPassword: userPassword, firstTime: firstTime, configDirectory: configDirectory }).then(
             (success) => {
-                // console.log("success: ", success);
                 if (success) {
-                    setSecureTip00(getMsg(langFile, "Login", "login.success"));
+                    setSubmitText(getMsg(langFile, "Login", "login.success"));
                     password.current.className = "correct-password";
                 } else {
                     password.current.className = "wrong-password";
+                    setSubmitText(getMsg(langFile, "Login", "login.wrong_password"))
                 }
 
                 setLoginSuccess(success);
-                setSubmitText(getMsg(langFile, "Login", "login.submit"));
+                // setSubmitText(getMsg(langFile, "Login", "login.submit"));
                 submitButton.removeAttribute("disabled");
             }
         );
@@ -93,12 +94,6 @@ export function Login({ langFile, setLoginSuccess }) {
             setSecureTip00(getMsg(langFile, "Login", "login.tip02"));
         }
     }, [langFile, firstTime]);
-
-    const correctLeft = (e) => {
-        findCorrectLeft(document.getElementById("login-page"));
-    }
-    // window.addEventListener("resize", correctLeft);
-    // correctLeft(null);
     
     return (
         <div id="login-page">

@@ -63,7 +63,8 @@ const PTBRLANG = {
         "login.tip01": "Esta será a única senha que você precisará lembrar.",
         "login.tip02": "Digite sua senha para continuar.",
         "login.verifying": "Verificando",
-        "login.success": "Sucesso"
+        "login.success": "Sucesso",
+        "login.wrong_password": "Incorreta"
     }
 }
 
