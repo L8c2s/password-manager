@@ -6,7 +6,7 @@
 import { React, useState, useEffect } from "react";
 import "./notification.css";
 
-import { getConfigValue } from "../Config/config";
+import { invoke } from "@tauri-apps/api/core";
 import { checkPasswordSecurity, checkPasswordUnique } from "../Config/security";
 
 import { getMsg } from "./../Config/lang";
@@ -44,27 +44,30 @@ export function Notification({ langFile, accounts, account, notificationId, setU
     const [isNotUnique, setIsNotUnique] = useState("");
     const [safeAccount, setSafeAccount] = useState("");
 
-    const testPassword = () => {
-        if (!account || !account.service || !account.username) {
+    const testPassword = async () => {
+        
+        if (!account || !account.service || !account.username || account === undefined) {
             setSecurityLevel(-1);
             setSecurityMessage("-");
             return;
         }
 
-        if (!account.password) {
+        let userPassword = await invoke("decrypt_password", { encryptedPassword: account.password });
+
+        if (!userPassword) {
             setSecurityLevel(0);
             setSecurityMessage(noPasswordText);
             return;
         }
 
-        const isSecure = checkPasswordSecurity(account.password);
+        const isSecure = checkPasswordSecurity(userPassword);
         if (!isSecure) {
             setSecurityLevel(1);
             setSecurityMessage(notSafeEnough);
             return;
         }
 
-        const isUnique = checkPasswordUnique(accounts, account);
+        const isUnique = await checkPasswordUnique(accounts, account.id, userPassword);
         if (isUnique >= 1) {
             setSecurityLevel(1);
             setSecurityMessage(isNotUnique);

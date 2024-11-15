@@ -1,3 +1,5 @@
+import { invoke } from "@tauri-apps/api/core";
+
 export function checkPasswordSecurity(password) {
     if (!password) return false;
     // check if the password has at least 8 in length
@@ -12,15 +14,17 @@ export function checkPasswordSecurity(password) {
     return true;
 }
 
-export function checkPasswordUnique(accounts, account) {
+export async function checkPasswordUnique(accounts, accountId, accountPassword) {
     let occurrences = 0;
 
     for (const service in accounts) {
-        accounts[service].forEach((acc) => {
-            if (acc.password === account.password && acc.id !== account.id) {
+        for (const acc of accounts[service]) {
+            let decryptedPassword = await invoke("decrypt_password", { encryptedPassword: acc.password });
+
+            if (decryptedPassword === accountPassword && accountId !== acc.id) {
                 occurrences++;
             }
-        })
+        }
     }
 
     return occurrences;

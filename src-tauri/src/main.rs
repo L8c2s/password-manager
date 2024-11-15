@@ -19,15 +19,11 @@ use std::{fs, num::NonZeroU32};
 use rand::Rng;
 use ring::pbkdf2;
 use ring::{
-    aead::{self, Aad, BoundKey, LessSafeKey, Nonce, UnboundKey, AES_256_GCM},
+    aead::{Aad, LessSafeKey, Nonce, UnboundKey, AES_256_GCM},
     rand::{SecureRandom, SystemRandom},
 };
 
-use base64::{
-    alphabet,
-    engine::{self, general_purpose},
-    Engine as _,
-};
+use base64::{engine::general_purpose, Engine as _};
 
 #[derive(Serialize, Deserialize)]
 struct AppConfig {
@@ -128,11 +124,16 @@ fn derive_password(master_password: &String) -> [u8; 32] {
 }
 
 fn get_encrypted_password(key: &[u8; 32], password: String) -> String {
-    let unbound_key = UnboundKey::new(&AES_256_GCM, key).unwrap();
+    let unbound_key = UnboundKey::new(&AES_256_GCM, key)
+        .map_err(|_| "Error creating key.")
+        .unwrap();
     let encrypted_key = LessSafeKey::new(unbound_key);
 
     let mut nonce = [0u8; 12];
-    SystemRandom::new().fill(&mut nonce).unwrap();
+    SystemRandom::new()
+        .fill(&mut nonce)
+        .map_err(|_| "Could not generate random nonce.")
+        .unwrap();
 
     let nonce_ref = Nonce::assume_unique_for_key(nonce);
 
@@ -140,9 +141,44 @@ fn get_encrypted_password(key: &[u8; 32], password: String) -> String {
     password_bytes.extend_from_slice(&[0; 16]);
     encrypted_key
         .seal_in_place_append_tag(nonce_ref, Aad::empty(), &mut password_bytes)
+        .map_err(|_| "Error encrypting password.")
         .unwrap();
 
-    general_purpose::STANDARD.encode([nonce.as_ref(), password_bytes.as_slice()].concat())
+    let mut all_data = Vec::new();
+    all_data.extend_from_slice(key);
+    all_data.extend_from_slice(&nonce);
+    all_data.extend_from_slice(&password_bytes);
+
+    general_purpose::STANDARD.encode(all_data)
+}
+
+fn get_decrypted_password(encrypted_password: Vec<u8>) -> Result<String, &'static str> {
+    if encrypted_password.len() < 44 {
+        return Err("");
+    }
+
+    let (key, nencrypted) = encrypted_password.split_at(32);
+    let (nonce, encrypted_password) = nencrypted.split_at(12);
+
+    let unbound_key = UnboundKey::new(&AES_256_GCM, key).map_err(|_| "Error creating key.")?;
+    let encrypted_key = LessSafeKey::new(unbound_key);
+    let nonce = Nonce::try_assume_unique_for_key(nonce).map_err(|_| "Error creating nonce.")?;
+
+    let mut bytes_password = encrypted_password.to_owned();
+    let decrypted_password = encrypted_key
+        .open_in_place(nonce, Aad::empty(), &mut bytes_password)
+        .map_err(|_| "Error trying to decrypt password")?;
+
+    let password;
+    if let Some(pos) = decrypted_password.iter().position(|&x| x == 0) {
+        password = String::from_utf8(decrypted_password[..pos].to_vec())
+            .map_err(|_| "Error converting password to String.")?;
+    } else {
+        password = String::from_utf8(decrypted_password.to_vec())
+            .map_err(|_| "Error converting password to String.")?;
+    }
+
+    Ok(password)
 }
 
 #[tauri::command]
@@ -150,6 +186,19 @@ fn encrypt_password(password: String) -> String {
     let master_password = get_password().expect("Error: Master Password was not defined.");
     let key = derive_password(&master_password);
     get_encrypted_password(&key, password)
+}
+
+#[tauri::command]
+fn decrypt_password(encrypted_password: String) -> String {
+    let from_base64 = match general_purpose::STANDARD.decode(&encrypted_password) {
+        Ok(decoded) => decoded,
+        Err(_) => return encrypted_password,
+    };
+
+    match get_decrypted_password(from_base64) {
+        Ok(decrypted_password) => decrypted_password,
+        Err(_) => encrypted_password,
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -160,7 +209,8 @@ pub fn main() {
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             receive_user_password,
-            encrypt_password
+            encrypt_password,
+            decrypt_password
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -27,24 +27,28 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
     }, [showAccountInfo]);
 
     useEffect(() => {
-        const loadAccount = async () => {
-            setAccount(getAccount(accounts, selectedId));
-        }
-
-        if (!selectedId || selectedId === "") return;
-
-        loadAccount();
+        if (!selectedId) return;
+        setAccount(getAccount(accounts, selectedId));
     }, [selectedId]);
 
+    // useEffect(() => {
+    //     setPassword(account.password);
+    //     setAccountLoaded(true);
+    // }, [decryptedPassword]);
+
     useEffect(() => {
+        const decrypt = async () => {
+            await decryptPassword();
+        }
+        
         if (!account) return;
+
+        decrypt();
 
         setFavorite([account.id, account.favorite]);
         setService(account.service);
         setUsername(account.username);
-        setPassword(account.password);
         setNotes(account.notes);
-        setAccountLoaded(true);
 
         const lastModified = document.getElementById("last-modified");
         const created = document.getElementById("created-date");
@@ -107,6 +111,23 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
         if (!favorite[0]) return;
         updateFavorite();
     }, [favorite]);
+
+    const decryptPassword = async () => {
+        if (!account) return;
+
+        console.log("Decrypting: ", account.password);
+        let decrypted;
+        try {
+            decrypted = await invoke("decrypt_password", { encryptedPassword: account.password });
+        } catch {}
+
+        if (!decrypted) {
+            return;
+        }
+
+        setPassword(decrypted);
+        setAccountLoaded(true);
+    }
 
     const deleteAccount = async (accountId) => {
         let accountIndex = -1;
@@ -183,15 +204,7 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
             password.type = "password";
             showPassBtn.removeAttribute("disabled");
             visibilityButton.className = "no-visibility";
-        }, 2000));
-    }
-
-    const openEditAccount = () => {
-        const openEditAccountButton = document.getElementById("edit-account");
-        openEditAccountButton.setAttribute("disabled", "true");
-
-        setEditAccount(true);
-        setTimeout(() => openEditAccountButton.removeAttribute("disabled"), 670);
+        }, 1000));
     }
 
     return (
@@ -206,7 +219,7 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
                     <button id="favorite" className="not-favorite"
                      onClick={ () => setFavorite([account.id, !account.favorite]) }></button>
                     <button id="edit-account"
-                     onClick={ () => { openEditAccount() } }></button>
+                     onClick={ () => { setEditAccount(true) } }></button>
                     <button id="delete"
                      onClick={ () => deleteAccount(account.id) }></button>
                 </div>

@@ -8,12 +8,14 @@ import { findCorrectLeft } from "../Config/config";
 
 import { Notification } from "../notification/notification";
 
+import { Automation } from "../../../tests/automate";
+
 // como vai funcionar
 // quando clicar em nova conta:
 // o componente vai carregar um objeto de conta, gerar um id e adicionar no objeto
 // os campos são preenchidos com placeholders traduzidos
 
-export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, setEditAccount, addAccount, setAddAccount, selectedId, setShowAccountInfo }) {
+export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, setEditAccount, addAccount, setAddAccount, selectedId, setShowAccountInfo, automation }) {
     const [loaded, setLoaded] = useState(false);
     const [account, setAccount] = useState({});
     const [randomPassword, setRandomPassword] = useState("");
@@ -22,6 +24,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     const [accountIndex, setAccountIndex] = useState(-1);
     const [updatePassWarn, setUpdatePassWarn] = useState(false);
     const [isButtonVisible, setIsButtonVisible] = useState(true);
+    const [valuesSet, setValuesSet] = useState(false);
 
     const checkKeys = (acc) => {
         acc.password_history = acc.password_history ?? [acc.password];
@@ -71,6 +74,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         if (!service.value) {
             service.classList.remove("safe-value");
             service.classList.add("not-safe-value");
+            console.log("There must be at least one character as Service.");
         } else {
             service.classList.remove("not-safe-value");
             service.classList.add("safe-value");
@@ -78,11 +82,16 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         }
 
         let safeUsername = false;
-        // check if the account already exists
+        // the username verification is not simplified for debugging reasons
         const exists = checkAccount(service.value, username.value);
-        if (!username.value || exists) {
+        if (!username.value) {
             username.classList.remove("safe-value");
             username.classList.add("not-safe-value");
+            console.log("There must be at least one character as Username.");
+        } else if (exists) {
+            username.classList.remove("safe-value");
+            username.classList.add("not-safe-value");
+            console.log("The Username already exists for this Service.")
         } else {
             username.classList.remove("not-safe-value");
             username.classList.add("safe-value");
@@ -132,9 +141,39 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             displayLength.className = "hide";
     }
 
-    const applyAccount = async () => {
-        let acc = account;
+    const checkId = (accountId) => {
+        for (const service in accounts) {
+            for (const account of accounts[service]) {
+                if (account.id === accountId) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    const applyAccount = async (newAccount = null) => {
+        setSaveButton("Salvando");
+
+        const apply = document.getElementById("save-account");
+        apply.setAttribute("disabled", "true");
+
+        let acc;
+        if (newAccount) {
+            acc = newAccount;
+        } else {
+            acc = account;
+        }
+    
         let allAccounts = accounts;
+
+        let accountExists = checkId(acc.id);
+        if (accountExists) {
+            apply.removeAttribute("disabled");
+            console.log(`Account ID (${acc.id}) already registered.`);
+            return false;
+        }
 
         if (addAccount) {
             acc.created = getDateTime();
@@ -167,6 +206,32 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         setEditAccount(false);
     }
 
+    const automate = async () => {
+        console.log("Automating AddAccount process...");
+
+        let lastId = null;
+        let currentId = "";
+
+        let _account;
+        while (currentId !== lastId && currentId !== null) {
+            console.log("Inside loop...")
+
+            _account = await Automation(currentId);
+            if (_account === undefined) break;
+
+            console.log("Setting `account` to ", _account);
+
+            if (currentId) {
+                lastId = currentId;
+            }
+            console.log("Updating ID to ", _account.id);
+            currentId = _account.id;
+
+            console.log("Adding account with ID: ", currentId);
+            await applyAccount(_account);
+        }
+    }
+
     useEffect(() => {
         const handleScroll = () => {
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
@@ -184,6 +249,11 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
         window.addEventListener("scroll", handleScroll);
         window.addEventListener("keydown", addAccountShortcut);
+
+        if (automation) {
+            automate();
+        };
+
         return () => {
             window.removeEventListener("scroll", handleScroll)
             window.removeEventListener("keydown", addAccountShortcut);
@@ -204,11 +274,9 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             findCorrectLeft(document.getElementById("add-edit-account"));
         }
 
-        let disableWindow;
         const off = () => {
             const fullWindow = document.getElementById("add-edit-account-full-window");
             fullWindow.className = "zoom-out";
-            // disableWindow = setTimeout(() => fullWindow.style = "display: none;", 500);
             setAddAccount(false);
             setEditAccount(false);
         }
@@ -219,7 +287,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             for (const service in accounts) {
                 for (let i = 0; i < accounts[service].length; i++) {
                     const acc = accounts[service][i]
-                    if (acc.id == generatedId) {
+                    if (acc.id === generatedId) {
                         setAccountIndex(i);
                         return i;
                     }
@@ -230,14 +298,13 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
         if (editAccount) {
             let tmpAccount = getAccount(accounts, selectedId);
-            if (!tmpAccount) {
+            if (!tmpAccount || tmpAccount === undefined) {
                 return;
             }
 
             generatedId = selectedId;
-            const index = getAccountIndex();
-
             tmpAccount = checkKeys(tmpAccount);
+            getAccountIndex();
 
             setAccount(tmpAccount);
             setLoaded(true);
@@ -270,16 +337,22 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             setLoaded(false);
             return;
         }
-
-        return () => clearTimeout(disableWindow);
     }, [editAccount, addAccount]);
+
+    useEffect(() => {
+        if (!valuesSet) return;
+
+        const service = document.getElementById("edit-service");
+        const username = document.getElementById("edit-username");
+
+        updateWarnStyle(service, username);
+    }, [valuesSet])
 
     const [title, setTitle] = useState("");
     const [usernamePlaceHld, setUsernamePlaceHld] = useState("");
     const [notesPlaceHld, setNotesPlaceHld] = useState("");
     const [saveButton, setSaveButton] = useState("");
     const [cancelButton, setCancelButton] = useState("");
-    const [generatePasswordText, setGeneratePasswordText] = useState("");
     const [serviceTitle, setServiceTitle] = useState("");
     const [usernameTitle, setUsernameTitle] = useState("");
     const [passwordTitle, setPasswordTitle] = useState("");
@@ -287,17 +360,27 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     const [notificationPreviewTitle, setNotificationPreviewTitle] = useState(""); 
     const [passwordLengthDisplay, setPasswordLengthDisplay] = useState("");
 
-    const updateEditorValues = () => {
+    const updateEditorValues = async () => {
+        if (!account || account === undefined) return;
+
+        let decryptedPassword = await invoke("decrypt_password", { encryptedPassword: account.password });
+
         document.getElementById("edit-service").value = account.service;
         document.getElementById("edit-username").value = account.username;
-        document.getElementById("edit-password").value = account.password;
+        document.getElementById("edit-password").value = decryptedPassword;
         document.getElementById("edit-notes").value = account.notes;
+
+        setValuesSet(true);
     }
 
     useEffect(() => {
+        const updateValues = async () => {
+            await updateEditorValues();
+        }
+
         if (!loaded) return;
 
-        updateEditorValues();
+        updateValues();
         setRandomPassword(generatePassword(12));
 
         const loadLangText = async () => {
@@ -309,7 +392,6 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             setNotesPlaceHld(getMsg(langFile, "AddEditAccount", "edit_notes.placeholder"));
             setSaveButton(getMsg(langFile, "AddEditAccount", "save_button.text"));
             setCancelButton(getMsg(langFile, "AddEditAccount", "cancel_button.text"));
-            setGeneratePasswordText(getMsg(langFile, "AddEditAccount", "generate_password.text"));
             setServiceTitle(getMsg(langFile, "AccountInfo", "service.title"));
             setUsernameTitle(getMsg(langFile, "AccountInfo", "username.title"));
             setPasswordTitle(getMsg(langFile, "AccountInfo", "password.title"));
@@ -320,11 +402,6 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
         if (!langFile) return;
         loadLangText();
-
-        const service = document.getElementById("edit-service");
-        const username = document.getElementById("edit-username");
-
-        updateWarnStyle(service, username);
     }, [langFile, loaded]);
 
     const openAddAccount = async () => {
