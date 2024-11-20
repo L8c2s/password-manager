@@ -32,13 +32,20 @@ function App() {
             setLangFile(loadLangFile(langSaved));
         }
 
+        loadLang();
+    }, []);
+
+    useEffect(() => {
+        if (!loginSuccess) {
+            return;
+        }
+
         const loadAccounts = async () => {
             setAccounts(await getAccounts());
         }
 
-        loadLang();
         loadAccounts();
-    }, []);
+    }, [loginSuccess]);
 
     useEffect(() => {
         if (settingsPopup || addAccount || editAccount) {

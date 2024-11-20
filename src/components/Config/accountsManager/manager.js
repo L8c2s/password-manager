@@ -1,9 +1,10 @@
 import { exists, mkdir, readTextFile, writeTextFile, BaseDirectory } from "@tauri-apps/plugin-fs";
 import { appDataDir } from "@tauri-apps/api/path";
+import { invoke } from "@tauri-apps/api/core";
 
 
 const MAINPATH = await appDataDir();
-const ACCOUNTSPATH = "accounts.json";
+const ACCOUNTSPATH = "accounts";
 
 
 export function getDateTime() {
@@ -55,6 +56,7 @@ export async function getAccounts() {
         console.log("Could not load accounts: ", error);
         accounts = false;
     }
+    accounts = await invoke("decrypt_password", { encryptedPassword: accounts });
 
     if (!accounts) {
         accounts = "{}";
@@ -71,7 +73,8 @@ export async function saveAccounts(accounts) {
         await mkdir(MAINPATH);
     }
 
-    await writeTextFile(ACCOUNTSPATH, JSON.stringify(accounts), { baseDir: BaseDirectory.AppData });
+    accounts = await invoke("encrypt_password", { password: JSON.stringify(accounts) });
+    await writeTextFile(ACCOUNTSPATH, accounts, { baseDir: BaseDirectory.AppData });
 }
 
 export function getAccount(accounts, accountId) {

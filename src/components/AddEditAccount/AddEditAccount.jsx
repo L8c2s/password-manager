@@ -169,7 +169,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         let allAccounts = accounts;
 
         let accountExists = checkId(acc.id);
-        if (accountExists) {
+        if (accountExists && !editAccount && addAccount) {
             apply.removeAttribute("disabled");
             console.log(`Account ID (${acc.id}) already registered.`);
             return false;
@@ -381,7 +381,9 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         if (!loaded) return;
 
         updateValues();
-        setRandomPassword(generatePassword(12));
+
+        let passwordLength = document.getElementById("password-length");
+        setRandomPassword(generatePassword(passwordLength.value));
 
         const loadLangText = async () => {
             if (addAccount)
