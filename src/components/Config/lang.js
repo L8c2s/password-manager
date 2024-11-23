@@ -1,5 +1,3 @@
-import { readTextFile } from "@tauri-apps/plugin-fs";
-
 const PTBRLANG = {
     "Header": {
         "search.placeholder": "Use \"/\" para pesquisar"
@@ -18,7 +16,11 @@ const PTBRLANG = {
         "create-text-file.title": "Criar arquivo de texto",
         "create-text-file.created": "Arquivo criado em",
         "create-text-file.explanation": "Crie um arquivo de texto simples com suas contas para fácil leitura e compartilhamento.",
-        "create-text-file.select_folder": "Selecionar"
+        "create-text-file.select_folder": "Selecionar",
+        "open-backup-folder.title": "Abrir a pasta de backups",
+        "open-backup-folder.explanation": "Abre a pasta de backups no explorador de arquivos do Windows. Você pode copiar qualquer arquivo de backup para a pasta anterior, renomear o arquivo para 'accounts' e então recarregar o aplicativo.",
+        "open-backup-folder.button_text": "Abrir"
+
     },
     "AccountsList": {
         "sort-message.username": "Nome de Usuário",
@@ -47,7 +49,8 @@ const PTBRLANG = {
         "save_button.text": "Salvar",
         "cancel_button.text": "Cancelar",
         "notification_preview.title": "Prévia da Notificação",
-        "password_length.display": "Comprimento:"
+        "password_length.display": "Comprimento:",
+        "save_button.saving": "Salvando"
     },
     "notification": {
         "level_security.no_password": "Sua conta não possui uma senha.",
@@ -86,7 +89,10 @@ const ENUSLANG = {
         "create-text-file.title": "Create text file",
         "create-text-file.created": "File created in",
         "create-text-file.explanation": "Create a simple to read and share text file with all your accounts.",
-        "create-text-file.select_folder": "Select folder"
+        "create-text-file.select_folder": "Select folder",
+        "open-backup-folder.title": "Open the backup folder",
+        "open-backup-folder.explanation": "Open the backup folder on Windows Explorer. You can copy any backup file to the previous folder and rename it to 'accounts', then reload the app.",
+        "open-backup-folder.button_text": "Open"
     },
     "AccountsList": {
         "sort-message.username": "Username",
@@ -115,13 +121,25 @@ const ENUSLANG = {
         "save_button.text": "Save",
         "cancel_button.text": "Cancel",
         "notification_preview.title": "Notification Preview",
-        "password_length.display": "Password length:"
+        "password_length.display": "Password length:",
+        "save_button.saving": "Saving"
     },
     "notification": {
         "level_security.no_password": "Your account doesn't have a password.",
         "level_security.not_safe_enough": "The password isn't safe enough.",
         "level_security.repeated_password": "More than one account has the same password.",
         "level_security.safe": "Your account is safe."
+    },
+    "Login": {
+        ".title": "Welcome",
+        "login_password.placeholder": "Your password",
+        "login.submit": "Continue",
+        "login.tip00": "Enter a password that is easy to remember, but  secure enough to protect all of your accounts.",
+        "login.tip01": "This is the only password that you will ever need to remember.",
+        "login.tip02": "Enter your password to continue.",
+        "login.verifying": "Verifying",
+        "login.success": "Success",
+        "login.wrong_password": "Incorrect"
     }
 }
 

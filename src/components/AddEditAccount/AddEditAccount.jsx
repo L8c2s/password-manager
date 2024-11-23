@@ -154,7 +154,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     }
 
     const applyAccount = async (newAccount = null) => {
-        setSaveButton("Salvando");
+        setSaveButton(savingText);
 
         const apply = document.getElementById("save-account");
         apply.setAttribute("disabled", "true");
@@ -359,6 +359,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     const [notesTitle, setNotesTitle] = useState("");
     const [notificationPreviewTitle, setNotificationPreviewTitle] = useState(""); 
     const [passwordLengthDisplay, setPasswordLengthDisplay] = useState("");
+    const [savingText, setSavingText] = useState("");
 
     const updateEditorValues = async () => {
         if (!account || account === undefined) return;
@@ -400,6 +401,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             setNotesTitle(getMsg(langFile, "AccountInfo", "notes.title"));
             setNotificationPreviewTitle(getMsg(langFile, "AddEditAccount", "notification_preview.title"));
             setPasswordLengthDisplay(getMsg(langFile, "AddEditAccount", "password_length.display"));
+            setSavingText(getMsg(langFile, "AddEditAccount", "save_button.saving"));
         }
 
         if (!langFile) return;

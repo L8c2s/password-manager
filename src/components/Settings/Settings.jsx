@@ -140,6 +140,9 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
     const [fileCreatedText, setFileCreatedText] = useState("");
     const [textFileExplanation, setTextFileExplanation] = useState("");
     const [selectFolderText, setSelectFolderText] = useState("");
+    const [openBackupFolderTitle, setOpenBackupFolderTitle] = useState("");
+    const [openBackupFolderExpl, setOpenBackupFolderExpl] = useState("");
+    const [openButtonText, setOpenButtonText] = useState("");
 
     useEffect(() => {
         setTitle(getMsg(langFile, "Settings", ".title"));
@@ -153,6 +156,9 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
         setFileCreatedText(getMsg(langFile, "Settings", "create-text-file.created"));
         setTextFileExplanation(getMsg(langFile, "Settings", "create-text-file.explanation"));
         setSelectFolderText(getMsg(langFile, "Settings", "create-text-file.select_folder"));
+        setOpenBackupFolderTitle(getMsg(langFile, "Settings", "open-backup-folder.title"));
+        setOpenBackupFolderExpl(getMsg(langFile, "Settings", "open-backup-folder.explanation"));
+        setOpenButtonText(getMsg(langFile, "Settings", "open-backup-folder.button_text"));
 
         setUpdateLangSet(langFile);
     }, [langFile]);
@@ -243,20 +249,18 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
 
                     <div id="open-backup-folder">
                         <h3 id="open-backup-folder-title">
-                            { /* add the variable please */ } Abrir pasta de backup
+                            {openBackupFolderTitle}
                         </h3>
 
                         <p id="open-backup-folder-explanation">
-                            { /* add the variable please */ }
-                            Abre o gerenciador de arquivos do Windows na pasta de backups
+                            {openBackupFolderExpl}
                         </p>
 
                         <button id="open-backup-folder-button" className="fit-content"
                          onClick={
                             async () => { await openDirectory(`${await appDataDir()}\\backup`) }
                         }>
-                            { /* add the variable please */ }
-                            Abrir
+                            {openButtonText}
                         </button>
                     </div>
 
