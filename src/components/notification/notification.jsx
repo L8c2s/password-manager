@@ -43,12 +43,13 @@ export function Notification({ langFile, accounts, account, notificationId, setU
     const [notSafeEnough, setNotSafeEnough] = useState("");
     const [isNotUnique, setIsNotUnique] = useState("");
     const [safeAccount, setSafeAccount] = useState("");
+    const [verifying, setVerifying] = useState("");
 
     const testPassword = async () => {
         
         if (!account || !account.service || !account.username || account === undefined) {
             setSecurityLevel(-1);
-            setSecurityMessage("-");
+            setSecurityMessage("");
             return;
         }
 
@@ -84,6 +85,7 @@ export function Notification({ langFile, accounts, account, notificationId, setU
             setNotSafeEnough(getMsg(langFile, "notification", "level_security.not_safe_enough"));
             setIsNotUnique(getMsg(langFile, "notification", "level_security.repeated_password"));
             setSafeAccount(getMsg(langFile, "notification", "level_security.safe"));
+            setVerifying(getMsg(langFile, "Login", "login.verifying"));
         }
 
         loadMessages();

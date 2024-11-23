@@ -118,6 +118,10 @@
     border-bottom: 3px solid #ff8d23;
 }
 
+.no-value {
+    border-bottom: 3px solid #747474;
+}
+
 .appear {
     animation: fade-in .5s forwards;
 }

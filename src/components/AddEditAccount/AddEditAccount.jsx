@@ -69,7 +69,11 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     }
 
     const updateWarnStyle = (service, username) => {
+        if (!loaded) return;
+
         let safeService = false;
+
+        console.log("checking safety");
 
         if (!service.value) {
             service.classList.remove("safe-value");
@@ -110,14 +114,17 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         const currentPassWarn = document.getElementById("edit-account-notification").classList;
 
         if (currentPassWarn.contains("safe")) {
-            password.classList.remove("not-safe-value", "not-safe-password");
+            password.classList.remove("not-safe-value", "not-safe-password", "no-value");
             password.classList.add("safe-value");
         } else if (currentPassWarn.contains("alert")) {
-            password.classList.remove("not-safe-value", "safe-value");
+            password.classList.remove("not-safe-value", "safe-value", "no-value");
             password.classList.add("not-safe-password");
         } else if (currentPassWarn.contains("warning")) {
-            password.classList.remove("not-safe-password", "safe-value");
+            password.classList.remove("not-safe-password", "safe-value", "no-value");
             password.classList.add("not-safe-value");
+        } else if (currentPassWarn.contains("no-notification")) {
+            password.classList.remove("not-safe-password", "safe-value", "not-safe-value");
+            password.classList.add("no-value");
         }
 
         setUpdatePassWarn(false);
@@ -176,9 +183,9 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         }
 
         if (addAccount) {
-            acc.created = getDateTime();
+            acc.created = await getDateTime();
         }
-        acc.last_modified = getDateTime();
+        acc.last_modified = await getDateTime();
 
         acc.password = await invoke("encrypt_password", { password: acc.password });
 
@@ -281,6 +288,10 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             setEditAccount(false);
         }
 
+        const updateValues = async () => {
+            await updateEditorValues();
+        }
+
         let generatedId;
         // generate an ID, check if the ID is unique, if True, save index as -1, else, save index as the index of the account in the service list
         const getAccountIndex = () => {
@@ -332,21 +343,14 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             setLoaded(true);
             on();
         } else {
+            console.log("disabling add/edit account");
+
             off();
-            updateEditorValues();
+            updateValues();
             setLoaded(false);
             return;
         }
     }, [editAccount, addAccount]);
-
-    useEffect(() => {
-        if (!valuesSet) return;
-
-        const service = document.getElementById("edit-service");
-        const username = document.getElementById("edit-username");
-
-        updateWarnStyle(service, username);
-    }, [valuesSet])
 
     const [title, setTitle] = useState("");
     const [usernamePlaceHld, setUsernamePlaceHld] = useState("");
@@ -363,15 +367,18 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
     const updateEditorValues = async () => {
         if (!account || account === undefined) return;
-
+        
         let decryptedPassword = await invoke("decrypt_password", { encryptedPassword: account.password });
 
-        document.getElementById("edit-service").value = account.service;
-        document.getElementById("edit-username").value = account.username;
+        const service = document.getElementById("edit-service");
+        const username = document.getElementById("edit-username");
         document.getElementById("edit-password").value = decryptedPassword;
         document.getElementById("edit-notes").value = account.notes;
 
-        setValuesSet(true);
+        service.value = account.service;
+        username.value = account.username;
+
+        updateWarnStyle(service, username);
     }
 
     useEffect(() => {

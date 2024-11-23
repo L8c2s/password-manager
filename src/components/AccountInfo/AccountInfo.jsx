@@ -115,7 +115,6 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
     const decryptPassword = async () => {
         if (!account) return;
 
-        console.log("Decrypting: ", account.password);
         let decrypted;
         try {
             decrypted = await invoke("decrypt_password", { encryptedPassword: account.password });

@@ -26,6 +26,8 @@ use ring::{
 
 use base64::{engine::general_purpose, Engine as _};
 
+use chrono::prelude::*;
+
 #[derive(Serialize, Deserialize)]
 struct AppConfig {
     lang: String,
@@ -210,6 +212,12 @@ fn open_folder(directory: String) {
         .expect("Failed to open the backup folder.");
 }
 
+#[tauri::command]
+fn get_date_time() -> String {
+    let local: DateTime<Local> = Local::now();
+    local.format("%Y-%m-%d %H:%M:%S").to_string()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn main() {
     tauri::Builder::default()
@@ -220,7 +228,8 @@ pub fn main() {
             receive_user_password,
             encrypt_password,
             decrypt_password,
-            open_folder
+            open_folder,
+            get_date_time
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

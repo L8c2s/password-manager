@@ -7,22 +7,26 @@ const MAINPATH = await appDataDir();
 const ACCOUNTSPATH = "accounts";
 
 
-export function getDateTime() {
-    const date = new Date();
-    const localHour = date.getUTCHours();
-    let utc3 = localHour - 3;
+export async function getDateTime() {
+    const datetime = await invoke("get_date_time");
+    const [date, time] = datetime.split(" ");
 
-    if (utc3 < 0) {
-        utc3 = 24 + utc3;
-    }
+    let [year, month, day] = date.split("-");
+    let [hour, minute, second] = time.split(":");
 
-    let year = date.getUTCFullYear();
-    let day = ("0" + date.getUTCDate()).slice(-2);
-    let month = ("0" + (date.getUTCMonth() + 1)).slice(-2);
-    
-    let hour = ("0" + utc3).slice(-2);
-    let minute = ("0" + date.getUTCMinutes()).slice(-2);
-    let second = ("0" + date.getUTCSeconds()).slice(-2);
+    // if (month < 10) {
+    //     month = `0${month}`;
+    // } if (day < 10) {
+    //     month = `0${day}`;
+    // }
+
+    // if (hour < 10) {
+    //     hour = `0${hour}`;
+    // } if (minute < 10) {
+    //     minute = `0${minute}`;
+    // } if (second < 10) {
+    //     second = `0${second}`;
+    // }
 
     return `${year}-${month}-${day}T${hour}:${minute}:${second}.000Z`;
 }
@@ -78,14 +82,14 @@ export async function saveAccounts(accounts) {
     await createBackup(accounts);
 }
 
-function getBackupFileName() {
-    const currentTime = getDateTime().split(".")[0];
-    return `${currentTime.replace(/:/g, "-")}`;
+async function getBackupFileName() {
+    const currentTime = await getDateTime();
+    return `${currentTime.split(".")[0].replace(/:/g, "-")}`;
 }
 
 async function createBackup(accounts) {
     const backupPath = "backup";
-    const filePath = `${backupPath}/${getBackupFileName()}`;
+    const filePath = `${backupPath}/${await getBackupFileName()}`;
 
     if (!await exists(backupPath, { baseDir: BaseDirectory.AppData })) {
         await mkdir(backupPath, { baseDir: BaseDirectory.AppData });
