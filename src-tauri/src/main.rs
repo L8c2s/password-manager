@@ -13,6 +13,7 @@ use lazy_static::lazy_static;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
+use std::process::Command;
 use std::sync::{Arc, Mutex};
 use std::{fs, num::NonZeroU32};
 
@@ -201,6 +202,15 @@ fn decrypt_password(encrypted_password: String) -> String {
     }
 }
 
+#[tauri::command]
+fn open_backup_folder(backup_dir: String) {
+    println!("{}", backup_dir);
+    Command::new("explorer")
+        .arg(backup_dir)
+        .status()
+        .expect("Failed to open the backup folder.");
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn main() {
     tauri::Builder::default()
@@ -210,7 +220,8 @@ pub fn main() {
         .invoke_handler(tauri::generate_handler![
             receive_user_password,
             encrypt_password,
-            decrypt_password
+            decrypt_password,
+            open_backup_folder
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

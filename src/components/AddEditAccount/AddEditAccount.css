@@ -48,11 +48,6 @@
     margin-left: 20px;
 }
 
-#save-account,
-#cancel-operation {
-    width: fit-content;
-}
-
 #align-items {
     display: flex;
     vertical-align: center;

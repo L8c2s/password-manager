@@ -52,18 +52,9 @@
     margin-bottom: 40px;
 }
 
-#update-language {
-    width: fit-content;
-}
-
 #change-accounts-dir {
     /* background: #2066ec url("../../icons/switch-dir.svg") no-repeat center; */
     height: 39px;
-    width: fit-content;
-}
-
-#create-text-file {
-    width: fit-content;
 }
 
 #creation-area {

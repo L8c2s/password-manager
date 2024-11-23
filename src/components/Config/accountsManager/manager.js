@@ -75,6 +75,23 @@ export async function saveAccounts(accounts) {
 
     accounts = await invoke("encrypt_password", { password: JSON.stringify(accounts) });
     await writeTextFile(ACCOUNTSPATH, accounts, { baseDir: BaseDirectory.AppData });
+    await createBackup(accounts);
+}
+
+function getBackupFileName() {
+    const currentTime = getDateTime().split(".")[0];
+    return `${currentTime.replace(/:/g, "-")}`;
+}
+
+async function createBackup(accounts) {
+    const backupPath = "backup";
+    const filePath = `${backupPath}/${getBackupFileName()}`;
+
+    if (!await exists(backupPath, { baseDir: BaseDirectory.AppData })) {
+        await mkdir(backupPath, { baseDir: BaseDirectory.AppData });
+    }
+
+    await writeTextFile(filePath, accounts, { baseDir: BaseDirectory.AppData });
 }
 
 export function getAccount(accounts, accountId) {

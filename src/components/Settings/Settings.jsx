@@ -1,6 +1,8 @@
 import { React, useEffect, useRef, useState } from "react";
-import { open } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
+import { appDataDir } from "@tauri-apps/api/path";
+import { open } from "@tauri-apps/plugin-dialog";
+import { invoke } from "@tauri-apps/api/core";
 
 import "./Settings.css";
 
@@ -212,13 +214,14 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
 
                         <button
                             id="update-language"
+                            className="fit-content"
                             onClick={() => {
                                 changeLanguage(updateLangSet)
                             }}
                         >{updateLangText}</button>
                     </div>
 
-                    <div id="create-text-file-div">
+                    <div id="create-text-file-div" className="settings-content">
                         <h3 id="create-text-file-title">
                             {createTextFileTitle}
                         </h3>
@@ -226,10 +229,29 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
                             {textFileExplanation}
                         </p>
                         <div id="creation-area">
-                            <button id="create-text-file"
+                            <button id="create-text-file" className="fit-content"
                              onClick={ () => { createTextFile() } }>{selectFolderText}</button>
                             <p id="created-confirmation" ref={createdConfirmation} style={{ display: "none" }}>{fileCreatedText} <a href="#" onClick={ () => pathToClipboard() }>{textFilePath}</a></p>
                         </div>
+                    </div>
+
+                    <div id="open-backup-folder">
+                        <h3 id="open-backup-folder-title">
+                            { /* add the variable please */ } Abrir pasta de backup
+                        </h3>
+
+                        <p id="open-backup-folder-explanation">
+                            { /* add the variable please */ }
+                            Abre o gerenciador de arquivos do Windows na pasta de backups
+                        </p>
+
+                        <button id="open-backup-folder-button" className="fit-content"
+                         onClick={
+                            async () => { await invoke("open_backup_folder", { backupDir: `${await appDataDir()}\\backup` }) }
+                        }>
+                            { /* add the variable please */ }
+                            Abrir
+                        </button>
                     </div>
 
                 </div>

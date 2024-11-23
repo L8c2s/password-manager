@@ -463,9 +463,9 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
                         </div>
 
                         <div id="form-buttons">
-                            <button id="save-account"
+                            <button id="save-account" className="fit-content"
                             onClick={ () => { applyAccount(); setShowAccountInfo(false) }}>{saveButton}</button>
-                            <button id="cancel-operation"
+                            <button id="cancel-operation" className="fit-content"
                             onClick={ () => { setAddAccount(false); setEditAccount(false) } }>{cancelButton}</button>
                         </div>
                     </div>

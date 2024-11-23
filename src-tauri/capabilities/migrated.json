@@ -22,7 +22,8 @@
       "allow": [
         "$APPDATA/*",
         "$APPDATA",
-        "$RESOURCE/lang/*"
+        "$RESOURCE/lang/*",
+        "$APPDATA/backup/*"
       ]
     },
     "shell:allow-open",

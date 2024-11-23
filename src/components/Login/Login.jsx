@@ -101,7 +101,7 @@ export function Login({ langFile, setLoginSuccess }) {
             <input type="password" autoComplete="off" className="idle" ref={password} id="login-password" placeholder={loginPasswordPlhd} autoFocus onChange={ () => {
                 if (!password.current.value) password.current.className = "idle";
             } } />
-            <button id="submit-password" onClick={ () => { submitPassword() } }>{submitText}</button>
+            <button id="submit-password" className="fit-content" onClick={ () => { submitPassword() } }>{submitText}</button>
 
             <p id="secure-password-tips-00" className="tips">{secureTip00}</p>
             <p id="secure-password-tips-01" className="tips">{secureTip01}</p>
