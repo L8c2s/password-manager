@@ -14,6 +14,7 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
     const [updateLangSet, setUpdateLangSet] = useState("");
     const [accountsDirValue, setAccountsDirValue] = useState("");
     const [textFilePath, setTextFilePath] = useState("");
+    const [textFileDir, setTextFileDir] = useState("");
     const createdConfirmation = useRef(null);
 
     useEffect(() => {
@@ -103,6 +104,7 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
 
         if (!accountsDirPath) return;
 
+        setTextFileDir(accountsDirPath);
         const filePath = accountsDirPath + "\\accounts.txt";
         setTextFilePath(filePath);
 
@@ -114,6 +116,10 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
         } catch (error) {
             console.log("Could not create the file: ", error)
         }
+    }
+
+    const openDirectory = async (directory) => {
+        await invoke("open_folder", { directory: directory });
     }
 
     const pathToClipboard = () => {
@@ -231,7 +237,7 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
                         <div id="creation-area">
                             <button id="create-text-file" className="fit-content"
                              onClick={ () => { createTextFile() } }>{selectFolderText}</button>
-                            <p id="created-confirmation" ref={createdConfirmation} style={{ display: "none" }}>{fileCreatedText} <a href="#" onClick={ () => pathToClipboard() }>{textFilePath}</a></p>
+                            <p id="created-confirmation" ref={createdConfirmation} style={{ display: "none" }}>{fileCreatedText} <a href="#" onClick={ async () => await openDirectory(textFileDir) }>{textFilePath}</a></p>
                         </div>
                     </div>
 
@@ -247,7 +253,7 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
 
                         <button id="open-backup-folder-button" className="fit-content"
                          onClick={
-                            async () => { await invoke("open_backup_folder", { backupDir: `${await appDataDir()}\\backup` }) }
+                            async () => { await openDirectory(`${await appDataDir()}\\backup`) }
                         }>
                             { /* add the variable please */ }
                             Abrir

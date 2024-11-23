@@ -203,10 +203,9 @@ fn decrypt_password(encrypted_password: String) -> String {
 }
 
 #[tauri::command]
-fn open_backup_folder(backup_dir: String) {
-    println!("{}", backup_dir);
+fn open_folder(directory: String) {
     Command::new("explorer")
-        .arg(backup_dir)
+        .arg(directory)
         .status()
         .expect("Failed to open the backup folder.");
 }
@@ -221,7 +220,7 @@ pub fn main() {
             receive_user_password,
             encrypt_password,
             decrypt_password,
-            open_backup_folder
+            open_folder
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
