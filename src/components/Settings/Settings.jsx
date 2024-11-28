@@ -8,9 +8,11 @@ import "./Settings.css";
 
 import { editConfigKey, getConfigValue, findCorrectLeft } from "../Config/config";
 import { getMsg } from "../Config/lang";
+import { readTextFile } from "@tauri-apps/plugin-fs";
+import { saveAccounts } from "../Config/accountsManager/manager";
 
 
-export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }) {
+export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts, setDisplayRestoreTip }) {
     const [updateLangSet, setUpdateLangSet] = useState("");
     const [accountsDirValue, setAccountsDirValue] = useState("");
     const [textFilePath, setTextFilePath] = useState("");
@@ -119,7 +121,16 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
     }
 
     const openDirectory = async (directory) => {
-        await invoke("open_folder", { directory: directory });
+        let backupFilePath = await open({
+            multiple: false,
+            directory: false,
+            defaultPath: directory
+        });
+
+        let fileData = await readTextFile(backupFilePath);
+        console.log(fileData);
+        await saveAccounts(fileData, true);
+        location.reload();
     }
 
     const pathToClipboard = () => {
@@ -168,6 +179,7 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
             let settings_full_window = document.getElementById("settings-full-window");
             settings_full_window.style.display = "block";
             settings_full_window.className = "zoom-in";
+            setDisplayRestoreTip(false);
         }
 
         let disableSettings;
@@ -233,21 +245,7 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
                         >{updateLangText}</button>
                     </div>
 
-                    <div id="create-text-file-div" className="settings-content">
-                        <h3 id="create-text-file-title">
-                            {createTextFileTitle}
-                        </h3>
-                        <p id="create-text-file-explanation">
-                            {textFileExplanation}
-                        </p>
-                        <div id="creation-area">
-                            <button id="create-text-file" className="fit-content"
-                             onClick={ () => { createTextFile() } }>{selectFolderText}</button>
-                            <p id="created-confirmation" ref={createdConfirmation} style={{ display: "none" }}>{fileCreatedText} <a href="#" onClick={ async () => await openDirectory(textFileDir) }>{textFilePath}</a></p>
-                        </div>
-                    </div>
-
-                    <div id="open-backup-folder">
+                    <div id="open-backup-folder" className="settings-content">
                         <h3 id="open-backup-folder-title">
                             {openBackupFolderTitle}
                         </h3>
@@ -262,6 +260,20 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts }
                         }>
                             {openButtonText}
                         </button>
+                    </div>
+
+                    <div id="create-text-file-div" className="settings-content">
+                        <h3 id="create-text-file-title">
+                            {createTextFileTitle}
+                        </h3>
+                        <p id="create-text-file-explanation">
+                            {textFileExplanation}
+                        </p>
+                        <div id="creation-area">
+                            <button id="create-text-file" className="fit-content"
+                             onClick={ () => { createTextFile() } }>{selectFolderText}</button>
+                            <p id="created-confirmation" ref={createdConfirmation} style={{ display: "none" }}>{fileCreatedText} <a href="#" onClick={ async () => await openDirectory(textFileDir) }>{textFilePath}</a></p>
+                        </div>
                     </div>
 
                 </div>

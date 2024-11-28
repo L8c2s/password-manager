@@ -49,6 +49,12 @@
     margin-left: 10px;
 }
 
+#display-restore-tip {
+    /* background: url("../../icons/right-arrow.svg") no-repeat center right;
+    padding-right: 30px; */
+    color: rgba(255, 255, 255, .4)
+}
+
 @media (max-width: 490px) {
     #clear-search-bar {
         display: none;

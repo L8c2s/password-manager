@@ -17,7 +17,6 @@
 #right-nav,
 #left-nav {
     height: 100%;
-    width: 50%;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -25,6 +24,11 @@
 
 #right-nav {
     justify-content: right;
+    width: 80%;
+}
+
+#left-nav {
+    width: 20%;
 }
 
 #display-password-history {
@@ -101,6 +105,11 @@
 #show-notes-info {
     background: url("../../icons/notes.svg") no-repeat 10px center;
     width: 85%;
+}
+
+#display-history-tip {
+    color: rgba(255, 255, 255, .4);
+    margin-right: 5px;
 }
 
 .visibility {

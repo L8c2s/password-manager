@@ -27,6 +27,7 @@ function App() {
     const [editAccount, setEditAccount] = useState(false);
     const [loginSuccess, setLoginSuccess] = useState(false);
     const [displayHistory, setDisplayHistory] = useState(false);
+    const [displayRestoreTip, setDisplayRestoreTip] = useState(false);
 
     useEffect(() => {
         const loadLang = async () => {
@@ -70,6 +71,7 @@ function App() {
                         settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
                         langFile={langFile}
                         setAddAccount={setAddAccount} setEditAccount={setEditAccount}
+                        displayRestoreTip={displayRestoreTip}
                     />
 
                     <UpdateList 
@@ -103,6 +105,7 @@ function App() {
                         settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
                         langFile={langFile} setLangFile={langFile}
                         accounts={accounts}
+                        setDisplayRestoreTip={setDisplayRestoreTip}
                     />
 
                     <AddEditAccount 
@@ -112,6 +115,7 @@ function App() {
                         selectedId={selectedId}
                         setShowAccountInfo={setShowAccountInfo}
                         langFile={langFile}
+                        setDisplayRestoreTip={setDisplayRestoreTip}
                     />
                 </div>
             )}

@@ -56,14 +56,16 @@ export async function getAccounts() {
     return accounts;
 }
 
-export async function saveAccounts(accounts) {
+export async function saveAccounts(accounts, encrypted=false) {
     if (!accounts) return;
 
     if (!await exists(MAINPATH)) {
         await mkdir(MAINPATH);
     }
 
-    accounts = await invoke("encrypt_password", { password: JSON.stringify(accounts) });
+    if (!encrypted)
+        accounts = await invoke("encrypt_password", { password: JSON.stringify(accounts) });
+
     await writeTextFile(ACCOUNTSPATH, accounts, { baseDir: BaseDirectory.AppData });
     await createBackup(accounts);
 }

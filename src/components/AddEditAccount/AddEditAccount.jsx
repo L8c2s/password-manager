@@ -15,7 +15,7 @@ import { Automation } from "../../../tests/automate";
 // o componente vai carregar um objeto de conta, gerar um id e adicionar no objeto
 // os campos são preenchidos com placeholders traduzidos
 
-export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, setEditAccount, addAccount, setAddAccount, selectedId, setShowAccountInfo, automation }) {
+export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, setEditAccount, addAccount, setAddAccount, selectedId, setShowAccountInfo, automation, setDisplayRestoreTip }) {
     const [loaded, setLoaded] = useState(false);
     const [account, setAccount] = useState({});
     const [randomPassword, setRandomPassword] = useState("");
@@ -201,22 +201,20 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             acc.password_history = [];
         }
 
-        let passInHistory = false;
-        for (let i = 0; i < acc.password_history.length; i++) {
-            if (!acc.password_history[i]["password"]) continue;
+        // let passInHistory = false;
+        // for (let i = 0; i < acc.password_history.length; i++) {
+        //     if (!acc.password_history[i]["password"]) continue;
 
-            const historicPassword = await invoke("decrypt_password", { encryptedPassword: acc.password_history[i]["password"] });
-            if (historicPassword === currentPassword) {
-                passInHistory = true;
-            }
-        }
+        //     const historicPassword = await invoke("decrypt_password", { encryptedPassword: acc.password_history[i]["password"] });
+        //     if (historicPassword === currentPassword) {
+        //         acc.password_history.splice(i, 1);
+        //     }
+        // }
 
-        if (!passInHistory) {
-            acc.password_history.unshift({
-                password: acc.password,
-                added: acc.last_modified
-            })
-        }
+        acc.password_history.unshift({
+            password: acc.password,
+            added: acc.last_modified
+        });
 
         if (accountIndex === -1) {
             allAccounts[acc.service].push(acc);
@@ -233,6 +231,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         setAccounts(await getAccounts());
         setAddAccount(false);
         setEditAccount(false);
+        setDisplayRestoreTip(true);
     }
 
     const automate = async () => {

@@ -17,9 +17,10 @@ const PTBRLANG = {
         "create-text-file.created": "Arquivo criado em",
         "create-text-file.explanation": "Crie um arquivo de texto simples com suas contas para fácil leitura e compartilhamento.",
         "create-text-file.select_folder": "Selecionar",
-        "open-backup-folder.title": "Abrir a pasta de backups",
-        "open-backup-folder.explanation": "Abre a pasta de backups no explorador de arquivos do Windows. Você pode copiar qualquer arquivo de backup para a pasta anterior, renomear o arquivo para 'accounts' e então recarregar o aplicativo.",
-        "open-backup-folder.button_text": "Abrir"
+        "open-backup-folder.title": "Recuperar contas",
+        "open-backup-folder.explanation": "Se precisar recuperar suas contas salvas, clique no botão abaixo, escolha o arquivo desejado, digite sua senha e o aplicativo restaurará suas contas automaticamente.",
+        "open-backup-folder.button_text": "Abrir",
+        "recover.tip": "Você pode recuperar suas contas aqui"
 
     },
     "AccountsList": {
@@ -95,9 +96,10 @@ const ENUSLANG = {
         "create-text-file.created": "File created in",
         "create-text-file.explanation": "Create a simple to read and share text file with all your accounts.",
         "create-text-file.select_folder": "Select folder",
-        "open-backup-folder.title": "Open the backup folder",
-        "open-backup-folder.explanation": "Open the backup folder on Windows Explorer. You can copy any backup file to the previous folder and rename it to 'accounts', then reload the app.",
-        "open-backup-folder.button_text": "Open"
+        "open-backup-folder.title": "Restore accounts",
+        "open-backup-folder.explanation": "If you need to recover your saved accounts, click the button below, choose the desired file, enter your password, and the app will automatically restore your accounts.",
+        "open-backup-folder.button_text": "Open",
+        "recover.tip": "You can restore your accounts here"
     },
     "AccountsList": {
         "sort-message.username": "Username",

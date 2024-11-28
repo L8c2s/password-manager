@@ -15,6 +15,7 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
     const [password, setPassword] = useState("");
     const [notes, setNotes] = useState("");
     const [accountLoaded, setAccountLoaded] = useState(false);
+    const [displayHistoryTip, setDisplayHistoryTip] = useState(false);
 
     useEffect(() => {
         const infoWindow = document.getElementById("accounts-info-div");
@@ -165,6 +166,7 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
     const [notesTitle, setNotesTitle] = useState("");
     const [lastModifiedText, setLastModifiedText] = useState("");
     const [createdText, setCreatedText] = useState("");
+    const [passwordHistoryTitle, setPasswordHistoryTitle] = useState("");
 
     useEffect(() => {
         const setLangMsg = async () => {
@@ -175,6 +177,7 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
             setLastModifiedText(getMsg(langFile, "AccountInfo", "additional-info.last_modified"));
             setCreatedText(getMsg(langFile, "AccountInfo", "additional-info.created"));
             setConfirmDeleteMsg(getMsg(langFile, "AccountInfo", "delete_account.confirmation"));
+            setPasswordHistoryTitle(getMsg(langFile, "PasswordHistory", ".title"));
         }
 
         setLangMsg();
@@ -209,6 +212,15 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
         }, 1000));
     }
 
+    useEffect(() => {
+        const historyTip = document.getElementById("display-history-tip");
+
+        if (!displayHistoryTip)
+            historyTip.className = "hidden";
+        else
+            historyTip.className = "show";
+    }, [displayHistoryTip]);
+
     return (
         <div id="accounts-info-div" className="info-off">
             <div id="info-nav">
@@ -218,9 +230,11 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
                 </div>
 
                 <div id="right-nav">
-                    <button id="display-password-history" onClick={
-                        () => setDisplayHistory(true)
-                    }></button>
+                    <p id="display-history-tip">{passwordHistoryTitle}</p>
+                    <button id="display-password-history"
+                     onClick={ () => setDisplayHistory(true) }
+                     onMouseOver={ () => setDisplayHistoryTip(true) }
+                     onMouseOut={ () => setDisplayHistoryTip(false) }></button>
                     <button id="favorite" className="not-favorite"
                      onClick={ () => setFavorite([account.id, !account.favorite]) }></button>
                     <button id="edit-account"
