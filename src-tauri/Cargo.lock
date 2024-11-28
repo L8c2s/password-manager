@@ -2615,7 +2615,7 @@ dependencies = [
 
 [[package]]
 name = "password-manager"
-version = "0.9.6"
+version = "0.9.7"
 dependencies = [
  "aes",
  "argon2",
