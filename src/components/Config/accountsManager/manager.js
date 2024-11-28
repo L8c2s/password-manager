@@ -14,20 +14,6 @@ export async function getDateTime() {
     let [year, month, day] = date.split("-");
     let [hour, minute, second] = time.split(":");
 
-    // if (month < 10) {
-    //     month = `0${month}`;
-    // } if (day < 10) {
-    //     month = `0${day}`;
-    // }
-
-    // if (hour < 10) {
-    //     hour = `0${hour}`;
-    // } if (minute < 10) {
-    //     minute = `0${minute}`;
-    // } if (second < 10) {
-    //     second = `0${second}`;
-    // }
-
     return `${year}-${month}-${day}T${hour}:${minute}:${second}.000Z`;
 }
 
@@ -101,7 +87,6 @@ async function createBackup(accounts) {
 export function getAccount(accounts, accountId) {
     for (const service in accounts) {
         for (let i = 0; i < accounts[service].length; i++) {
-
             if (accounts[service][i].id === accountId) {
                 return accounts[service][i];
             }
@@ -130,7 +115,6 @@ export async function editAccount(accounts, accountId, newAccount) {
 }
 
 export async function editAccountKey(accounts, accountId, key, newValue) {
-    // console.log(accounts, accountId, key, newValue);
     let account = getAccount(accounts, accountId);
     account[key] = newValue;
     return await editAccount(accounts, accountId, account);

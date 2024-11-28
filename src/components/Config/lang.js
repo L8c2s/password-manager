@@ -68,6 +68,11 @@ const PTBRLANG = {
         "login.verifying": "Verificando",
         "login.success": "Sucesso",
         "login.wrong_password": "Incorreta"
+    },
+    "PasswordHistory": {
+        ".title": "Histórico de senhas",
+        "password.added_in": "Adicionado em: ",
+        "password.current": "(Atual)"
     }
 }
 
@@ -140,6 +145,11 @@ const ENUSLANG = {
         "login.verifying": "Verifying",
         "login.success": "Success",
         "login.wrong_password": "Incorrect"
+    },
+    "PasswordHistory": {
+        ".title": "Password history",
+        "password.added_in": "Added in: ",
+        "password.current": "(Current)"
     }
 }
 

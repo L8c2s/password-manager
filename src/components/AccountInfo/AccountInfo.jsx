@@ -8,7 +8,7 @@ import { editAccountKey, getAccount, getAccounts, saveAccounts } from "../Config
 import { Notification } from "../notification/notification";
 
 
-export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite, setEditAccount }) {
+export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite, setEditAccount, setDisplayHistory }) {
     const [account, setAccount] = useState({});
     const [service, setService] = useState("");
     const [username, setUsername] = useState("");
@@ -91,6 +91,7 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
         setAccountLoaded(false);
     }, [accountLoaded]);
 
+    // todo: make this better
     useEffect(() => {
         const updateFavorite = async () => {
             const acc = getAccount(accounts, favorite[0]);
@@ -100,11 +101,13 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
             }
 
             // change the favorite icon
-            const favoriteButton = document.getElementById("favorite");
-            if (favorite[1]) {
-                favoriteButton.className = "favorite";
-            } else {
-                favoriteButton.className = "not-favorite";
+            if (selectedId === favorite[0]) {
+                const favoriteButton = document.getElementById("favorite");
+                if (favorite[1]) {
+                    favoriteButton.className = "favorite";
+                } else {
+                    favoriteButton.className = "not-favorite";
+                }
             }
         }
 
@@ -114,7 +117,7 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
 
     const decryptPassword = async () => {
         if (!account) return;
-
+        
         let decrypted;
         try {
             decrypted = await invoke("decrypt_password", { encryptedPassword: account.password });
@@ -207,7 +210,7 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
     }
 
     return (
-        <div id="accounts-info-div">
+        <div id="accounts-info-div" className="info-off">
             <div id="info-nav">
                 <div id="left-nav">
                     <button id="close-info"
@@ -215,6 +218,9 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
                 </div>
 
                 <div id="right-nav">
+                    <button id="display-password-history" onClick={
+                        () => setDisplayHistory(true)
+                    }></button>
                     <button id="favorite" className="not-favorite"
                      onClick={ () => setFavorite([account.id, !account.favorite]) }></button>
                     <button id="edit-account"
@@ -242,10 +248,10 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
                 <div id="password-info">
                     <p id="password-title" className="info-title">{passwordTitle}</p>
                     <input type="password" id="show-password-info" className="info-input" placeholder="Password Info" readOnly />
-                    <button id="copy-password"
-                    onClick={ () => copy("show-password-info") } className="copy-button"></button>
                     <button id="show-password"
                     onClick={ () => turnPassVisibility() } className="no-visibility"></button>
+                    <button id="copy-password"
+                    onClick={ () => copy("show-password-info") } className="copy-button"></button>
                 </div>
 
                 <div id="notes-info">

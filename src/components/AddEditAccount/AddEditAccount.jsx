@@ -24,10 +24,9 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     const [accountIndex, setAccountIndex] = useState(-1);
     const [updatePassWarn, setUpdatePassWarn] = useState(false);
     const [isButtonVisible, setIsButtonVisible] = useState(true);
-    const [valuesSet, setValuesSet] = useState(false);
 
     const checkKeys = (acc) => {
-        acc.password_history = acc.password_history ?? [acc.password];
+        acc.password_history = acc.password_history ?? [{"password": acc.password, "added": "unknown"}];
         acc.created = acc.created ?? "";
         acc.last_modified = acc.last_modified ?? "";
         acc.favorite = acc.favorite ?? false;
@@ -73,12 +72,10 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
         let safeService = false;
 
-        console.log("checking safety");
-
         if (!service.value) {
             service.classList.remove("safe-value");
             service.classList.add("not-safe-value");
-            console.log("There must be at least one character as Service.");
+            // console.log("There must be at least one character as Service.");
         } else {
             service.classList.remove("not-safe-value");
             service.classList.add("safe-value");
@@ -91,11 +88,11 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         if (!username.value) {
             username.classList.remove("safe-value");
             username.classList.add("not-safe-value");
-            console.log("There must be at least one character as Username.");
+            // console.log("There must be at least one character as Username.");
         } else if (exists) {
             username.classList.remove("safe-value");
             username.classList.add("not-safe-value");
-            console.log("The Username already exists for this Service.")
+            // console.log("The Username already exists for this Service.")
         } else {
             username.classList.remove("not-safe-value");
             username.classList.add("safe-value");
@@ -178,7 +175,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         let accountExists = checkId(acc.id);
         if (accountExists && !editAccount && addAccount) {
             apply.removeAttribute("disabled");
-            console.log(`Account ID (${acc.id}) already registered.`);
+            // console.log(`Account ID (${acc.id}) already registered.`);
             return false;
         }
 
@@ -187,14 +184,39 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         }
         acc.last_modified = await getDateTime();
 
-        acc.password = await invoke("encrypt_password", { password: acc.password });
+        let currentPassword;
+
+        if (addAccount) {
+            currentPassword = acc.password;
+            acc.password = await invoke("encrypt_password", { password: acc.password });
+        } else {
+            currentPassword = await invoke("decrypt_password", { encryptedPassword: acc.password });
+        }
 
         if (!allAccounts[acc.service]) {
             allAccounts[acc.service] = [];
         }
 
-        if (!acc.password_history.includes(acc.password))
-            acc.password_history.push(acc.password);
+        if (!acc.password_history) {
+            acc.password_history = [];
+        }
+
+        let passInHistory = false;
+        for (let i = 0; i < acc.password_history.length; i++) {
+            if (!acc.password_history[i]["password"]) continue;
+
+            const historicPassword = await invoke("decrypt_password", { encryptedPassword: acc.password_history[i]["password"] });
+            if (historicPassword === currentPassword) {
+                passInHistory = true;
+            }
+        }
+
+        if (!passInHistory) {
+            acc.password_history.unshift({
+                password: acc.password,
+                added: acc.last_modified
+            })
+        }
 
         if (accountIndex === -1) {
             allAccounts[acc.service].push(acc);
@@ -343,8 +365,6 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             setLoaded(true);
             on();
         } else {
-            console.log("disabling add/edit account");
-
             off();
             updateValues();
             setLoaded(false);
@@ -437,12 +457,12 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
                         <h1 id="add-edit-title">{title}</h1>
                     </div>
 
-                    <h2 id="notification-preview-title" className="info-title">{notificationPreviewTitle}</h2>
+                    <p id="notification-preview-title" className="info-title">{notificationPreviewTitle}</p>
                     <Notification langFile={langFile} accounts={accounts} account={account} notificationId={"edit-account-notification"} setUpdatePassWarn={setUpdatePassWarn} />
 
                     <div id="edit-account-info">
                         <div id="edit-service-div">
-                            <h2 id="service-title" className="info-title">{serviceTitle}</h2>
+                            <p id="service-title" className="info-title">{serviceTitle}</p>
                             <input type="text" autoComplete="off" id="edit-service" className="input-info" placeholder="Website[.com]" onChange={ () => updateAccount() } />
                         </div>
 

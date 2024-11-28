@@ -4,9 +4,10 @@ import "./App.css";
 // components
 import { Login } from "./components/Login/Login";
 import { Header } from "./components/Header/Header";
-import { UpdateList } from "./components/AccountsList/AccountsList";
 import { Settings } from "./components/Settings/Settings";
+import { UpdateList } from "./components/AccountsList/AccountsList";
 import { AccountsInfo } from "./components/AccountInfo/AccountInfo";
+import { History } from "./components/PasswordHistory/PasswordHistory";
 import { AddEditAccount } from "./components/AddEditAccount/AddEditAccount";
 
 // configurations
@@ -25,6 +26,7 @@ function App() {
     const [addAccount, setAddAccount] = useState(false);
     const [editAccount, setEditAccount] = useState(false);
     const [loginSuccess, setLoginSuccess] = useState(false);
+    const [displayHistory, setDisplayHistory] = useState(false);
 
     useEffect(() => {
         const loadLang = async () => {
@@ -48,12 +50,12 @@ function App() {
     }, [loginSuccess]);
 
     useEffect(() => {
-        if (settingsPopup || addAccount || editAccount) {
+        if (settingsPopup || addAccount || editAccount || displayHistory) {
             document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "auto";
         }
-    }, [settingsPopup, addAccount, editAccount]);
+    }, [settingsPopup, addAccount, editAccount, displayHistory]);
 
     // window.addEventListener("resize", logWindowSize);
 
@@ -87,6 +89,14 @@ function App() {
                         setSearchTerm={setSearchTerm}
                         editAccount={editAccount} setEditAccount={setEditAccount}
                         langFile={langFile}
+                        setDisplayHistory={setDisplayHistory}
+                    />
+
+                    <History
+                        langFile={langFile}
+                        accounts={accounts}
+                        displayHistory={displayHistory} setDisplayHistory={setDisplayHistory}
+                        selectedId={selectedId}
                     />
 
                     <Settings

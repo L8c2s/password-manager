@@ -45,7 +45,6 @@ export function Login({ langFile, setLoginSuccess }) {
             tip01.style.display = "block";
         }
 
-        // console.log(firstTime);
     }, [firstTime]);
 
     const submitPassword = async () => {
@@ -58,7 +57,6 @@ export function Login({ langFile, setLoginSuccess }) {
         setSubmitText(getMsg(langFile, "Login", "login.verifying"));
         submitButton.setAttribute("disabled", "true");
 
-        // console.log(`receive_user_password arguments: ${userPassword}, ${firstTime}, ${configDirectory}`);
         invoke("receive_user_password", { userPassword: userPassword, firstTime: firstTime, configDirectory: configDirectory }).then(
             (success) => {
                 if (success) {

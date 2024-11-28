@@ -63,6 +63,13 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         filteredAccounts.forEach(acc => {
             updateFavoriteIcon(acc.id);
         });
+
+        if (selectedId) {
+            try {
+                document.getElementById(selectedId).style = "border-bottom: 5px solid #196aff;";
+            } catch {}
+        }
+
     }, [filteredAccounts]);
 
     useEffect(() => {
@@ -148,7 +155,7 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         // set the selectedId to the ID of the account selected in the list
         if (selectedId) {
             // if selectedId is not empty, change the style of the border of the item to be unselected
-            let accountDiv = document.getElementById(selectedId);
+            const accountDiv = document.getElementById(selectedId);
             if (accountDiv) {
                 accountDiv.style = "";
             }
@@ -185,7 +192,7 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
             </div>
 
             <ul id="accounts-list">
-                {filteredAccounts.map((account) => (
+                {filteredAccounts && filteredAccounts.map((account) => (
                     <div className="account-list-item" id={account.id} key={account.id}>
                         <div id="account-list-info"
                          onClick={ () => {

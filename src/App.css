@@ -36,8 +36,10 @@ button {
   cursor: pointer;
   background: #2066ec;
   color: #f6f6f6;
-  width: 37px;
-  height: 37px;
+  width: 39px;
+  height: 39px;
+  vertical-align: middle;
+  margin-left: 5px;
 }
 
 input {

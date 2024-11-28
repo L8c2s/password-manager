@@ -7,6 +7,8 @@ const CONFIGPATH = `config.json`;
 
 if (!await exists(MAINPATH)) {
     await mkdir(MAINPATH);
+} if (!await exists(`${MAINPATH}/backup`)) {
+    await mkdir(`${MAINPATH}/backup`)
 }
 
 export async function saveConfig(newConfig) {
