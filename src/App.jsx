@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 
 // components
@@ -11,7 +12,7 @@ import { History } from "./components/PasswordHistory/PasswordHistory";
 import { AddEditAccount } from "./components/AddEditAccount/AddEditAccount";
 
 // configurations
-import { getConfigValue } from "./components/Config/config";
+import { loadConfig } from "./components/Config/config";
 import { getAccounts } from "./components/Config/accountsManager/manager";
 import { loadLangFile } from "./components/Config/lang";
 
@@ -28,27 +29,32 @@ function App() {
     const [loginSuccess, setLoginSuccess] = useState(false);
     const [displayHistory, setDisplayHistory] = useState(false);
     const [displayRestoreTip, setDisplayRestoreTip] = useState(false);
+    const [config, setConfig] = useState({});
+    const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
-        const loadLang = async () => {
-            let langSaved = await getConfigValue("lang");
-            setLangFile(loadLangFile(langSaved));
-        }
-
-        loadLang();
+        loadConfig().then(conf => {
+            setConfig(conf);
+            setLangFile(loadLangFile(conf.lang));
+        });
     }, []);
 
     useEffect(() => {
-        if (!loginSuccess) {
-            return;
-        }
+        if (!loginSuccess) return;
+        getAccounts().then(accs => setAccounts(accs));
 
-        const loadAccounts = async () => {
-            setAccounts(await getAccounts());
-        }
-
-        loadAccounts();
+        // invoke("test_derivation");
+        // invoke("encryption_test", { testString: "test" });
+        // invoke("decryption_test", { testString: "test" });
     }, [loginSuccess]);
+
+    // check if all resources are loaded
+    useEffect(() => {
+        if (config, langFile)
+            setLoaded(true);
+        else
+            setLoaded(false);
+    }, [config, langFile]);
 
     useEffect(() => {
         if (settingsPopup || addAccount || editAccount || displayHistory) {
@@ -58,20 +64,19 @@ function App() {
         }
     }, [settingsPopup, addAccount, editAccount, displayHistory]);
 
-    // window.addEventListener("resize", logWindowSize);
-
-    return (
+    return loaded && (
         <div id="content">
-            { !loginSuccess && (<Login langFile={langFile} setLoginSuccess={setLoginSuccess} />) }
+            { !loginSuccess && (<Login langFile={langFile} setLoginSuccess={setLoginSuccess} config={config} setConfig={setConfig} />) }
 
             { loginSuccess && (
-                <div>
+                <div id="main-content">
                     <Header
                         searchTerm={searchTerm} setSearchTerm={setSearchTerm}
                         settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
                         langFile={langFile}
                         setAddAccount={setAddAccount} setEditAccount={setEditAccount}
                         displayRestoreTip={displayRestoreTip}
+                        config={config}
                     />
 
                     <UpdateList 
@@ -81,6 +86,7 @@ function App() {
                         selectedId={selectedId} setSelectedId={setSelectedId}
                         favorite={favorite} setFavorite={setFavorite}
                         langFile={langFile}
+                        config={config}
                     />
 
                     <AccountsInfo
@@ -92,6 +98,7 @@ function App() {
                         editAccount={editAccount} setEditAccount={setEditAccount}
                         langFile={langFile}
                         setDisplayHistory={setDisplayHistory}
+                        config={config}
                     />
 
                     <History
@@ -99,6 +106,7 @@ function App() {
                         accounts={accounts}
                         displayHistory={displayHistory} setDisplayHistory={setDisplayHistory}
                         selectedId={selectedId}
+                        config={config}
                     />
 
                     <Settings
@@ -106,6 +114,7 @@ function App() {
                         langFile={langFile} setLangFile={langFile}
                         accounts={accounts}
                         setDisplayRestoreTip={setDisplayRestoreTip}
+                        config={config}
                     />
 
                     <AddEditAccount 
@@ -116,6 +125,7 @@ function App() {
                         setShowAccountInfo={setShowAccountInfo}
                         langFile={langFile}
                         setDisplayRestoreTip={setDisplayRestoreTip}
+                        config={config}
                     />
                 </div>
             )}

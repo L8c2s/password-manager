@@ -18,6 +18,10 @@
   width: fit-content;
 }
 
+html, body {
+  min-height: 100%;
+}
+
 input::-ms-reveal { display: none; }
 
 input,
@@ -30,6 +34,7 @@ button {
   font-family: inherit;
   transition: border-color 0.25s;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  outline: none;
 }
 
 button {
@@ -62,9 +67,4 @@ button:disabled {
 
 input:focus {
   border-color: #206eff;
-}
-
-input,
-button {
-  outline: none;
 }

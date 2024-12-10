@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "./AccountsList.css";
 
-import { editConfigKey, findCorrectMarginLeft, getConfigValue } from "../Config/config";
+import { editConfigKey } from "../Config/config";
 import { getAccount } from "../Config/accountsManager/manager";
 
 import { getMsg } from "../Config/lang";
 
-export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite, langFile }) {
+export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite, langFile, config }) {
     const [defaultFilteredAccounts, setDefaultFilteredAccounts] = useState([]);
     const [sortFilter, setSortFilter] = useState("");
     const [filteredAccounts, setFilteredAccounts] = useState([]);
@@ -17,9 +17,7 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
     useEffect(() => {
         // load the last list filter used in the previous interaction with the program
         const loadSortFilter = async () => {
-            const filter = await getConfigValue("sort_filter");
-            await new Promise((resolve) => setTimeout(resolve, 100));
-            setSortFilter(filter);
+            setSortFilter(config.sort_filter);
         };
 
         // loops through all the accounts in the list of all services and adds the account object in the list

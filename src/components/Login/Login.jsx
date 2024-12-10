@@ -5,10 +5,10 @@ import { appDataDir } from "@tauri-apps/api/path";
 import "./Login.css";
 
 import { getMsg } from "../Config/lang";
-import { getConfigValue, findCorrectLeft } from "../Config/config";
+import { loadConfig } from "../Config/config";
 
 
-export function Login({ langFile, setLoginSuccess }) {
+export function Login({ langFile, setLoginSuccess, config, setConfig }) {
     // login page for the user to create a password for the program
     // to encrypt and decrypt all their passwords
 
@@ -23,17 +23,12 @@ export function Login({ langFile, setLoginSuccess }) {
     const password = useRef(null);
 
     useEffect(() => {
-        const checkFirstTime = async () => {
-            let password_hash = await getConfigValue("password_hash");
-            if (!password_hash) {
-                setFirstTime(true)
-                return;
-            };
+        if (!config.password_hash) {
+            setFirstTime(true)
+            return;
+        };
 
-            setFirstTime(false);
-        }
-
-        checkFirstTime();
+        setFirstTime(false);
     }, []);
 
     useEffect(() => {
@@ -62,6 +57,9 @@ export function Login({ langFile, setLoginSuccess }) {
                 if (success) {
                     setSubmitText(getMsg(langFile, "Login", "login.success"));
                     password.current.className = "correct-password";
+                    loadConfig().then(conf => {
+                        setConfig(conf);
+                    });
                 } else {
                     password.current.className = "wrong-password";
                     setSubmitText(getMsg(langFile, "Login", "login.wrong_password"))
@@ -92,17 +90,19 @@ export function Login({ langFile, setLoginSuccess }) {
             setSecureTip00(getMsg(langFile, "Login", "login.tip02"));
         }
     }, [langFile, firstTime]);
-    
-    return (
-        <div id="login-page">
-            <h1 id="login-title">{loginTitle}</h1>
-            <input type="password" autoComplete="off" className="idle" ref={password} id="login-password" placeholder={loginPasswordPlhd} autoFocus onChange={ () => {
-                if (!password.current.value) password.current.className = "idle";
-            } } />
-            <button id="submit-password" className="fit-content" onClick={ () => { submitPassword() } }>{submitText}</button>
 
-            <p id="secure-password-tips-00" className="tips">{secureTip00}</p>
-            <p id="secure-password-tips-01" className="tips">{secureTip01}</p>
+    return (
+        <div id="full-login-page">
+            <div id="login-page">
+                <h1 id="login-title">{loginTitle}</h1>
+                <input type="password" autoComplete="off" className="idle" ref={password} id="login-password" placeholder={loginPasswordPlhd} autoFocus onChange={ () => {
+                    if (!password.current.value) password.current.className = "idle";
+                } } />
+                <button id="submit-password" className="fit-content" onClick={ () => { submitPassword() } }>{submitText}</button>
+
+                <p id="secure-password-tips-00" className="tips">{secureTip00}</p>
+                <p id="secure-password-tips-01" className="tips">{secureTip01}</p>
+            </div>
         </div>
     );
 }

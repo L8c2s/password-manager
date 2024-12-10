@@ -4,16 +4,13 @@ import "./Header.css"
 import { getMsg } from "../Config/lang";
 
 
-export function Header({ langFile, searchTerm, setSearchTerm, settingsPopup, setSettingsPopup, setAddAccount, setEditAccount, displayRestoreTip }) {
+export function Header({ langFile, searchTerm, setSearchTerm, settingsPopup, setSettingsPopup, setAddAccount, setEditAccount }) {
     const searchRef = useRef(null);
 
     const [placeholder, setPlaceholder] = useState("");
-    const [restoreTip, setRestoreTip] = useState("");
 
-    // set the text using the current language
     useEffect(() => {
         setPlaceholder(getMsg(langFile, "Header", "search.placeholder"));
-        setRestoreTip(getMsg(langFile, "Settings", "recover.tip"));
     }, [langFile]);
 
     useEffect(() => {
@@ -54,10 +51,6 @@ export function Header({ langFile, searchTerm, setSearchTerm, settingsPopup, set
             </div>
 
             <div id="utils">
-                <div id="display-restore-tip">
-                    {displayRestoreTip === true ? <p id="restore-tip">{restoreTip}</p> : null}
-                </div>
-
                 <button id="open-settings"
                     onClick={() => { setSettingsPopup(true) }}
                 ></button>

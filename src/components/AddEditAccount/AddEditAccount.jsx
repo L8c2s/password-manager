@@ -201,16 +201,6 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             acc.password_history = [];
         }
 
-        // let passInHistory = false;
-        // for (let i = 0; i < acc.password_history.length; i++) {
-        //     if (!acc.password_history[i]["password"]) continue;
-
-        //     const historicPassword = await invoke("decrypt_password", { encryptedPassword: acc.password_history[i]["password"] });
-        //     if (historicPassword === currentPassword) {
-        //         acc.password_history.splice(i, 1);
-        //     }
-        // }
-
         acc.password_history.unshift({
             password: acc.password,
             added: acc.last_modified

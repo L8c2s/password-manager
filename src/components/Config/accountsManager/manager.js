@@ -48,6 +48,8 @@ export async function getAccounts() {
     }
     accounts = await invoke("decrypt_password", { encryptedPassword: accounts });
 
+    console.log(accounts);
+
     if (!accounts) {
         accounts = "{}";
     }

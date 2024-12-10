@@ -25,31 +25,23 @@ export async function editConfigKey(key, value) {
 export async function loadConfig() {
     let config;
     try {
-        let textFile = await readTextFile(CONFIGPATH, { baseDir: BaseDirectory.AppData });
-        config = JSON.parse(textFile);
+        config = await readTextFile(CONFIGPATH, { baseDir: BaseDirectory.AppData });
+        config = JSON.parse(config);
     } catch (error) {
         config = false;
         console.log("Could not load config file: ", error);
     }
 
-    await new Promise(resolve => setTimeout(resolve, 100));
-
     if (!config) {
         config = { lang: "pt-BR", sort_filter: "serviceName", password_hash: "" }
         await saveConfig(config);
     } else {
-        config["lang"] = config["lang"] ?? "pt-BR";
-        config["sort_filter"] = config["sort_filter"] ?? "serviceName";
-        config["password_hash"] = config["password_hash"] ?? "";
+        config.lang = config.lang ?? "pt-BR";
+        config.sort_filter = config.sort_filter ?? "serviceName";
+        config.password_hash = config.password_hash ?? "";
     }
 
     return config;
-}
-
-export async function getConfigValue(key) {
-    let config = await loadConfig();
-    if (config.hasOwnProperty(key))
-        return config[key];
 }
 
 export function findCorrectLeft(popup) {

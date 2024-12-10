@@ -1,9 +1,14 @@
+#full-login-page {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #login-page {
     width: 50%;
     height: 50%;
-    position: fixed;
-    top: 25%;
-    left: 25%;
 }
 
 #submit-password {

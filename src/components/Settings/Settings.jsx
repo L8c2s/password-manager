@@ -6,13 +6,13 @@ import { invoke } from "@tauri-apps/api/core";
 
 import "./Settings.css";
 
-import { editConfigKey, getConfigValue, findCorrectLeft } from "../Config/config";
+import { editConfigKey, findCorrectLeft } from "../Config/config";
 import { getMsg } from "../Config/lang";
 import { readTextFile } from "@tauri-apps/plugin-fs";
 import { saveAccounts } from "../Config/accountsManager/manager";
 
 
-export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts, setDisplayRestoreTip }) {
+export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts, setDisplayRestoreTip, config }) {
     const [updateLangSet, setUpdateLangSet] = useState("");
     const [accountsDirValue, setAccountsDirValue] = useState("");
     const [textFilePath, setTextFilePath] = useState("");
@@ -21,10 +21,9 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts, 
 
     useEffect(() => {
         const loadAccountsDir = async () => {
-            let dir = await getConfigValue("accounts_dir");
             let dirValue = "";
 
-            if (dir && dir !== "") {
+            if (config.dir && config.dir !== "") {
                 dirValue = dir.split("\\");
                 dirValue = `${dirValue[dirValue.length-2]}\\${dirValue[dirValue.length-1]}`;
             }
@@ -32,12 +31,8 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts, 
             setAccountsDirValue(dirValue);
         }
 
-        const getLangSet = async () => {
-            setUpdateLangSet(await getConfigValue("lang"));
-        }
-
         loadAccountsDir();
-        getLangSet();
+        setUpdateLangSet(config.lang);
     }, []);
 
     const correctLeft = (e) => {
@@ -255,10 +250,9 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts, 
                         </p>
 
                         <button id="open-backup-folder-button" className="fit-content"
-                         onClick={
-                            async () => { await openDirectory(`${await appDataDir()}\\backup`) }
-                        }>
-                            {openButtonText}
+                            onClick={
+                                async () => { await openDirectory(`${await appDataDir()}\\backup`) }
+                            }>{openButtonText}
                         </button>
                     </div>
 
@@ -271,11 +265,10 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts, 
                         </p>
                         <div id="creation-area">
                             <button id="create-text-file" className="fit-content"
-                             onClick={ () => { createTextFile() } }>{selectFolderText}</button>
+                            onClick={ () => { createTextFile() } }>{selectFolderText}</button>
                             <p id="created-confirmation" ref={createdConfirmation} style={{ display: "none" }}>{fileCreatedText} <a href="#" onClick={ async () => await openDirectory(textFileDir) }>{textFilePath}</a></p>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
