@@ -1,6 +1,6 @@
 [package]
 name = "password-manager"
-version = "0.9.7"
+version = "0.9.8"
 description = "Password Manager"
 authors = ["Lucas Ferreira"]
 edition = "2021"
@@ -15,16 +15,16 @@ tauri = { version = "2.1.1", features = [] }
 serde = { version = "1.0.215", features = ["derive"] }
 serde_json = "1.0.133"
 aes = "0.8.4"
-tauri-plugin-dialog = "2.0.3"
-tauri-plugin-shell = "2.0.2"
-tauri-plugin-fs = "2.0.3"
+tauri-plugin-dialog = "2.2.0"
+tauri-plugin-shell = "2.2.0"
+tauri-plugin-fs = "2.2.0"
 argon2 = "0.5.3"
 rand_core = { version = "0.6.4", features = ["getrandom"] }
 rand = "0.8.5"
 ring = "0.17.8"
 lazy_static = "1.5.0"
 base64 = "0.22.1"
-chrono = "0.4.38"
+chrono = "0.4.39"
 hex = "0.4.3"
 password-hash = "0.5.0"
 
