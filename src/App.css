@@ -1,3 +1,4 @@
+
 :root {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;
@@ -18,8 +19,25 @@
   width: fit-content;
 }
 
-html, body {
-  min-height: 100%;
+#content {
+  width: 100vw;
+  height: 100vh;
+}
+
+#main-content {
+  width: 100vw;
+  height: 100vh;
+}
+
+#manager-content {
+  display: flex;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+
+  overflow-x: hidden;
 }
 
 input::-ms-reveal { display: none; }
@@ -41,10 +59,10 @@ button {
   cursor: pointer;
   background: #2066ec;
   color: #f6f6f6;
-  width: 39px;
-  height: 39px;
+  width: 40px;
+  height: 40px;
   vertical-align: middle;
-  margin-left: 5px;
+  margin-left: 6px;
 }
 
 input {

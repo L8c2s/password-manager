@@ -11,10 +11,6 @@ use argon2::{
 use lazy_static::lazy_static;
 
 use core::str;
-use std::fs;
-use std::fs::File;
-use std::io::Read;
-use std::path::Path;
 use std::process::Command;
 use std::sync::{Arc, Mutex};
 
@@ -44,21 +40,6 @@ lazy_static! {
     }));
 }
 
-fn save_config(path: String, data: String) -> Result<(), Box<dyn std::error::Error>> {
-    fs::write(&path, &data)?;
-    Ok(())
-}
-
-fn read_config(config_directory: &String) -> AppConfig {
-    let path = Path::new(&config_directory);
-    let mut current_config = String::new();
-    let mut raw_file = File::open(path).expect("File could not be openned.");
-    raw_file
-        .read_to_string(&mut current_config)
-        .expect("File could not be read.");
-    serde_json::from_str(&current_config).unwrap()
-}
-
 fn store_password(master_password: String) {
     let mut state = APP_STATE.lock().unwrap();
     state.master_password = Some(master_password);
@@ -66,21 +47,17 @@ fn store_password(master_password: String) {
 
 fn get_password() -> String {
     let state = APP_STATE.lock().unwrap();
-    state.master_password.clone().unwrap()
+    state.master_password.clone().unwrap_or_default()
 }
 
 #[tauri::command]
-fn receive_user_password(
-    user_password: String,
-    first_time: bool,
-    config_directory: String,
-) -> bool {
+fn receive_user_password(user_password: String, first_time: bool, config: String) -> String {
     // receive the master password
     // checks if it is the first time that the user is accessing the program,
     // if true, create a hash of the password and save it in memory and in the config file
     // else, load the hash saved and checks if it is the same password
 
-    let mut app_config = read_config(&config_directory);
+    let mut conf: AppConfig = serde_json::from_str(&config).unwrap();
 
     if first_time {
         let salt = SaltString::generate(&mut OsRng);
@@ -89,22 +66,12 @@ fn receive_user_password(
             .unwrap()
             .to_string();
 
-        app_config.password_hash = password_hash;
-
-        match save_config(
-            config_directory,
-            serde_json::to_string(&app_config)
-                .map_err(|e| e.to_string())
-                .unwrap(),
-        ) {
-            Ok(_) => println!("Password saved."),
-            Err(_) => println!("Could not save password."),
-        }
-
+        conf.password_hash = password_hash.clone();
         store_password(user_password);
-        true
+
+        serde_json::to_string(&conf).unwrap()
     } else {
-        let saved_hash = app_config.password_hash;
+        let saved_hash = conf.password_hash.clone();
 
         let parsed_hash = PasswordHash::new(&saved_hash)
             .map_err(|e| e.to_string())
@@ -115,9 +82,10 @@ fn receive_user_password(
             .is_ok();
         if ok {
             store_password(user_password);
+            serde_json::to_string(&conf).unwrap()
+        } else {
+            "false".to_string()
         }
-
-        ok
     }
 }
 
@@ -173,6 +141,8 @@ fn encrypt_password(password: String) -> String {
         return password;
     }
 
+    println!("Processing encryption...");
+
     let (key, salt) = derive_new_key();
 
     let mut encrypted_password = password.as_bytes().to_vec().clone();
@@ -215,6 +185,8 @@ fn decrypt_password(encrypted_password: String) -> String {
     if encrypted_password.is_empty() {
         return encrypted_password;
     }
+
+    println!("Processing decryption...");
 
     let encrypted_copy = encrypted_password.clone();
 

@@ -1,4 +1,258 @@
 #accounts-info-div {
+    width: 48.4vw;
+    height: 89%;
+
+    margin: 0;
+
+    position: fixed;
+    left: 49.95%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#account-info-anim-div {
+    width: 96%;
+    height: 96%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 11px;
+
+    background: #181b2c;
+}
+
+#account-info {
+    width: 97%;
+    height: 98%;
+}
+
+#account-info-utils {
+    width: 100%;
+    height: 8%;
+
+    display: flex;
+
+    border-bottom: 3px solid transparent;
+    box-shadow: 0 2px rgba(0, 0, 0, 0.2);
+
+    padding-bottom: 5px;
+    
+    /* background: white; */
+}
+
+#info-utils-right,
+#info-utils-left {
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+}
+
+#info-utils-left {
+    width: 13%;
+
+    justify-content: left;
+}
+
+#close-info {
+    background: url("../../icons/close.svg") no-repeat center;
+}
+
+#info-utils-right {
+    width: 87%;
+
+    justify-content: right;
+}
+
+#display-history-tip {
+    color: #ffffff65;
+}
+
+#display-password-history {
+    background: url("../../icons/history.svg") no-repeat center;
+}
+
+.not-favorite {
+    background: url("../../icons/not-favorite.svg") no-repeat center;
+}
+
+.favorite {
+    background: url("../../icons/favorite.svg") no-repeat center;
+}
+
+#edit-account {
+    background: url("../../icons/edit.svg") no-repeat center;
+}
+
+#delete-account {
+    background: url("../../icons/delete.svg") no-repeat center;
+}
+
+#notification-div {
+    width: 100%;
+    height: 9%;
+
+    margin: 20px 0 0 0;
+}
+
+#account-info-sec {
+    width: 100%;
+    height: 67%;
+
+    display: flex;
+    align-items: center;
+
+    /* background: red; */
+}
+
+#account-info-items {
+    width: 100%;
+    height: 89%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#account-info-item-align {
+    width: 95%;
+    height: 100%;
+}
+
+.account-info-item {
+    margin: 20px 0 25px 0;
+    display: flex;
+
+    width: 100%;
+    height: fit-content;
+
+    /* background: green; */
+}
+
+.account-info-data {
+    margin: 0;
+}
+
+.account-data {
+    width: 79%;
+    height: 100%;
+
+    /* background: yellow; */
+}
+
+.account-data-title {
+    margin: 0 0 5px 0;
+    color: white;
+    color: #6b6e8f;
+}
+
+.account-data-input {
+    width: 80%;
+}
+
+#account-service-info {
+    background: url("../../icons/website.svg") no-repeat 10px center;
+    padding-left: 40px;
+}
+
+#account-username-info {
+    background: url("../../icons/username.svg") no-repeat 10px center;
+    padding-left: 40px;
+}
+
+#account-password-info {
+    background: url("../../icons/password.svg") no-repeat 10px center;
+    padding-left: 40px;
+}
+
+.visibility {
+    background: url("../../icons/visibility.svg") no-repeat center;
+}
+
+.no-visibility {
+    background: url("../../icons/visibility-off.svg") no-repeat center;
+}
+
+.copy-button {
+    background: url("../../icons/copy.svg") no-repeat center;
+}
+
+#account-notes-info {
+    background: url("../../icons/notes.svg") no-repeat 10px center;
+    padding-left: 40px;
+}
+
+.account-data-utils {
+    /* background: blue; */
+
+    width: 21%;
+    height: 100%;
+
+    align-self: flex-end;
+
+    display: flex;
+    align-items: end;
+}
+
+.data-utils {
+    margin: 0 5px 0 0;
+}
+
+#notes-data {
+    width: 100%;
+}
+
+#date-data {
+    height: 13%;
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* background: white; */
+}
+
+#date-info {
+    width: 95%;
+    height: fit-content;
+}
+
+.account-info-date {
+    margin: 0;
+    color: #6b6e8f;
+}
+
+.info-on {
+    animation: slide-in .5s forwards;
+}
+
+.info-off {
+    animation: slide-out .5s forwards;
+}
+
+@keyframes slide-in {
+    from {
+        transform: translate(100%);
+    } to {
+        transform: translate(0);
+    }
+}
+  
+@keyframes slide-out {
+    from {
+        transform: translate(0);
+    } to {
+        transform: translate(110%);
+        display: none;
+    }
+}
+
+/* #accounts-info-div {
     width: 46%;
     height: 87%;
     position: fixed;
@@ -142,29 +396,4 @@
 
 .not-favorite {
     background: url("../../icons/not-favorite.svg") no-repeat center;
-}
-
-.info-on {
-    animation: slide-in .5s forwards;
-}
-
-.info-off {
-    animation: slide-out .5s forwards;
-}
-
-@keyframes slide-in {
-    from {
-      transform: translate(100%);
-    } to {
-      transform: translate(0);
-    }
-  }
-  
-  @keyframes slide-out {
-    from {
-      transform: translate(0);
-    } to {
-      transform: translate(110%);
-      display: none;
-    }
-  }
+} */

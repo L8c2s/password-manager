@@ -1,110 +1,218 @@
-#add-edit-account-full-window {
+#add-edit-account {
     position: fixed;
     top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
+
+    width: 100vw;
+    height: 100vh;
+    
     display: none;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 3;
 }
 
 #add-edit-account-blur {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
+
+    position: fixed;
+    top: 0;
+
     backdrop-filter: blur(3px);
 }
 
-#add-edit-account {
-    height: 80%;
-    width: 52%;
-    position: fixed;
-    top: 3%;
+#add-edit-account-div {
+    width: 50%;
+    height: 93%;
+
     background: #050414;
-    border-radius: 11px;
-    border: #728dc0 1px solid;
-    padding: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    border: #494949 1px solid;
+    border-radius: 15px;
+
+    z-index: 2;
     overflow-y: auto;
 }
 
-@media (max-width: 870px) {
-    #add-edit-account {
-        width: 70%;
-    }
+#add-edit-account-align {
+    width: 97%;
+    height: 97%;
+
+    /* background: white; */
 }
 
-#add-account-button {
-    position: fixed;
-    top: 85%;
-    left: 5%;
-    border-radius: 50px;
-    height: 75px;
-    width: 75px;
-    background: #2066ec url("../../icons/new.svg") no-repeat center;
-}
+#add-edit-account-title-div {
+    width: 100%;
+    height: 15%;
 
-#generate-password {
-    background: url("../../icons/generate-password.svg") no-repeat center;
-    width: 39px;
-    height: 39px;
-    margin-left: 20px;
-}
-
-#align-items {
     display: flex;
-    vertical-align: center;
+    align-items: end;
+    justify-content: center;
+
+    /* background: white; */
 }
 
-#title-bar {
-    margin-bottom: 40px;
-}
+#add-edit-account-title-align {
+    width: 85%;
+    height: 100%;
 
-#inline-length-display {
     display: flex;
+    justify-content: left;
+    align-items: end;
+
+    /* background: blue; */
 }
 
-#display-length {
-    color: #747474;
-    margin: 9px 0 0 10px;
-    opacity: 0;
+#add-edit-account-notification-div {
+    width: 100%;
+    height: 12%;
+
+    display: flex;
+    align-items: center;
+
+    /* background: green; */
 }
 
-#password-length {
-    width: 27%;
-    margin-left: 35px;
+#add-edit-account-notification-align {
+    width: 100%;
+    height: 70%;
 }
 
-#edit-service {
+#add-edit-account-notification {
+    margin-top: 0;
+}
+
+#add-edit-account-sec-div {
+    width: 100%;
+    height: fit-content;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* background: green; */
+}
+
+.add-edit-account-info-title {
+    color: #6b6e8f;
+}
+
+#add-edit-account-sec-align {
+    width: 95%;
+    height: 100%;
+
+    /* background: blue; */
+}
+
+#add-edit-account-utils-div {
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+
+    /* background: blue; */
+}
+
+#add-edit-password-info {
+    display: flex;
+    align-items: center;
+
+    margin-bottom: 0;
+}
+
+#add-edit-account-utils-align {
+    height: 100%;
+
+    display: flex;
+    justify-content: center;
+
+    /* background: white; */
+}
+
+.add-edit-info-div {
+    margin: 10px 0;
+    /* background: red; */
+
+    height: fit-content;
+}
+
+#add-edit-password {
+    /* background: white; */
+    width: 90%;
+    height: 100%;
+
+    padding-bottom: 0;
+}
+
+#add-edit-password-utils {
+    width: 15%;
+
+    display: flex;
+    align-self: flex-end;
+
+    /* background: black; */
+}
+
+#add-edit-service-input {
+    padding-left: 40px;
     background: #1e1d2b url("../../icons/website.svg") no-repeat 10px center;
 }
 
-#edit-username {
+#add-edit-username-input {
+    padding-left: 40px;
     background: #1e1d2b url("../../icons/username.svg") no-repeat 10px center;
 }
 
-#edit-password {
-    margin-bottom: 0;
+#add-edit-password-input {
+    width: 85%;
+    padding-left: 40px;
     background: #1e1d2b url("../../icons/password.svg") no-repeat 10px center;
+    margin-bottom: 0;
 }
 
-#edit-notes {
-    margin-bottom: 30px;
+#add-edit-notes-input {
+    padding-left: 40px;
     background: #1e1d2b url("../../icons/notes.svg") no-repeat 10px center;
 }
 
-#edit-account-notification {
-    margin-bottom: 30px;
-}
+#add-edit-password-length-sec {
+    width: 90%;
+    /* background: purple; */
 
-#form-buttons {
-    width: 100%;
+    margin: 0;
+
     display: flex;
     justify-content: center;
 }
 
-.input-info {
+#generate-password {
+    background: url("../../icons/generate-password.svg") no-repeat center;
+}
+
+#password-length {
+    width: 35%;
+    margin-right: 10px;
+}
+
+#password-length-display {
+    color: #ffffff65;
+}
+
+.add-edit-account-utils {
+    margin: 0 5px 0 5px;
+}
+
+.add-edit-account-input-info {
     width: 80%;
-    padding-left: 40px;
-    margin-bottom: 20px;
+}
+
+.add-edit-account-info {
+    margin: 3px 0;
 }
 
 .safe-value {
@@ -144,6 +252,5 @@
         opacity: 1;
     } to {
         opacity: 0;
-        display: none;
     }
 }

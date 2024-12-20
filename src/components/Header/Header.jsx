@@ -1,16 +1,13 @@
 import { React, useEffect, useRef, useState } from "react";
-import "./Header.css"
-
-import { getMsg } from "../Config/lang";
 
 
-export function Header({ langFile, searchTerm, setSearchTerm, settingsPopup, setSettingsPopup, setAddAccount, setEditAccount }) {
+export function Header({ langFile, searchTerm, setSearchTerm, setSettingsPopup, setAddAccount, setEditAccount }) {
     const searchRef = useRef(null);
 
-    const [placeholder, setPlaceholder] = useState("");
+    const [searchPlhd, setSearchPlhd] = useState("");
 
     useEffect(() => {
-        setPlaceholder(getMsg(langFile, "Header", "search.placeholder"));
+        setSearchPlhd(langFile.placeholders.search);
     }, [langFile]);
 
     useEffect(() => {
@@ -34,26 +31,20 @@ export function Header({ langFile, searchTerm, setSearchTerm, settingsPopup, set
 
     return (
         <div id="header">
-            <div id="search">
-                <input
-                    type="text"
-                    id="search-bar"
-                    value={searchTerm}
-                    onChange={(e) => { setSearchTerm(e.target.value) }}
-                    autoFocus
-                    ref={searchRef}
-                    autoComplete="off"
-                    placeholder={placeholder}
-                />
-                <button id="clear-search-bar"
-                    onClick={() => { setSearchTerm("") }}
-                ></button>
+            <div id="search-div">
+                <input type="text" id="search-bar" value={searchTerm} onChange={ e => {
+                    setSearchTerm(e.target.value)
+                } } autoFocus ref={searchRef} autoComplete="off" placeholder={searchPlhd} />
+
+                <button id="clear-search-bar" onClick={ () => {
+                    setSearchTerm("");
+                } }></button>
             </div>
 
-            <div id="utils">
-                <button id="open-settings"
-                    onClick={() => { setSettingsPopup(true) }}
-                ></button>
+            <div id="utils-div">
+                <button id="open-settings" onClick={() => {
+                    setSettingsPopup(true);
+                }}></button>
             </div>
         </div>
     );

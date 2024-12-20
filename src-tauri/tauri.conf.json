@@ -29,7 +29,7 @@
       {
         "title": "Gerenciador de Senhas v0.9.8",
         "width": 1100,
-        "minWidth": 461,
+        "minWidth": 800,
         "center": true,
         "resizable": true,
         "maximizable": true

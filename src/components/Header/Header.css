@@ -1,67 +1,50 @@
 #header {
     position: sticky;
     top: 0;
-    width: 100vv;
-    height: 10vh;
-    margin: 0;
-    display: flex;
-    flex-direction: row;
-    z-index: 1;
-    background: #050414;
-}
 
-#search,
-#utils {
+    width: 100vw;
+    height: 11vh;
     margin: 0;
+
     display: flex;
-    flex-direction: row;
-    justify-content: center;
     align-items: center;
-    width: 50%;
+
+    background: green;
+    background: #050414;
+
+    z-index: 2;
 }
 
-#utils {
-    justify-content: right;
+#search-div,
+#utils-div {
+    display: flex;
+    align-items: center;
+
+    width: 50vw;
+    height: 100%;
 }
 
-@media (max-width: 870px) {
-    #utils {
-        justify-content: center;
-        width: 10%;
-    }
-
-    #search {
-        width: 90%;
-    }
+#search-div {
+    justify-content: center;
+    /* background: white; */
 }
 
 #search-bar {
-    width: 50%;
     background: #1e1d2b url("../../icons/search.svg") no-repeat 10px center;
     padding-left: 40px;
-    margin-left: 10%;
+    width: 50%;
+    /* todo: fix this to be in the correct center of the accounts list div { margin-left: 10%; } */
 }
 
 #clear-search-bar {
     background: #2066ec url("../../icons/backspace.svg") no-repeat center;
-    width: 37px;
-    height: 37px;
-    margin-left: 10px;
 }
 
-@media (max-width: 490px) {
-    #clear-search-bar {
-        display: none;
-    }
-
-    #search-bar {
-        width: 60%;
-    }
+#utils-div {
+    justify-content: right;
 }
 
 #open-settings {
     background: url("../../icons/settings.svg") no-repeat center;
-    width: 37px;
-    height: 37px;
-    margin-right: 5%;
+    margin: 0 7% 0 0;
 }

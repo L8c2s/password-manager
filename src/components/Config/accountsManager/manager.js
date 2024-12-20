@@ -18,12 +18,18 @@ export async function getDateTime() {
 }
 
 export function generatePassword(length=8) {
-    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-={}[]\:;'<>,.?/~`";
+    if (length < 4) return;
+
+    const upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const lowerCase = "abcdefghijklmnopqrstuvwxyz";
+    const numbers = "0123456789"
+    const symbols = "!@#$%^&*()_+-={}[]\:;'<>,.?/~`" + '"';
+    const chars = upperCase + lowerCase + numbers + symbols;
+
     let password = "";
 
     for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * chars.length);
-        password += chars.charAt(randomIndex);
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
     const lower = /[a-z]/.test(password);
@@ -38,17 +44,16 @@ export function generatePassword(length=8) {
     return password;
 }
 
-export async function getAccounts() {
+export async function loadAccounts() {
     let accounts;
     try {
         accounts = await readTextFile(ACCOUNTSPATH, { baseDir: BaseDirectory.AppConfig });
+        accounts = new TextDecoder("utf-8").decode(accounts);
     } catch (error) {
-        console.log("Could not load accounts: ", error);
+        console.log("[loadAccounts] Could not load accounts: ", error);
         accounts = false;
     }
     accounts = await invoke("decrypt_password", { encryptedPassword: accounts });
-
-    console.log(accounts);
 
     if (!accounts) {
         accounts = "{}";
@@ -118,10 +123,11 @@ export async function editAccount(accounts, accountId, newAccount) {
     return accounts;
 }
 
-export async function editAccountKey(accounts, accountId, key, newValue) {
-    let account = getAccount(accounts, accountId);
+export async function editAccountKey(accounts, accountId, key, newValue, account=null) {
+    if (account === null)
+        account = getAccount(accounts, accountId);
     account[key] = newValue;
-    return await editAccount(accounts, accountId, account);
+    return await editAccount(accounts, account.id, account);
 }
 
 export async function deleteAccount(accounts, accountId) {

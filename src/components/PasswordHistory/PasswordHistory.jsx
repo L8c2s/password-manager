@@ -1,14 +1,13 @@
 import { React, useEffect, useState } from "react";
-import "./PasswordHistory.css";
 
-import { findCorrectLeft } from "../Config/config";
 import { getAccount } from "../Config/accountsManager/manager";
 
 import { invoke } from "@tauri-apps/api/core";
-import { getMsg } from "../Config/lang";
+
 
 export function History({ langFile, accounts, displayHistory, setDisplayHistory, selectedId }) {
     const [passwordHistory, setPasswordHistory] = useState([]);
+    const [account, setAccount] = useState({});
 
     useEffect(() => {
         const turn = async () => {
@@ -29,25 +28,26 @@ export function History({ langFile, accounts, displayHistory, setDisplayHistory,
     }, [passwordHistory]);
 
     const historyOn = () => {
-        const fullWindow = document.getElementById("history-full-window");
-        fullWindow.style.display = "block";
+        const fullWindow = document.getElementById("password-history-div");
+        fullWindow.style.display = "flex";
         fullWindow.className = "zoom-in";
-        correctLeft(null);
     }
 
     const historyOff = () => {
-        const fullWindow = document.getElementById("history-full-window");
+        const fullWindow = document.getElementById("password-history-div");
         fullWindow.className = "zoom-out";
     }
 
     const getHistory = async () => {
         if (!selectedId) return;
         
-        const account = getAccount(accounts, selectedId);
+        const acc = getAccount(accounts, selectedId);
+        setAccount(acc);
+
         let history = [];
 
-        for (let i = 0; i < account.password_history.length; i++) {
-            const currentPass = account.password_history[i];
+        for (let i = 0; i < acc.password_history.length; i++) {
+            const currentPass = acc.password_history[i];
             if (!currentPass.password) continue;
 
             let addedDate = currentPass.added;
@@ -100,36 +100,52 @@ export function History({ langFile, accounts, displayHistory, setDisplayHistory,
     const [isCurrent, setIsCurrent] = useState("");
 
     useEffect(() => {
-        setHistoryTitle(getMsg(langFile, "PasswordHistory", ".title"));
-        setPasswordTitle(getMsg(langFile, "PasswordHistory", "password.added_in"));
-        setIsCurrent(getMsg(langFile, "PasswordHistory", "password.current"));
+        setHistoryTitle(langFile.titles.passwordHistory);
+        setPasswordTitle(langFile.messages.passwordAddedIn);
+        setIsCurrent(langFile.messages.passwordCurrent);
     }, [langFile]);
 
-    const correctLeft = (e) => {
-        findCorrectLeft(document.getElementById("history-window"));
-    }
-    window.addEventListener("resize", correctLeft);
-
     return (
-        <div id="history-full-window">
-            <div id="history-blur" onClick={
-                () => { setDisplayHistory(false) }
-            }></div>
+        <div id="password-history-div">
+            <div id="password-history-blur" onClick={ () => setDisplayHistory(false) }></div>
 
-            <div id="history-window">
-                <div id="history-header">
-                    <h1 id="history-title">{historyTitle}</h1>
-                </div>
-
-                <div id="history-display">
-                    {passwordHistory.map((password, index) => (
-                        <div className="password-history-item" key={password.added}>
-                            <p className="password-history-title">{passwordTitle} {password.added} {index === 0 ? isCurrent : null}</p>
-                            <input type="password" className="password-history-input" id={password.added} value={password.password} readOnly />
-                            <button id={`${password.added}vision`} className="display-password password-visibility-off" onClick={ () => turnVisibility(password.added, index) }></button>
-                            <button className="copy-password-history" onClick={ () => copyPassword(password.added) }></button>
+            <div id="password-history-window">
+                <div id="password-history-align-div">
+                    <div id="password-history-header">
+                        <div id="password-history-title-align">
+                            <h1 id="password-history-title">{historyTitle}</h1>
                         </div>
-                    ))}
+                    </div>
+
+                    <div id="password-history-account-info">
+                        <div id="password-history-info-align">
+                            <div id="password-history-account-data">
+                                <h3 id="history-account-info-service" className="history-account-info">{account && account.service}</h3>
+
+                                <p id="history-account-info-username" className="history-account-info">{account && account.username}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="password-history-list-div">
+                        <div id="password-history-list-align">
+                            {passwordHistory.map((password, index) => (
+                                <div className="password-history-item" key={password.added}>
+                                    <div className="password-history-item-info">
+                                        <p className="history-password-title">{passwordTitle} {password.added} {index === 0 ? isCurrent : null}</p>
+
+                                        <input type="password" name="password-from-history" id={password.added} className="password-history-input" placeholder="Account Password" readOnly value={password.password} />
+                                    </div>
+
+                                    <div className="password-history-item-utils">
+                                        <button id={`${password.added}vision`} className="display-password password-visibility-off" onClick={ () => turnVisibility(password.added) }></button>
+
+                                        <button className="copy-password-history" onClick={ () => copyPassword(password.added) }></button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

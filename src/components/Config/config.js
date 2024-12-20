@@ -1,9 +1,10 @@
 import { BaseDirectory, mkdir, exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { appDataDir } from "@tauri-apps/api/path";
+import { invoke } from "@tauri-apps/api/core";
 
 
 const MAINPATH = await appDataDir();
-const CONFIGPATH = `config.json`;
+const CONFIGPATH = `config`;
 
 if (!await exists(MAINPATH)) {
     await mkdir(MAINPATH);
@@ -11,52 +12,48 @@ if (!await exists(MAINPATH)) {
     await mkdir(`${MAINPATH}/backup`)
 }
 
-export async function saveConfig(newConfig) {
-    newConfig = JSON.stringify(newConfig);
+export async function saveConfig(newConfig, call=null) {
+    // console.log(`[${call}] Saving config...`);
+    try {
+        newConfig = JSON.stringify(newConfig);
+    } catch (error) {
+        console.log("[saveConfig] Could not stringify to save: ", error);
+        return;
+    }
+
     await writeTextFile(CONFIGPATH, newConfig, { baseDir: BaseDirectory.AppData });
 }
 
-export async function editConfigKey(key, value) {
-    let config = await loadConfig();
-    config[key] = value;
-    await saveConfig(config);
-}
-
 export async function loadConfig() {
-    let config;
+    let config
+
     try {
         config = await readTextFile(CONFIGPATH, { baseDir: BaseDirectory.AppData });
-        config = JSON.parse(config);
+        config = new TextDecoder("utf-8").decode(config);
     } catch (error) {
-        config = false;
-        console.log("Could not load config file: ", error);
+        console.log("[loadConfig] Could not load the config file: ", error);
+        config = "{}";
     }
 
-    if (!config) {
-        config = { lang: "pt-BR", sort_filter: "serviceName", password_hash: "" }
-        await saveConfig(config);
-    } else {
-        config.lang = config.lang ?? "pt-BR";
-        config.sort_filter = config.sort_filter ?? "serviceName";
-        config.password_hash = config.password_hash ?? "";
-    }
+    if (!config) config = "{}";
+    return checkConfig(JSON.parse(config));
+}
+
+export function checkConfig(config) {
+    if (!config) config = {};
+    if (!config.lang) config.lang = "pt-BR";
+    if (!config.sort_filter) config.sort_filter = "serviceName";
+    if (!config.password_hash) config.password_hash = "";
 
     return config;
 }
 
-export function findCorrectLeft(popup) {
-    if (popup) {
-        let leftValue = Math.round((window.innerWidth - popup.offsetWidth) / 2);
-        popup.style.left = `${leftValue}px`;
-    }
-}
+export async function setKey(key=null, value=null) {
+    if (key === null || value === null) return;
 
-export function findCorrectMarginLeft(elementsList, windowPercent) {
-    if (elementsList) {
-        elementsList.forEach(item => {
-            const element = document.getElementById(item.id);
-            let leftValue = Math.round((window.innerWidth * (windowPercent / 100) - element.offsetWidth) / 2);
-            element.style.marginLeft = `${leftValue}px`;
-        })
-    }
+    let config = await loadConfig();
+    config[key] = value;
+    await saveConfig(config);
+
+    return true;
 }

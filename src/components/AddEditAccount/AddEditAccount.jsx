@@ -1,19 +1,13 @@
-import { React, useEffect, useState } from "react";
+import { React, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import "./AddEditAccount.css";
 
-import { getMsg } from "../Config/lang";
-import { getAccount, getAccounts, saveAccounts, getDateTime, generatePassword } from "../Config/accountsManager/manager";
-import { findCorrectLeft } from "../Config/config";
+
+import { getAccount, loadAccounts, saveAccounts, getDateTime, generatePassword } from "../Config/accountsManager/manager";
 
 import { Notification } from "../notification/notification";
 
 import { Automation } from "../../../tests/automate";
 
-// como vai funcionar
-// quando clicar em nova conta:
-// o componente vai carregar um objeto de conta, gerar um id e adicionar no objeto
-// os campos são preenchidos com placeholders traduzidos
 
 export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, setEditAccount, addAccount, setAddAccount, selectedId, setShowAccountInfo, automation, setDisplayRestoreTip }) {
     const [loaded, setLoaded] = useState(false);
@@ -23,7 +17,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     const [lengthNumber, setLengthNumber] = useState(12);
     const [accountIndex, setAccountIndex] = useState(-1);
     const [updatePassWarn, setUpdatePassWarn] = useState(false);
-    const [isButtonVisible, setIsButtonVisible] = useState(true);
+    const passwordLengthRef = useRef(null)
 
     const checkKeys = (acc) => {
         acc.password_history = acc.password_history ?? [{"password": acc.password, "added": "unknown"}];
@@ -44,25 +38,25 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             randomPass = randomPassword;
         }
 
-        document.getElementById("edit-password").value = randomPass;
+        document.getElementById("add-edit-password-input").value = randomPass;
         setRandomPassword(randomPass);
         setLastRandomUsed(randomPass);
     }
 
     const updateAccount = () => {
-        const service = document.getElementById("edit-service");
-        const username = document.getElementById("edit-username");
-        const password = document.getElementById("edit-password");
-        const notes = document.getElementById("edit-notes");
-
+        const service = document.getElementById("add-edit-service-input");
+        const username = document.getElementById("add-edit-username-input");
+        const password = document.getElementById("add-edit-password-input");
+        const notes = document.getElementById("add-edit-notes-input");
+        
         updateWarnStyle(service, username);
 
         let updater = {...account};
 
-        updater.service = service.value;
-        updater.username = username.value;
-        updater.password = password.value;
-        updater.notes = notes.value;
+        updater.service = service.value.trim();
+        updater.username = username.value.trim();
+        updater.password = password.value.trim();
+        updater.notes = notes.value.trim();
 
         setAccount(updater);
     }
@@ -72,7 +66,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
         let safeService = false;
 
-        if (!service.value) {
+        if (!service.value.trim()) {
             service.classList.remove("safe-value");
             service.classList.add("not-safe-value");
             // console.log("There must be at least one character as Service.");
@@ -84,8 +78,8 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
         let safeUsername = false;
         // the username verification is not simplified for debugging reasons
-        const exists = checkAccount(service.value, username.value);
-        if (!username.value) {
+        const exists = checkAccount(service.value.trim(), username.value.trim());
+        if (!username.value.trim()) {
             username.classList.remove("safe-value");
             username.classList.add("not-safe-value");
             // console.log("There must be at least one character as Username.");
@@ -108,6 +102,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
     useEffect(() => {
         const password = document.getElementById("edit-password");
+        if (!password) return;
         const currentPassWarn = document.getElementById("edit-account-notification").classList;
 
         if (currentPassWarn.contains("safe")) {
@@ -138,7 +133,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     }
 
     const enableLengthDisplay = (enable) => {
-        const displayLength = document.getElementById("display-length");
+        const displayLength = document.getElementById("password-length-display");
         if (enable) {
             displayLength.className = "appear";
         } else
@@ -184,15 +179,6 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         }
         acc.last_modified = await getDateTime();
 
-        let currentPassword;
-
-        if (addAccount) {
-            currentPassword = acc.password;
-            acc.password = await invoke("encrypt_password", { password: acc.password });
-        } else {
-            currentPassword = await invoke("decrypt_password", { encryptedPassword: acc.password });
-        }
-
         if (!allAccounts[acc.service]) {
             allAccounts[acc.service] = [];
         }
@@ -218,10 +204,10 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         }
 
         await saveAccounts(allAccounts);
-        setAccounts(await getAccounts());
+        setAccounts(await loadAccounts());
         setAddAccount(false);
+        setDisplayRestoreTip(editAccount);
         setEditAccount(false);
-        setDisplayRestoreTip(true);
     }
 
     const automate = async () => {
@@ -251,49 +237,24 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     }
 
     useEffect(() => {
-        const handleScroll = () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-                setIsButtonVisible(false);
-            } else {
-                setIsButtonVisible(true);
-            }
-        }
-
-        const addAccountShortcut = (event) => {
-            if (event.ctrlKey && event.key === "n") {
-                setAddAccount(true);
-            }
-        }
-
-        window.addEventListener("scroll", handleScroll);
-        window.addEventListener("keydown", addAccountShortcut);
-
         if (automation) {
             automate();
         };
-
-        return () => {
-            window.removeEventListener("scroll", handleScroll)
-            window.removeEventListener("keydown", addAccountShortcut);
-        };
     }, []);
 
-    const correctLeft = (e) => {
-        findCorrectLeft(document.getElementById("add-edit-account"));
-    }
-    window.addEventListener("resize", correctLeft);
-
     useEffect(() => {
+        const fullWindow = document.getElementById("add-edit-account");
+        if (!fullWindow) return;
+
         const on = () => {
-            const fullWindow = document.getElementById("add-edit-account-full-window");
-            fullWindow.style = "display: block;";
+            fullWindow.style = "display: flex;";
             fullWindow.className = "zoom-in";
-            document.getElementById("edit-service").focus();
-            findCorrectLeft(document.getElementById("add-edit-account"));
+            const editService = document.getElementById("add-edit-service-input");
+            if (!editService) return;
+            editService.focus()
         }
 
         const off = () => {
-            const fullWindow = document.getElementById("add-edit-account-full-window");
             fullWindow.className = "zoom-out";
             setAddAccount(false);
             setEditAccount(false);
@@ -375,14 +336,18 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     const [savingText, setSavingText] = useState("");
 
     const updateEditorValues = async () => {
-        if (!account || account === undefined) return;
-        
+        if (!account || !account.password) return;
+
         let decryptedPassword = await invoke("decrypt_password", { encryptedPassword: account.password });
 
-        const service = document.getElementById("edit-service");
-        const username = document.getElementById("edit-username");
-        document.getElementById("edit-password").value = decryptedPassword;
-        document.getElementById("edit-notes").value = account.notes;
+        const service = document.getElementById("add-edit-service-input");
+        const username = document.getElementById("add-edit-username-input");
+        const editPassword = document.getElementById("add-edit-password-input");
+        if (!editPassword) return;
+        editPassword.value = decryptedPassword;
+        const editNotes = document.getElementById("add-edit-notes-input");
+        if (!editNotes) return;
+        editNotes.value = account.notes;
 
         service.value = account.service;
         username.value = account.username;
@@ -399,92 +364,117 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
         updateValues();
 
-        let passwordLength = document.getElementById("password-length");
+        const passwordLength = document.getElementById("password-length");
+        if (!passwordLength) return;
         setRandomPassword(generatePassword(passwordLength.value));
 
-        const loadLangText = async () => {
-            if (addAccount)
-                setTitle(getMsg(langFile, "AddEditAccount", "add_account.title"));
-            else if (editAccount)
-                setTitle(getMsg(langFile, "AddEditAccount", "edit_account.title"));
-            setUsernamePlaceHld(getMsg(langFile, "AddEditAccount", "edit_username.placeholder"));
-            setNotesPlaceHld(getMsg(langFile, "AddEditAccount", "edit_notes.placeholder"));
-            setSaveButton(getMsg(langFile, "AddEditAccount", "save_button.text"));
-            setCancelButton(getMsg(langFile, "AddEditAccount", "cancel_button.text"));
-            setServiceTitle(getMsg(langFile, "AccountInfo", "service.title"));
-            setUsernameTitle(getMsg(langFile, "AccountInfo", "username.title"));
-            setPasswordTitle(getMsg(langFile, "AccountInfo", "password.title"));
-            setNotesTitle(getMsg(langFile, "AccountInfo", "notes.title"));
-            setNotificationPreviewTitle(getMsg(langFile, "AddEditAccount", "notification_preview.title"));
-            setPasswordLengthDisplay(getMsg(langFile, "AddEditAccount", "password_length.display"));
-            setSavingText(getMsg(langFile, "AddEditAccount", "save_button.saving"));
-        }
-
-        if (!langFile) return;
-        loadLangText();
+        if (addAccount)
+            setTitle(langFile.titles.addAccount);
+        else if (editAccount)
+            setTitle(langFile.titles.editAccount);
+        setUsernamePlaceHld(langFile.placeholders.editUsername);
+        setNotesPlaceHld(langFile.placeholders.editNotes);
+        setSaveButton(langFile.buttons.save);
+        setCancelButton(langFile.buttons.cancel);
+        setServiceTitle(langFile.titles.accountInfoService);
+        setUsernameTitle(langFile.titles.accountInfoUsername);
+        setPasswordTitle(langFile.titles.accountInfoPassword);
+        setNotesTitle(langFile.titles.accountInfoNotes);
+        setNotificationPreviewTitle(langFile.titles.notificationPreview);
+        setPasswordLengthDisplay(langFile.messages.passwordLengthDisplay);
+        setSavingText(langFile.buttons.save);
     }, [langFile, loaded]);
 
-    const openAddAccount = async () => {
-        document.getElementById("add-account-button");
-        setAddAccount(true);
-    }
-
     return (
-        <div id="add-edit-account-main">
-            <div id="add-account-space">
-                <button id="add-account-button"
-                 onClick={ async () => { openAddAccount() } }
-                 style={{ display: isButtonVisible ? "block" : "none" }}></button>
-            </div>
+        <div id="add-edit-account">
+            <div id="add-edit-account-blur" onClick={() => {
+                setAddAccount(false);
+                setEditAccount(false);
+            }}></div>
 
-            <div id="add-edit-account-full-window">
-                <div id="add-edit-account-blur"
-                onClick={ () => { setAddAccount(false); setEditAccount(false) } }></div>
-
-                <div id="add-edit-account">
-                    <div id="title-bar">
-                        <h1 id="add-edit-title">{title}</h1>
+            <div id="add-edit-account-div">
+                <div id="add-edit-account-align">
+                    <div id="add-edit-account-title-div">
+                        <div id="add-edit-account-title-align">
+                            <h1 id="add-edit-account-title">{title}</h1>
+                        </div>
                     </div>
 
-                    <p id="notification-preview-title" className="info-title">{notificationPreviewTitle}</p>
-                    <Notification langFile={langFile} accounts={accounts} account={account} notificationId={"edit-account-notification"} setUpdatePassWarn={setUpdatePassWarn} />
-
-                    <div id="edit-account-info">
-                        <div id="edit-service-div">
-                            <p id="service-title" className="info-title">{serviceTitle}</p>
-                            <input type="text" autoComplete="off" id="edit-service" className="input-info" placeholder="Website[.com]" onChange={ () => updateAccount() } />
+                    <div id="add-edit-account-notification-div">
+                        <div id="add-edit-account-notification-align">
+                            <Notification account={account} accounts={accounts} langFile={langFile} notificationId={"add-edit-account-notification"} setUpdatePassWarn={setUpdatePassWarn} />
                         </div>
+                    </div>
 
-                        <div id="edit-username-div">
-                            <p id="username-title" className="info-title">{usernameTitle}</p>
-                            <input type="text" autoComplete="off" id="edit-username" className="input-info" placeholder={usernamePlaceHld} onChange={ () => updateAccount() } />
-                        </div>
+                    <div id="add-edit-account-sec-div">
+                        <div id="add-edit-account-sec-align">
+                            <div id="add-edit-service-info" className="add-edit-info-div">
+                                <div id="add-edit-service">
+                                    <h4 id="add-edit-service-title" className="add-edit-account-info add-edit-account-info-title">{serviceTitle}</h4>
 
-                        <div id="edit-password-div">
-                            <p id="password-title" className="info-title">{passwordTitle}</p>
-                            <div id="align-items">
-                                <input type="text" autoComplete="off" id="edit-password" className="input-info" placeholder={randomPassword}
-                                 onChange={ () => updateAccount() } />
-                                <button id="generate-password"
-                                 onClick={ () => { updateRandomPassword(); updateAccount() } }></button>
+                                    <input type="text" id="add-edit-service-input" className="add-edit-account-input-info add-edit-account-info not-safe-value" placeholder="Website[.com]" autoComplete="off" onChange={ () => updateAccount() } />
+                                </div>
                             </div>
 
-                            <div id="inline-length-display">
-                                <input type="range" name="length-number" id="password-length" max={20} min={8} defaultValue={12} onChange={ (e) => {setLengthNumber(e.target.value); setRandomPassword(generatePassword(e.target.value))} } onMouseOver={ () => enableLengthDisplay(1) } onMouseOut={ () => enableLengthDisplay(0) } />
-                                <p id="display-length">{passwordLengthDisplay} {lengthNumber}</p>
+                            <div id="add-edit-username-info" className="add-edit-info-div">
+                                <div id="add-edit-username">
+                                    <h4 id="add-edit-username-title" className="add-edit-account-info add-edit-account-info-title">{usernameTitle}</h4>
+
+                                    <input type="text" id="add-edit-username-input" className="add-edit-account-input-info add-edit-account-info not-safe-value" placeholder={usernamePlaceHld} autoComplete="off" onChange={ () => updateAccount() } />
+                                </div>
+                            </div>
+
+                            <div id="add-edit-password-info" className="add-edit-info-div">
+                                <div id="add-edit-password">
+                                    <div id="add-edit-password-sec">
+                                        <h4 id="add-edit-password-title" className="add-edit-account-info add-edit-account-info-title">{passwordTitle}</h4>
+
+                                        <input type="text" id="add-edit-password-input" className="add-edit-account-input-info add-edit-account-info no-value" placeholder={randomPassword} autoComplete="off" onChange={ () => updateAccount() } />
+                                    </div>
+                                </div>
+
+                                <div id="add-edit-password-utils">
+                                    <button id="generate-password" onClick={ () => {
+                                        updateRandomPassword();
+                                        updateAccount();
+                                    } }></button>
+                                </div>
+                            </div>
+
+                            <div id="add-edit-password-length-sec">
+                                <input type="range" name="password-range" id="password-length" max={20} min={8} ref={passwordLengthRef} defaultValue={12}
+                                 onChange={ e => {
+                                    setLengthNumber(e.target.value);
+                                    setRandomPassword(generatePassword(e.target.value));
+                                } }
+                                 onMouseOver={ () => enableLengthDisplay(true) } 
+                                 onMouseOut={ () => enableLengthDisplay(false) } 
+                                 autoComplete="off"/>
+
+                                <p id="password-length-display" className="hide">{passwordLengthDisplay} {lengthNumber}</p>
+                            </div>
+
+                            <div id="add-edit-notes-info" className="add-edit-info-div">
+                                <div id="add-edit-notes">
+                                    <h4 id="add-edit-notes-title" className="add-edit-account-info add-edit-account-info-title">{notesTitle}</h4>
+
+                                    <input type="text" id="add-edit-notes-input" className="add-edit-account-input-info add-edit-account-info safe-value" placeholder={notesPlaceHld} autoComplete="off" onChange={ () => updateAccount() } />
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div id="edit-notes-div">
-                            <p id="notes-title" className="info-title">{notesTitle}</p>
-                            <input type="text" autoComplete="off" id="edit-notes" className="input-info safe-value" placeholder={notesPlaceHld} onChange={ () => updateAccount() } />
-                        </div>
+                    <div id="add-edit-account-utils-div">
+                        <div id="add-edit-account-utils-align">
+                            <button id="save-account" onClick={ () => {
+                                applyAccount();
+                                setShowAccountInfo(false);
+                            } } className="fit-content add-edit-account-utils">{saveButton}</button>
 
-                        <div id="form-buttons">
-                            <button id="save-account" className="fit-content"
-                            onClick={ () => { applyAccount(); setShowAccountInfo(false) }}>{saveButton}</button>
-                            <button id="cancel-operation" className="fit-content"
-                            onClick={ () => { setAddAccount(false); setEditAccount(false) } }>{cancelButton}</button>
+                            <button id="cancel-operation" onClick={ () => {
+                                setAddAccount(false);
+                                setEditAccount(false);
+                            } } className="fit-content add-edit-account-utils">{cancelButton}</button>
                         </div>
                     </div>
                 </div>

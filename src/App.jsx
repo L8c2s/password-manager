@@ -1,47 +1,61 @@
-import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { useState, useEffect } from "react";
 import "./App.css";
+import "./components/Login/Login.css";
+import "./components/Header/Header.css";
+import "./components/AccountsList/AccountsList.css";
+import "./components/notification/notification.css";
+import "./components/AccountInfo/AccountInfo.css";
+import "./components/PasswordHistory/PasswordHistory.css";
+import "./components/FloatingArea/FloatingArea.css";
+import "./components/AddEditAccount/AddEditAccount.css";
+import "./components/Settings/Settings.css";
+import "./max-size.css";
 
 // components
-import { Login } from "./components/Login/Login";
-import { Header } from "./components/Header/Header";
-import { Settings } from "./components/Settings/Settings";
-import { UpdateList } from "./components/AccountsList/AccountsList";
-import { AccountsInfo } from "./components/AccountInfo/AccountInfo";
-import { History } from "./components/PasswordHistory/PasswordHistory";
 import { AddEditAccount } from "./components/AddEditAccount/AddEditAccount";
+import { History } from "./components/PasswordHistory/PasswordHistory";
+import { FloatingArea } from "./components/FloatingArea/FloatingArea";
+import { AccountsInfo } from "./components/AccountInfo/AccountInfo";
+import { UpdateList } from "./components/AccountsList/AccountsList";
+import { Settings } from "./components/Settings/Settings";
+import { Header } from "./components/Header/Header";
+import { Login } from "./components/Login/Login";
 
 // configurations
+import { loadAccounts } from "./components/Config/accountsManager/manager";
 import { loadConfig } from "./components/Config/config";
-import { getAccounts } from "./components/Config/accountsManager/manager";
 import { loadLangFile } from "./components/Config/lang";
 
 function App() {
-    const [langFile, setLangFile] = useState("");
-    const [searchTerm, setSearchTerm] = useState("");
-    const [settingsPopup, setSettingsPopup] = useState(false);
+    const [afterEditAccount, setAfterEditAccount] = useState(false);
     const [showAccountInfo, setShowAccountInfo] = useState(false);
+    const [displayHistory, setDisplayHistory] = useState(false);
+    const [settingsPopup, setSettingsPopup] = useState(false);
+    const [loginSuccess, setLoginSuccess] = useState(false);
+    const [editAccount, setEditAccount] = useState(false);
+    const [addAccount, setAddAccount] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
     const [selectedId, setSelectedId] = useState("");
+    const [langFile, setLangFile] = useState("");
     const [accounts, setAccounts] = useState({});
     const [favorite, setFavorite] = useState([]);
-    const [addAccount, setAddAccount] = useState(false);
-    const [editAccount, setEditAccount] = useState(false);
-    const [loginSuccess, setLoginSuccess] = useState(false);
-    const [displayHistory, setDisplayHistory] = useState(false);
-    const [displayRestoreTip, setDisplayRestoreTip] = useState(false);
-    const [config, setConfig] = useState({});
     const [loaded, setLoaded] = useState(false);
+    const [config, setConfig] = useState({});
 
     useEffect(() => {
         loadConfig().then(conf => {
             setConfig(conf);
             setLangFile(loadLangFile(conf.lang));
         });
+
+        window.addEventListener("keydown", addAccountShortcut);
+        return () => window.removeEventListener("keydown", addAccountShortcut);
     }, []);
 
     useEffect(() => {
         if (!loginSuccess) return;
-        getAccounts().then(accs => setAccounts(accs));
+        loadAccounts().then(accs => setAccounts(accs));
 
         // invoke("test_derivation");
         // invoke("encryption_test", { testString: "test" });
@@ -58,13 +72,19 @@ function App() {
 
     useEffect(() => {
         if (settingsPopup || addAccount || editAccount || displayHistory) {
-            document.body.style.overflow = "hidden";
+            document.body.style.overflowY = "hidden";
         } else {
-            document.body.style.overflow = "auto";
+            document.body.style.overflowY = "auto";
         }
     }, [settingsPopup, addAccount, editAccount, displayHistory]);
 
-    return loaded && (
+    const addAccountShortcut = (event) => {
+        if (event.ctrlKey && (event.key === "n" || event.key === "N")) {
+            setAddAccount(true);
+        }
+    }
+
+    return loaded ? (
         <div id="content">
             { !loginSuccess && (<Login langFile={langFile} setLoginSuccess={setLoginSuccess} config={config} setConfig={setConfig} />) }
 
@@ -75,46 +95,48 @@ function App() {
                         settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
                         langFile={langFile}
                         setAddAccount={setAddAccount} setEditAccount={setEditAccount}
-                        displayRestoreTip={displayRestoreTip}
-                        config={config}
+                        displayRestoreTip={afterEditAccount}
+                        config={config} setConfig={setConfig}
                     />
 
-                    <UpdateList 
-                        accounts={accounts} setAccounts={setAccounts}
-                        searchTerm={searchTerm} setSearchTerm={setSearchTerm}
-                        showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo}
-                        selectedId={selectedId} setSelectedId={setSelectedId}
-                        favorite={favorite} setFavorite={setFavorite}
-                        langFile={langFile}
-                        config={config}
-                    />
+                    <div id="manager-content">
+                        <UpdateList 
+                            accounts={accounts} setAccounts={setAccounts}
+                            searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+                            showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo}
+                            selectedId={selectedId} setSelectedId={setSelectedId}
+                            favorite={favorite} setFavorite={setFavorite}
+                            langFile={langFile}
+                            config={config} setConfig={setConfig}
+                        />
 
-                    <AccountsInfo
-                        accounts={accounts} setAccounts={setAccounts}
-                        showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo}
-                        selectedId={selectedId} setSelectedId={setSelectedId}
-                        favorite={favorite} setFavorite={setFavorite}
-                        setSearchTerm={setSearchTerm}
-                        editAccount={editAccount} setEditAccount={setEditAccount}
-                        langFile={langFile}
-                        setDisplayHistory={setDisplayHistory}
-                        config={config}
-                    />
+                        <AccountsInfo
+                            accounts={accounts} setAccounts={setAccounts}
+                            showAccountInfo={showAccountInfo} setShowAccountInfo={setShowAccountInfo}
+                            selectedId={selectedId} setSelectedId={setSelectedId}
+                            favorite={favorite} setFavorite={setFavorite}
+                            setSearchTerm={setSearchTerm}
+                            editAccount={editAccount} setEditAccount={setEditAccount}
+                            langFile={langFile}
+                            setDisplayHistory={setDisplayHistory}
+                            config={config} setConfig={setConfig}
+                        />
+                    </div>
 
                     <History
                         langFile={langFile}
                         accounts={accounts}
                         displayHistory={displayHistory} setDisplayHistory={setDisplayHistory}
                         selectedId={selectedId}
-                        config={config}
+                        config={config} setConfig={setConfig}
                     />
 
                     <Settings
                         settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
                         langFile={langFile} setLangFile={langFile}
                         accounts={accounts}
-                        setDisplayRestoreTip={setDisplayRestoreTip}
-                        config={config}
+                        setDisplayRestoreTip={setAfterEditAccount}
+                        config={config} setConfig={setConfig}
                     />
 
                     <AddEditAccount 
@@ -124,13 +146,15 @@ function App() {
                         selectedId={selectedId}
                         setShowAccountInfo={setShowAccountInfo}
                         langFile={langFile}
-                        setDisplayRestoreTip={setDisplayRestoreTip}
-                        config={config}
+                        setDisplayRestoreTip={setAfterEditAccount}
+                        config={config} setConfig={setConfig}
                     />
+
+                    <FloatingArea setAddAccount={setAddAccount} afterEditAccount={afterEditAccount} setSettingsPopup={setSettingsPopup} />
                 </div>
             )}
         </div>
-    );
+    ) : null;
 }
 
 export default App;

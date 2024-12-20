@@ -1,135 +1,74 @@
-import { React, useEffect, useState } from "react";
+import { React, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import "./AccountInfo.css";
 
-import { getMsg } from "../Config/lang";
-import { editAccountKey, getAccount, getAccounts, saveAccounts } from "../Config/accountsManager/manager";
+
+import { editAccountKey, getAccount, loadAccounts, saveAccounts } from "../Config/accountsManager/manager";
 
 import { Notification } from "../notification/notification";
 
 
-export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite, setEditAccount, setDisplayHistory }) {
+export function AccountsInfo({ langFile, accounts, setAccounts, selectedId, setSelectedId, favorite, setFavorite, setEditAccount, setDisplayHistory, showAccountInfo, setShowAccountInfo }) {
     const [account, setAccount] = useState({});
-    const [service, setService] = useState("");
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [notes, setNotes] = useState("");
-    const [accountLoaded, setAccountLoaded] = useState(false);
     const [displayHistoryTip, setDisplayHistoryTip] = useState(false);
+    const passwordInput = useRef(null);
 
-    useEffect(() => {
-        const infoWindow = document.getElementById("accounts-info-div");
-        if (showAccountInfo) {
-            infoWindow.className = "info-on";
-        } else {
-            infoWindow.className = "info-off";
+    useEffect(() => {        
+        if (!showAccountInfo || !selectedId) {
             setAccount({});
+            setSelectedId("");
+            setShowAccountInfo(false);
+            return;
         }
-    }, [showAccountInfo]);
 
-    useEffect(() => {
-        if (!selectedId) return;
         setAccount(getAccount(accounts, selectedId));
-    }, [selectedId]);
-
-    // useEffect(() => {
-    //     setPassword(account.password);
-    //     setAccountLoaded(true);
-    // }, [decryptedPassword]);
+    }, [showAccountInfo, selectedId]);
 
     useEffect(() => {
-        const decrypt = async () => {
-            await decryptPassword();
-        }
-        
-        if (!account) return;
-
-        decrypt();
-
-        setFavorite([account.id, account.favorite]);
-        setService(account.service);
-        setUsername(account.username);
-        setNotes(account.notes);
-
-        const lastModified = document.getElementById("last-modified");
-        const created = document.getElementById("created-date");
-
-        const getDisplayable = (createdDate) => {
-            let [date, time] = createdDate.split("T");
-
-            let [year, month, day] = date.split("-");
-            date = `${day}/${month}/${year}`;
-
-            return `${date} ${time.split(".")[0]}`;
-        }
-
-        if (account.created) {
-            let createdDate = account.created;
-            let displayableCreate = "-";
-
-            if (createdDate)
-                displayableCreate = getDisplayable(createdDate);
-
-            created.innerHTML = `${createdText} ${displayableCreate}`;
-        } if (account.last_modified) {
-            let modifiedDate = account.last_modified;
-            let displayableModified = "-";
-
-            if (modifiedDate)
-                displayableModified = getDisplayable(modifiedDate);
-
-            lastModified.innerHTML = `${lastModifiedText} ${displayableModified}`;
-        }
+        if (!account || !account.password) return;
+        decryptPassword(account.password).then(password => passwordInput.current.value = password);
     }, [account]);
 
-    useEffect(() => {
-        if (!accountLoaded) return;
+    const getDisplayable = (createdDate) => {
+        if (!createdDate) return;
 
-        document.getElementById("show-service-info").value = service;
-        document.getElementById("show-username-info").value = username;
-        document.getElementById("show-password-info").value = password;
-        document.getElementById("show-notes-info").value = notes;
-        setAccountLoaded(false);
-    }, [accountLoaded]);
+        let [date, time] = createdDate.split("T");
 
-    // todo: make this better
+        let [year, month, day] = date.split("-");
+        date = `${day}/${month}/${year}`;
+
+        return `${date} ${time.split(".")[0]}`;
+    }
+
     useEffect(() => {
         const updateFavorite = async () => {
-            const acc = getAccount(accounts, favorite[0]);
-
-            if (favorite[1] !== acc.favorite) {
-                setAccounts(await editAccountKey(accounts, favorite[0], "favorite", favorite[1]));                
-            }
-
-            // change the favorite icon
-            if (selectedId === favorite[0]) {
-                const favoriteButton = document.getElementById("favorite");
-                if (favorite[1]) {
-                    favoriteButton.className = "favorite";
-                } else {
-                    favoriteButton.className = "not-favorite";
-                }
+            if (favorite[1] !== account.favorite) {
+                setAccounts(await editAccountKey(accounts, null, "favorite", favorite[1], account));
             }
         }
 
         if (!favorite[0]) return;
+
+        // change the favorite icon
+        if (selectedId === favorite[0]) {
+            const favoriteButton = document.getElementById("favorite-button");
+            if (favorite[1]) {
+                favoriteButton.className = "favorite";
+            } else {
+                favoriteButton.className = "not-favorite";
+            }
+        }
+
         updateFavorite();
     }, [favorite]);
 
-    const decryptPassword = async () => {
-        if (!account) return;
-        
-        let decrypted;
-        try {
-            decrypted = await invoke("decrypt_password", { encryptedPassword: account.password });
-        } catch {}
+    const decryptPassword = async (password) => {
+        let decrypted = await invoke("decrypt_password", { encryptedPassword: password });
 
         if (!decrypted) {
             return;
         }
 
-        setPassword(decrypted);
-        setAccountLoaded(true);
+        return decrypted;
     }
 
     const deleteAccount = async (accountId) => {
@@ -143,17 +82,17 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
         }
 
         if (accountIndex === -1) {
-            await window.alert(getMsg(langFile, "AccountInfo", "delete_account.no_id"));
+            await window.alert(langFile.messages.deleteAccountError);
             return;
         }
 
         const confirmation = await window.confirm(confirmDeleteMsg);
         if (!confirmation) return;
 
-        let newAccounts = accounts;
-        newAccounts[service].splice(accountIndex, 1);
+        let newAccounts = {...accounts};
+        newAccounts[account.service].splice(accountIndex, 1);
         await saveAccounts(newAccounts);
-        setAccounts(await getAccounts());
+        setAccounts(await loadAccounts());
 
         setShowAccountInfo(false);
         setSelectedId("");
@@ -169,37 +108,36 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
     const [passwordHistoryTitle, setPasswordHistoryTitle] = useState("");
 
     useEffect(() => {
-        const setLangMsg = async () => {
-            setServiceTitle(getMsg(langFile, "AccountInfo", "service.title"));
-            setUsernameTitle(getMsg(langFile, "AccountInfo", "username.title"));
-            setPasswordTitle(getMsg(langFile, "AccountInfo", "password.title"));
-            setNotesTitle(getMsg(langFile, "AccountInfo", "notes.title"));
-            setLastModifiedText(getMsg(langFile, "AccountInfo", "additional-info.last_modified"));
-            setCreatedText(getMsg(langFile, "AccountInfo", "additional-info.created"));
-            setConfirmDeleteMsg(getMsg(langFile, "AccountInfo", "delete_account.confirmation"));
-            setPasswordHistoryTitle(getMsg(langFile, "PasswordHistory", ".title"));
-        }
-
-        setLangMsg();
+        setServiceTitle(langFile.titles.accountInfoService);
+        setUsernameTitle(langFile.titles.accountInfoUsername);
+        setPasswordTitle(langFile.titles.accountInfoPassword);
+        setNotesTitle(langFile.titles.accountInfoNotes);
+        setLastModifiedText(langFile.titles.accountInfoLastModified);
+        setCreatedText(langFile.titles.accountInfoCreated);
+        setConfirmDeleteMsg(langFile.titles.accountDeleteConfirm);
+        setPasswordHistoryTitle(langFile.titles.passwordHistory);
     }, [langFile]);
 
-    const copy = (elementId) => {
+    const copyString = (string) => {
+        navigator.clipboard.writeText(string);
+    }
+
+    const copyElementValue = (elementId) => {
         const element = document.getElementById(elementId);
         if (!element.value) return false;
 
-        navigator.clipboard.writeText(element.value);
+        copyString(element.value);
     }
 
     const [passwordTimeout, setPasswordTimeout] = useState();
 
     const turnPassVisibility = () => {        
-        const password = document.getElementById("show-password-info");
+        const password = document.getElementById("account-password-info");
         password.type = "text";
         const showPassBtn = document.getElementById("show-password");
         showPassBtn.setAttribute("disabled", true);
-
-        const visibilityButton = document.getElementById("show-password");
-        visibilityButton.className = "visibility";
+        showPassBtn.classList.remove("no-visibility");
+        showPassBtn.classList.add("visibility");
 
         if (passwordTimeout) {
             clearTimeout(passwordTimeout);
@@ -208,12 +146,14 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
         setPasswordTimeout(setTimeout(() => {
             password.type = "password";
             showPassBtn.removeAttribute("disabled");
-            visibilityButton.className = "no-visibility";
+            showPassBtn.classList.remove("visibility");
+            showPassBtn.classList.add("no-visibility");
         }, 1000));
     }
 
     useEffect(() => {
         const historyTip = document.getElementById("display-history-tip");
+        if (!historyTip) return;
 
         if (!displayHistoryTip)
             historyTip.className = "hidden";
@@ -222,61 +162,93 @@ export function AccountsInfo({ langFile, accounts, setAccounts, showAccountInfo,
     }, [displayHistoryTip]);
 
     return (
-        <div id="accounts-info-div" className="info-off">
-            <div id="info-nav">
-                <div id="left-nav">
-                    <button id="close-info"
-                     onClick={() => { setShowAccountInfo(false) }}></button>
-                </div>
+        <div id="accounts-info-div" className={showAccountInfo ? "info-on" : "info-off"}>
+            <div id="account-info-anim-div">
+                {account && (<div id="account-info">
+                    <div id="account-info-utils">
+                        <div id="info-utils-left">
+                            <button id="close-info" onClick={ () => setShowAccountInfo(false) }></button>
+                        </div>
 
-                <div id="right-nav">
-                    <p id="display-history-tip">{passwordHistoryTitle}</p>
-                    <button id="display-password-history"
-                     onClick={ () => setDisplayHistory(true) }
-                     onMouseOver={ () => setDisplayHistoryTip(true) }
-                     onMouseOut={ () => setDisplayHistoryTip(false) }></button>
-                    <button id="favorite" className="not-favorite"
-                     onClick={ () => setFavorite([account.id, !account.favorite]) }></button>
-                    <button id="edit-account"
-                     onClick={ () => { setEditAccount(true) } }></button>
-                    <button id="delete"
-                     onClick={ () => deleteAccount(account.id) }></button>
-                </div>
-            </div>
+                        <div id="info-utils-right">
+                            <p id="display-history-tip" className="hidden">{passwordHistoryTitle}</p>
+                            <button id="display-password-history" 
+                             onClick={ () => { setDisplayHistory(true) } }
+                             onMouseOver={ () => setDisplayHistoryTip(true) }
+                             onMouseOut={ () => setDisplayHistoryTip(false) }></button>
 
-            <Notification langFile={langFile} accounts={accounts} account={account} notificationId={"account-info-notification"} />
+                             <button id="favorite-button" className={account.favorite ? "favorite" : "not-favorite"} onClick={() => {
+                                setFavorite([account.id, !account.favorite]);
+                             }}></button>
 
-            <div id="account-info">
-                <div id="service-info">
-                    <p id="service-title" className="info-title">{serviceTitle}</p>
-                    <input type="text" className="info-input" id="show-service-info" placeholder="Service Info" readOnly />
-                </div>
+                            <button id="edit-account" onClick={() => {
+                                setEditAccount(true);
+                            }}></button>
 
-                <div id="username-info">
-                    <p id="username-title" className="info-title">{usernameTitle}</p>
-                    <input type="text" id="show-username-info" className="info-input" placeholder="Username Info" readOnly />
-                    <button id="copy-username"
-                    onClick={ () => copy('show-username-info') } className="copy-button"></button>
-                </div>
+                            <button id="delete-account" onClick={ () => {
+                                deleteAccount(account.id);
+                                setSelectedId("");
+                            } }></button>
+                        </div>
+                    </div>
 
-                <div id="password-info">
-                    <p id="password-title" className="info-title">{passwordTitle}</p>
-                    <input type="password" id="show-password-info" className="info-input" placeholder="Password Info" readOnly />
-                    <button id="show-password"
-                    onClick={ () => turnPassVisibility() } className="no-visibility"></button>
-                    <button id="copy-password"
-                    onClick={ () => copy("show-password-info") } className="copy-button"></button>
-                </div>
+                    <div id="notification-div">
+                        <Notification langFile={langFile} accounts={accounts} account={account} notificationId={"account-info-notification"} />
+                    </div>
 
-                <div id="notes-info">
-                    <p id="notes-title" className="info-title">{notesTitle}</p>
-                    <input type="text" id="show-notes-info" className="info-input" placeholder="Notes Info" readOnly />
-                </div>
+                    <div id="account-info-sec">
+                        <div id="account-info-items">
+                             <div id="account-info-item-align">
+                                <div id="service-info" className="account-info-item">
+                                    <div id="service-data"
+                                    className="account-data">
+                                        <h4 id="service-title" className="account-info-data account-data-title">{serviceTitle}</h4>
+                                        <input type="text" id="account-service-info" readOnly placeholder="Account Service" value={account.service ?? ""} className="account-info-data account-data-input" />
+                                    </div>
+                                </div>
 
-                <div id="additional-info">
-                    <p id="last-modified">{lastModifiedText}</p>
-                    <p id="created-date">{createdText}</p>
-                </div>
+                                <div id="username-info" className="account-info-item">
+                                    <div id="username-data" className="account-data">
+                                        <h4 id="username-title" className="account-info-data account-data-title">{usernameTitle}</h4>
+                                        <input type="text" id="account-username-info" className="account-info-data account-data-input" readOnly placeholder="Account Username" value={account.username ?? ""} />
+                                    </div>
+
+                                    <div id="username-utils" className="account-data-utils">
+                                        <button id="copy-username" className="copy-button data-utils" onClick={ () => copyElementValue("account-username-info") }></button>
+                                    </div>
+                                </div>
+
+                                <div id="password-info" className="account-info-item">
+                                    <div id="password-data" className="account-data">
+                                        <h4 id="password-title" className="account-info-data account-data-title">{passwordTitle}</h4>
+
+                                        <input type="password" id="account-password-info" className="account-info-data account-data-input" readOnly placeholder="Account Password" ref={passwordInput} />
+                                    </div>
+
+                                    <div id="password-utils" className="account-data-utils">
+                                        <button id="show-password" className="visibility-button no-visibility data-utils" onClick={ () => turnPassVisibility() }></button>
+
+                                        <button id="copy-password" className="copy-button data-utils" onClick={ () => copyElementValue("account-password-info") }></button>
+                                    </div>
+                                </div>
+
+                                <div id="notes-info" className="account-info-item">
+                                    <div id="notes-data" className="account-data">
+                                        <h4 id="notes-title" className="account-info-data account-data-title">{notesTitle}</h4>
+                                        <input type="text" id="account-notes-info" className="account-info-data account-data-input" readOnly placeholder="Account Notes" value={account.notes ?? ""} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="date-data">
+                        <div id="date-info">
+                            <p id="created-date" className="account-info-date">{createdText} {getDisplayable(account.created) ?? ""}</p>
+                            <p id="last-modified" className="account-info-date">{lastModifiedText} {getDisplayable(account.last_modified) ?? ""}</p>
+                        </div>
+                    </div>
+                </div>)}
             </div>
         </div>
     );

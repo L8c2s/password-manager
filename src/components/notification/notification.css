@@ -1,16 +1,15 @@
 .notification {
     margin: 10px;
-    height: 8%;
+    height: 100%;
     border-radius: 8px;
     display: flex;
     align-items: center;
     padding-left: 40px;
     font-weight: bold;
-    margin-bottom: 0;
 }
 
 .safe {
-    background: #21ec32 url("../../icons/safe.svg") no-repeat 10px center;
+    background: #1dd62d url("../../icons/safe.svg") no-repeat 10px center;
 }
 
 .alert {

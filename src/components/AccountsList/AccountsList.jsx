@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from "react";
-import "./AccountsList.css";
 
-import { editConfigKey } from "../Config/config";
 import { getAccount } from "../Config/accountsManager/manager";
+import { setKey } from "../Config/config";
 
-import { getMsg } from "../Config/lang";
 
 export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccountInfo, selectedId, setSelectedId, favorite, setFavorite, langFile, config }) {
     const [defaultFilteredAccounts, setDefaultFilteredAccounts] = useState([]);
     const [sortFilter, setSortFilter] = useState("");
     const [filteredAccounts, setFilteredAccounts] = useState([]);
-    const [classSortMessage, setClassSortMessage] = useState("");
+    const [classSortMessage, setClassSortMessage] = useState("hidden");
     const [sortMessage, setSortMessage] = useState("");
     const [fixedFilteredAccounts, setFixedFilteredAccounts] = useState([]);
+    const [lastSelectedId, setLastSelectedId] = useState(selectedId);
 
     useEffect(() => {
         // load the last list filter used in the previous interaction with the program
@@ -38,14 +37,14 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         // use both to create fixedFilteredAccounts
         // it's basically all accounts listed in a different order
         // sortFilter determines this order
-        const saveSortFilter = async () => {
-            // since the useEffect is also called when sortFilter changes, save the new filter in the config file
-            await editConfigKey("sort_filter", sortFilter);
+
+        const updateConfig = async () => {
+            await setKey("sort_filter", sortFilter);
         }
 
         sortAccounts();
         if (!sortFilter) return
-        saveSortFilter();
+        updateConfig();
     }, [defaultFilteredAccounts, sortFilter, favorite]);
 
     useEffect(() => {
@@ -73,11 +72,15 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
     useEffect(() => {
         // if the AccountInfo component is closed using the x button,
         // change the account selected in the list to be unselected
-        if (!showAccountInfo && selectedId) {
-            document.getElementById(selectedId).style = "";
-            setSelectedId("");
+        if (!selectedId && lastSelectedId) {
+            const lastAccount = document.getElementById(lastSelectedId);
+            if (!lastAccount) return;
+            lastAccount.style = "";
+            setLastSelectedId("");
+        } else if (selectedId && lastSelectedId !== selectedId) {
+            setLastSelectedId(selectedId);
         }
-    }, [showAccountInfo]);
+    }, [selectedId]);
 
     const sortByDate = (date1, date2) => {
         // checks the dates to find the greater
@@ -94,18 +97,18 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
 
         if (sortFilter === "accountName") {
             newFilteredAccounts.sort((a, b) => a.username.localeCompare(b.username));
-            setSortMessage(getMsg(langFile, "AccountsList", "sort-message.username"));
+            setSortMessage(langFile.titles.sortUsername);
         } else if (sortFilter === "serviceName") {
             newFilteredAccounts.sort((a, b) => a.service.localeCompare(b.service));
-            setSortMessage(getMsg(langFile, "AccountsList", "sort-message.service"));
+            setSortMessage(langFile.titles.sortService);
         } else if (sortFilter === "created") {
             newFilteredAccounts.sort((a, b) => sortByDate(a.created, b.created));
-            setSortMessage(getMsg(langFile, "AccountsList", "sort-message.created"));
+            setSortMessage(langFile.titles.sortCreated);
         } else if (sortFilter === "lastModified") {
             newFilteredAccounts.sort((a, b) => sortByDate(a.last_modified, b.last_modified));
-            setSortMessage(getMsg(langFile, "AccountsList", "sort-message.last-modified"));
+            setSortMessage(langFile.titles.sortLastModified);
         } else {
-            setSortMessage(getMsg(langFile, "AccountsList", "sort-message.no-filter"))
+            setSortMessage(langFile.titles.sortNoFilter)
         }
 
         let favoriteAccounts = newFilteredAccounts.filter((acc) => acc.favorite);
@@ -173,49 +176,49 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
 
     return (
         <div id="accounts-list-div">
-            <div id="settings-utils">
-                {
-                    classSortMessage && (
-                        <div className={classSortMessage} id="sort-message">
-                            {sortMessage}
-                        </div>
-                    )
-                }
+            <div id="list-utils-div">
+                <div id="utils-left"></div>
 
-                <button id="sort"
-                    onClick={ () => jmpFilter() }
-                    onMouseOver={ () => setClassSortMessage("show") }
-                    onMouseOut={ () => setClassSortMessage("hidden") }
-                ></button>
+                <div id="utils-right">
+                    <div className={classSortMessage} id="sort-message">{sortMessage}</div>
+
+                    <button id="sort"
+                     onClick={ () => jmpFilter() }
+                     onMouseOver={ () => setClassSortMessage("show") }
+                     onMouseOut={ () => setClassSortMessage("hidden") }></button>
+
+                </div>
             </div>
 
-            <ul id="accounts-list">
-                {filteredAccounts && filteredAccounts.map((account) => (
-                    <div className="account-list-item" id={account.id} key={account.id}>
-                        <div id="account-list-info"
-                         onClick={ () => {
-                             accountSelected(account.id);
-                         } }>
-                            <h3 className="account-item-info" id="service">
-                                {account.service}
-                            </h3>
-                            <p className="account-item-info" id="username">
-                                {account.username}
-                            </p>
-                            <p className="account-item-info" id="notes">
-                                {account.notes}
-                            </p>
-                        </div>
+            <div id="accounts-list">
+                {!filteredAccounts.length ?
+                    <div id="create-account-tip-div">
+                        <p id="create-account-tip">{langFile.messages.newAccountTip0}</p>
+                    </div> 
+                    :
+                    (<div id="list">
+                        {filteredAccounts && filteredAccounts.map(account => (
+                            <div className="account-list-item" id={account.id} key= {account.id}>
+                                <div className="align-info">
+                                    <div className="account-list-info" onClick={() => {
+                                        accountSelected(account.id);
+                                    }}>
+                                        <h3 className="account-service-info account-item-info">{account.service}</h3>
+                                        <p className="account-username-info account-item-info">{account.username}</p>
+                                        <p className="account-notes-info account-item-info">{account.notes}</p>
+                                    </div>
 
-                        <div id="div-favorite-button">
-                            <button className="favorite-button not-favorite" id={`${account.id}btn`}
-                             onClick={ async () => {
-                                setFavorite([account.id, !account.favorite]);
-                             } }></button>
-                        </div>
+                                    <div className="account-favorite-button">
+                                        <button className="favorite-button not-favorite" id={`${account.id}btn`} onClick={async () => {
+                                            setFavorite([account.id, !account.favorite]);
+                                        }}></button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </ul>
+                )}
+            </div>
         </div>
     )
 }
