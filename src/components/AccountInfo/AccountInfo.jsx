@@ -28,7 +28,7 @@ export function AccountsInfo({ langFile, accounts, setAccounts, selectedId, setS
         decryptPassword(account.password).then(password => passwordInput.current.value = password);
     }, [account]);
 
-    const getDisplayable = (createdDate) => {
+    const getDisplayableDate = (createdDate) => {
         if (!createdDate) return;
 
         let [date, time] = createdDate.split("T");
@@ -40,25 +40,17 @@ export function AccountsInfo({ langFile, accounts, setAccounts, selectedId, setS
     }
 
     useEffect(() => {
-        const updateFavorite = async () => {
-            if (favorite[1] !== account.favorite) {
-                setAccounts(await editAccountKey(accounts, null, "favorite", favorite[1], account));
-            }
-        }
+        // favorite[0] === account id
+        // favorite[1] === new favorite value (true / false)
 
         if (!favorite[0]) return;
 
-        // change the favorite icon
+        // change the favorite icon only if the current selected account is the same as the one
+        // been changed
         if (selectedId === favorite[0]) {
             const favoriteButton = document.getElementById("favorite-button");
-            if (favorite[1]) {
-                favoriteButton.className = "favorite";
-            } else {
-                favoriteButton.className = "not-favorite";
-            }
+            favoriteButton.className = favorite[1] ? "favorite" : "not-favorite";
         }
-
-        updateFavorite();
     }, [favorite]);
 
     const decryptPassword = async (password) => {
@@ -73,11 +65,13 @@ export function AccountsInfo({ langFile, accounts, setAccounts, selectedId, setS
 
     const deleteAccount = async (accountId) => {
         let accountIndex = -1;
-        // gets the account index in the accounts object, removes it from the list and apply the changes
+        // gets the account index in the accounts object
         for (const service in accounts) {
             for (let i = 0; i < accounts[service].length; i++) {
-                if (accounts[service][i].id === accountId)
+                if (accounts[service][i].id === accountId) {
                     accountIndex = i;
+                    break
+                }
             }
         }
 
@@ -89,8 +83,10 @@ export function AccountsInfo({ langFile, accounts, setAccounts, selectedId, setS
         const confirmation = await window.confirm(confirmDeleteMsg);
         if (!confirmation) return;
 
+        // remove the specified account from the accounts list
         let newAccounts = {...accounts};
         newAccounts[account.service].splice(accountIndex, 1);
+        // save accounts and reload it
         await saveAccounts(newAccounts);
         setAccounts(await loadAccounts());
 
@@ -130,36 +126,20 @@ export function AccountsInfo({ langFile, accounts, setAccounts, selectedId, setS
     }
 
     const [passwordTimeout, setPasswordTimeout] = useState();
+    const [passwordVisible, setPasswordVisible] = useState(false);
 
-    const turnPassVisibility = () => {        
-        const password = document.getElementById("account-password-info");
-        password.type = "text";
-        const showPassBtn = document.getElementById("show-password");
-        showPassBtn.setAttribute("disabled", true);
-        showPassBtn.classList.remove("no-visibility");
-        showPassBtn.classList.add("visibility");
+    const turnPassVisibility = () => {
+        setPasswordVisible(true);
 
         if (passwordTimeout) {
             clearTimeout(passwordTimeout);
         }
 
         setPasswordTimeout(setTimeout(() => {
-            password.type = "password";
-            showPassBtn.removeAttribute("disabled");
-            showPassBtn.classList.remove("visibility");
-            showPassBtn.classList.add("no-visibility");
+            // return everything to normal after 1 second
+            setPasswordVisible(false);
         }, 1000));
     }
-
-    useEffect(() => {
-        const historyTip = document.getElementById("display-history-tip");
-        if (!historyTip) return;
-
-        if (!displayHistoryTip)
-            historyTip.className = "hidden";
-        else
-            historyTip.className = "show";
-    }, [displayHistoryTip]);
 
     return (
         <div id="accounts-info-div" className={showAccountInfo ? "info-on" : "info-off"}>
@@ -167,13 +147,15 @@ export function AccountsInfo({ langFile, accounts, setAccounts, selectedId, setS
                 {account && (<div id="account-info">
                     <div id="account-info-utils">
                         <div id="info-utils-left">
-                            <button id="close-info" onClick={ () => setShowAccountInfo(false) }></button>
+                            <button id="close-info" onClick={ () => {
+                                setShowAccountInfo(false);
+                            }}></button>
                         </div>
 
                         <div id="info-utils-right">
-                            <p id="display-history-tip" className="hidden">{passwordHistoryTitle}</p>
+                            <p id="display-history-tip" className={ displayHistoryTip ? "show" : "hidden" }>{passwordHistoryTitle}</p>
                             <button id="display-password-history" 
-                             onClick={ () => { setDisplayHistory(true) } }
+                             onClick={ () => setDisplayHistory(true) }
                              onMouseOver={ () => setDisplayHistoryTip(true) }
                              onMouseOut={ () => setDisplayHistoryTip(false) }></button>
 
@@ -181,9 +163,7 @@ export function AccountsInfo({ langFile, accounts, setAccounts, selectedId, setS
                                 setFavorite([account.id, !account.favorite]);
                              }}></button>
 
-                            <button id="edit-account" onClick={() => {
-                                setEditAccount(true);
-                            }}></button>
+                            <button id="edit-account" onClick={() => setEditAccount(true) }></button>
 
                             <button id="delete-account" onClick={ () => {
                                 deleteAccount(account.id);
@@ -222,11 +202,11 @@ export function AccountsInfo({ langFile, accounts, setAccounts, selectedId, setS
                                     <div id="password-data" className="account-data">
                                         <h4 id="password-title" className="account-info-data account-data-title">{passwordTitle}</h4>
 
-                                        <input type="password" id="account-password-info" className="account-info-data account-data-input" readOnly placeholder="Account Password" ref={passwordInput} />
+                                        <input type={ passwordVisible ? "text" : "password" } id="account-password-info" className="account-info-data account-data-input" readOnly placeholder="Account Password" ref={passwordInput} />
                                     </div>
 
                                     <div id="password-utils" className="account-data-utils">
-                                        <button id="show-password" className="visibility-button no-visibility data-utils" onClick={ () => turnPassVisibility() }></button>
+                                        <button id="show-password" className={ `visibility-button data-utils ${passwordVisible ? "visibility" : "no-visibility"}` } onClick={ () => turnPassVisibility() } disabled={ passwordVisible }></button>
 
                                         <button id="copy-password" className="copy-button data-utils" onClick={ () => copyElementValue("account-password-info") }></button>
                                     </div>
@@ -244,8 +224,8 @@ export function AccountsInfo({ langFile, accounts, setAccounts, selectedId, setS
 
                     <div id="date-data">
                         <div id="date-info">
-                            <p id="created-date" className="account-info-date">{createdText} {getDisplayable(account.created) ?? ""}</p>
-                            <p id="last-modified" className="account-info-date">{lastModifiedText} {getDisplayable(account.last_modified) ?? ""}</p>
+                            <p id="created-date" className="account-info-date">{createdText} {getDisplayableDate(account.created) ?? ""}</p>
+                            <p id="last-modified" className="account-info-date">{lastModifiedText} {getDisplayableDate(account.last_modified) ?? ""}</p>
                         </div>
                     </div>
                 </div>)}

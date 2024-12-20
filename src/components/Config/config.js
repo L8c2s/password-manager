@@ -55,5 +55,5 @@ export async function setKey(key=null, value=null) {
     config[key] = value;
     await saveConfig(config);
 
-    return true;
+    return config;
 }

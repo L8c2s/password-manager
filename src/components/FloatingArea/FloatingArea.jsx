@@ -12,9 +12,9 @@ export function FloatingArea({ setAddAccount, afterEditAccount, setSettingsPopup
         const handleScroll = () => {
             let isVisible = true;
 
-            console.log("innerHeight: ", window.innerHeight)
-            console.log("scrollY: ", window.scrollY);
-            console.log("scrollHeight: ", document.body.scrollHeight);
+            // console.log("innerHeight: ", window.innerHeight)
+            // console.log("scrollY: ", window.scrollY);
+            // console.log("scrollHeight: ", document.body.scrollHeight);
 
             if (window.innerHeight + window.scrollY >= document.body.scrollHeight) {
                 isVisible = false;

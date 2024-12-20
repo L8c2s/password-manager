@@ -133,8 +133,8 @@ function App() {
 
                     <Settings
                         settingsPopup={settingsPopup} setSettingsPopup={setSettingsPopup}
-                        langFile={langFile} setLangFile={langFile}
-                        accounts={accounts}
+                        langFile={langFile} setLangFile={setLangFile}
+                        accounts={accounts} setAccounts={setAccounts}
                         setDisplayRestoreTip={setAfterEditAccount}
                         config={config} setConfig={setConfig}
                     />

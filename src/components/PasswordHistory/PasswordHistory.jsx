@@ -12,10 +12,8 @@ export function History({ langFile, accounts, displayHistory, setDisplayHistory,
     useEffect(() => {
         const turn = async () => {
             if (displayHistory && selectedId) {
-                historyOn();
                 await getHistory();
             } else {
-                historyOff();
                 setPasswordHistory([]);
             }
         }
@@ -23,26 +21,24 @@ export function History({ langFile, accounts, displayHistory, setDisplayHistory,
         turn();
     }, [displayHistory]);
 
-    useEffect(() => {
-        
-    }, [passwordHistory]);
+    const getDateAndTime = (timeZone) => {
+        let [date, timeWithZone] = timeZone.split("T");
 
-    const historyOn = () => {
-        const fullWindow = document.getElementById("password-history-div");
-        fullWindow.style.display = "flex";
-        fullWindow.className = "zoom-in";
-    }
+        let [year, month, day] = date.split("-");
+        date = `${day}/${month}/${year}`;
 
-    const historyOff = () => {
-        const fullWindow = document.getElementById("password-history-div");
-        fullWindow.className = "zoom-out";
+        let time = timeWithZone.split(".")[0];
+
+        return [date, time];
     }
 
     const getHistory = async () => {
         if (!selectedId) return;
-        
+
         const acc = getAccount(accounts, selectedId);
         setAccount(acc);
+
+        console.log(acc.password_history);
 
         let history = [];
 
@@ -50,13 +46,7 @@ export function History({ langFile, accounts, displayHistory, setDisplayHistory,
             const currentPass = acc.password_history[i];
             if (!currentPass.password) continue;
 
-            let addedDate = currentPass.added;
-            let [date, timeWithZone] = addedDate.split("T");
-
-            let [year, month, day] = date.split("-");
-            date = `${day}/${month}/${year}`;
-            
-            let time = timeWithZone.split(".")[0];
+            let [date, time] = getDateAndTime(currentPass.added);
 
             history.push({
                 password: await invoke("decrypt_password", { encryptedPassword: currentPass.password }),
@@ -106,7 +96,7 @@ export function History({ langFile, accounts, displayHistory, setDisplayHistory,
     }, [langFile]);
 
     return (
-        <div id="password-history-div">
+        <div id="password-history-div" className={ (displayHistory && selectedId) ? "zoom-in" : "zoom-out" } style={{ display: (displayHistory && selectedId) ? "flex" : "none" }}>
             <div id="password-history-blur" onClick={ () => setDisplayHistory(false) }></div>
 
             <div id="password-history-window">

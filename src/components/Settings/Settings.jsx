@@ -6,39 +6,29 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 
 import { saveAccounts } from "../Config/accountsManager/manager";
+import { loadLangFile } from "../Config/lang";
 import { setKey } from "../Config/config";
 
 
-export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts, setDisplayRestoreTip, config }) {
+export function Settings({ settingsPopup, setSettingsPopup, langFile, setLangFile, accounts, setDisplayRestoreTip, config, setConfig }) {
     const [updateLangSet, setUpdateLangSet] = useState("");
-    const [accountsDirValue, setAccountsDirValue] = useState("");
     const [textFilePath, setTextFilePath] = useState("");
     const [textFileDir, setTextFileDir] = useState("");
     const createdConfirmation = useRef(null);
 
     useEffect(() => {
-        const loadAccountsDir = async () => {
-            let dirValue = "";
-
-            if (config.dir && config.dir !== "") {
-                dirValue = dir.split("\\");
-                dirValue = `${dirValue[dirValue.length-2]}\\${dirValue[dirValue.length-1]}`;
-            }
-
-            setAccountsDirValue(dirValue);
-        }
-
-        loadAccountsDir();
         setUpdateLangSet(config.lang);
     }, []);
 
-    const changeLanguage = async (language) => {
-        if (language === langFile)
-            return null;
+    useEffect(() => {
+        if (updateLangSet === langFile) return;
 
-        await setKey("lang", language);
-        location.reload();
-    }
+        setKey("lang", updateLangSet).then(conf => {
+            setConfig(conf);
+        });
+
+        setLangFile(loadLangFile(updateLangSet));
+    }, [updateLangSet]);
 
     const generateTextFileContent = async () => {
         const username = langFile.titles.accountInfoUsername;
@@ -85,7 +75,7 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts, 
 
         try {
             await writeTextFile(encodeURI(filePath), textFileContent);
-            createdConfirmation.current.style = "display: block;";
+            createdConfirmation.current.style.display = "block";
         } catch (error) {
             console.log("Could not create the file: ", error)
         }
@@ -108,43 +98,24 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts, 
         await invoke("open_folder", { directory: directory });
     }
 
-    const pathToClipboard = () => {
-        navigator.clipboard.writeText(textFilePath);
-        setTextFilePath(textFilePath + " (copied)");
-    }
-
     // ------------------------------ //
 
     const [title, setTitle] = useState("");
-    const [changeAccDirText, setChangeAccDirText] = useState("");
-    const [accountsDirPlhd, setAccountsDirPlhd] = useState("");
-    const [monthsToUpdatePassTitle, setMonthsToUpdatePassTitle] = useState("");
-    const [accountsDirTitle, setChangeAccDirTitle] = useState("");
     const [appLangTitle, setAppLangTitle] = useState("");
-    const [updateLangText, setUpdateLangText] = useState("");
     const [createTextFileTitle, setCreateTextFileTitle] = useState("");
     const [fileCreatedText, setFileCreatedText] = useState("");
     const [textFileExplanation, setTextFileExplanation] = useState("");
-    const [selectFolderText, setSelectFolderText] = useState("");
     const [openBackupFolderTitle, setOpenBackupFolderTitle] = useState("");
     const [openBackupFolderExpl, setOpenBackupFolderExpl] = useState("");
-    const [openButtonText, setOpenButtonText] = useState("");
 
     useEffect(() => {
         setTitle(langFile.titles.settings);
-        setAccountsDirPlhd(langFile.placeholders.accountsDir);
-        setChangeAccDirText(langFile.buttons.changeAccountsDir);
-        setMonthsToUpdatePassTitle(langFile.messages.monthsToUpdatePass);
-        setChangeAccDirTitle(langFile.titles.changeAccountsDir);
         setAppLangTitle(langFile.messages.appLanguage);
-        setUpdateLangText(langFile.buttons.updateLanguage);
         setCreateTextFileTitle(langFile.titles.createTextFile);
         setFileCreatedText(langFile.messages.textFileCreated);
         setTextFileExplanation(langFile.messages.createTextFileExplanation);
-        setSelectFolderText(langFile.buttons.createTextFileSelectFolder);
         setOpenBackupFolderTitle(langFile.titles.openBackupFolder);
         setOpenBackupFolderExpl(langFile.messages.openBackupFolderExplanation);
-        setOpenButtonText(langFile.buttons.openBackupFolder);
     }, [langFile]);
 
     useEffect(() => {
@@ -152,7 +123,6 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts, 
             let settingsFullWindow = document.getElementById("settings-div");
             if (!settingsFullWindow) return;
             settingsFullWindow.style.display = "flex";
-            settingsFullWindow.className = "zoom-in";
             setDisplayRestoreTip(false);
         }
 
@@ -160,7 +130,6 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts, 
         const off = () => {
             let settingsFullWindow = document.getElementById("settings-div");
             if (!settingsFullWindow) return;
-            settingsFullWindow.className = "zoom-out";
             disableSettings = setTimeout(() => settingsFullWindow.style.display = "none", 500);
             if (!createdConfirmation.current) return;
             createdConfirmation.current.style.display = "none";
@@ -176,7 +145,7 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts, 
     }, [settingsPopup])
 
     return (
-        <div id="settings-div">
+        <div id="settings-div" className={ settingsPopup ? "zoom-in" : "zoom-out" }>
             <div id="settings-blur" onClick={ () => setSettingsPopup(false) }></div>
 
             <div id="settings-window">
@@ -209,10 +178,6 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, accounts, 
 
                                                 <button id="english-language-select-box" className={"language-select-box" && updateLangSet === "en-US" ? "selected-box" : "unselected-box"} onClick={ () => setUpdateLangSet("en-US") }></button>
                                             </div>
-                                        </div>
-
-                                        <div id="apply-language-div">
-                                            <button id="apply-language-button" className="fit-content" onClick={ () => changeLanguage(updateLangSet) } disabled={updateLangSet === config.lang}></button>  
                                         </div>
                                     </div>                                    
                                 </div>

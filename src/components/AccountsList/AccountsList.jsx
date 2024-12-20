@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import { getAccount } from "../Config/accountsManager/manager";
+import { editAccount, editAccountKey, getAccount, saveAccounts } from "../Config/accountsManager/manager";
 import { setKey } from "../Config/config";
 
 
@@ -11,16 +11,11 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
     const [classSortMessage, setClassSortMessage] = useState("hidden");
     const [sortMessage, setSortMessage] = useState("");
     const [fixedFilteredAccounts, setFixedFilteredAccounts] = useState([]);
-    const [lastSelectedId, setLastSelectedId] = useState(selectedId);
 
     useEffect(() => {
-        // load the last list filter used in the previous interaction with the program
-        const loadSortFilter = async () => {
-            setSortFilter(config.sort_filter);
-        };
-
         // loops through all the accounts in the list of all services and adds the account object in the list
         if (!accounts) return;
+
         let newDefaultList = [];
         for (const service in accounts) {
             accounts[service].forEach(acc => {
@@ -29,7 +24,8 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         }
 
         setDefaultFilteredAccounts([...newDefaultList]);
-        loadSortFilter();
+        // load the last list filter used in the previous interaction with the program
+        setSortFilter(config.sort_filter ? config.sort_filter : "serviceName");
     }, [accounts]);
 
     useEffect(() => {
@@ -38,14 +34,18 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         // it's basically all accounts listed in a different order
         // sortFilter determines this order
 
-        const updateConfig = async () => {
-            await setKey("sort_filter", sortFilter);
+        if (favorite) {
+            updateFavorite();
+            sortAccounts();
         }
 
-        sortAccounts();
-        if (!sortFilter) return
-        updateConfig();
+        if (!sortFilter) return;
+        setKey("sort_filter", sortFilter);
     }, [defaultFilteredAccounts, sortFilter, favorite]);
+
+    const updateFavorite = () => {
+        editAccountKey(accounts, favorite[0], "favorite", favorite[1]);
+    }
 
     useEffect(() => {
         // when fixedFilteredAccounts finished loading the filteredAccounts list must
@@ -55,15 +55,11 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
     }, [searchTerm, fixedFilteredAccounts]);
 
     useEffect(() => {
-        // since filteredAccounts is done to be rendered
-        // use the updateFavoriteIcon function to update the icon favorite icon of the account in the list
-        filteredAccounts.forEach(acc => {
-            updateFavoriteIcon(acc.id);
-        });
-
+        // always checks the selectedId because when the user searches and the selected item disappears the program loses track of
+        // what item was selected in the list
         if (selectedId) {
             try {
-                document.getElementById(selectedId).style = "border-bottom: 5px solid #196aff;";
+                document.getElementById(selectedId).style.borderBottom = "5px solid #196aff";
             } catch {}
         }
 
@@ -72,15 +68,13 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
     useEffect(() => {
         // if the AccountInfo component is closed using the x button,
         // change the account selected in the list to be unselected
-        if (!selectedId && lastSelectedId) {
-            const lastAccount = document.getElementById(lastSelectedId);
+        if (!showAccountInfo) {
+            const lastAccount = document.getElementById(selectedId);
             if (!lastAccount) return;
-            lastAccount.style = "";
-            setLastSelectedId("");
-        } else if (selectedId && lastSelectedId !== selectedId) {
-            setLastSelectedId(selectedId);
+            lastAccount.style.borderBottom = "";
+            setSelectedId("");
         }
-    }, [selectedId]);
+    }, [showAccountInfo]);
 
     const sortByDate = (date1, date2) => {
         // checks the dates to find the greater
@@ -91,7 +85,7 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
     }
 
     const sortAccounts = async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // await new Promise(resolve => setTimeout(resolve, 100));
         // use defaultFilteredAccounts as reference to filter all accounts
         let newFilteredAccounts = [...defaultFilteredAccounts];
 
@@ -127,24 +121,6 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         );
     };
 
-    const updateFavoriteIcon = (accountId = null) => {
-        // updated the class of the favorite icon in the list
-        // so it can be the red icon when the account is favorite and white icon when is is not favorite
-        if (!accountId) {
-            return updateFavoriteIcon(selectedId);
-        }
-
-        const account = getAccount(accounts, accountId);
-        const accountListed = document.getElementById(`${account.id}btn`);
-
-        if (!accountListed) return;
-
-        const newClass = account.favorite ? "favorite" : "not-favorite";
-        newClass === "favorite" ? accountListed.classList.remove("not-favorite") : accountListed.classList.remove("favorite");
-
-        accountListed.classList.add(newClass);
-    };
-
     const jmpFilter = async () => {
         // update the filter in loop
         const sorters = [ "accountName", "serviceName", "lastModified", "created", "noFilter" ];
@@ -158,7 +134,7 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
             // if selectedId is not empty, change the style of the border of the item to be unselected
             const accountDiv = document.getElementById(selectedId);
             if (accountDiv) {
-                accountDiv.style = "";
+                accountDiv.style.borderBottom = "";
             }
             // if the account selected is the same that was selected before, set the selectedId to unselected and hide the account info
             if (accountId === selectedId) {
@@ -171,7 +147,7 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
         // update the selected account
         setSelectedId(accountId);
         setShowAccountInfo(true);
-        document.getElementById(accountId).style = "border-bottom: 5px solid #196aff;";
+        document.getElementById(accountId).style.borderBottom = "5px solid #196aff";
     };
 
     return (
@@ -209,8 +185,13 @@ export function UpdateList({ accounts, searchTerm, showAccountInfo, setShowAccou
                                     </div>
 
                                     <div className="account-favorite-button">
-                                        <button className="favorite-button not-favorite" id={`${account.id}btn`} onClick={async () => {
+                                        <button className={`favorite-button ${account.favorite ? "favorite" : "not-favorite"}`} id={`${account.id}btn`} onClick={e => {
                                             setFavorite([account.id, !account.favorite]);
+
+                                            const newClass = !account.favorite ? "favorite" : "not-favorite";
+                                            newClass === "favorite" ? e.target.classList.remove("not-favorite") : e.target.classList.remove("favorite");
+
+                                            e.target.classList.add(newClass);
                                         }}></button>
                                     </div>
                                 </div>

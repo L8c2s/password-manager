@@ -6,10 +6,8 @@ import { getAccount, loadAccounts, saveAccounts, getDateTime, generatePassword }
 
 import { Notification } from "../notification/notification";
 
-import { Automation } from "../../../tests/automate";
 
-
-export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, setEditAccount, addAccount, setAddAccount, selectedId, setShowAccountInfo, automation, setDisplayRestoreTip }) {
+export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, setEditAccount, addAccount, setAddAccount, selectedId, setShowAccountInfo, setDisplayRestoreTip }) {
     const [loaded, setLoaded] = useState(false);
     const [account, setAccount] = useState({});
     const [randomPassword, setRandomPassword] = useState("");
@@ -17,14 +15,25 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     const [lengthNumber, setLengthNumber] = useState(12);
     const [accountIndex, setAccountIndex] = useState(-1);
     const [updatePassWarn, setUpdatePassWarn] = useState(false);
+    const [serviceValue, setServiceValue] = useState("");
+    const [usernameValue, setUsernameValue] = useState("");
+
     const passwordLengthRef = useRef(null)
 
     const checkKeys = (acc) => {
-        acc.password_history = acc.password_history ?? [{"password": acc.password, "added": "unknown"}];
-        acc.created = acc.created ?? "";
-        acc.last_modified = acc.last_modified ?? "";
-        acc.favorite = acc.favorite ?? false;
-        acc.id = acc.id ?? generatePassword(6);
+        if (!acc.password_history) {
+            acc.password_history = [{
+                password: acc.password,
+                added: "unknown"
+            }]
+        } if (!acc.created)
+            acc.created = "";
+        if (!acc.last_modified)
+            acc.last_modified = "";
+        if (!acc.favorite)
+            acc.favorite = false;
+        if (!acc.id)
+            acc.id = generatePassword(6);
 
         return acc;
     }
@@ -48,8 +57,6 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         const username = document.getElementById("add-edit-username-input");
         const password = document.getElementById("add-edit-password-input");
         const notes = document.getElementById("add-edit-notes-input");
-        
-        updateWarnStyle(service, username);
 
         let updater = {...account};
 
@@ -61,62 +68,21 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         setAccount(updater);
     }
 
-    const updateWarnStyle = (service, username) => {
-        if (!loaded) return;
-
-        let safeService = false;
-
-        if (!service.value.trim()) {
-            service.classList.remove("safe-value");
-            service.classList.add("not-safe-value");
-            // console.log("There must be at least one character as Service.");
-        } else {
-            service.classList.remove("not-safe-value");
-            service.classList.add("safe-value");
-            safeService = true;
-        }
-
-        let safeUsername = false;
-        // the username verification is not simplified for debugging reasons
-        const exists = checkAccount(service.value.trim(), username.value.trim());
-        if (!username.value.trim()) {
-            username.classList.remove("safe-value");
-            username.classList.add("not-safe-value");
-            // console.log("There must be at least one character as Username.");
-        } else if (exists) {
-            username.classList.remove("safe-value");
-            username.classList.add("not-safe-value");
-            // console.log("The Username already exists for this Service.")
-        } else {
-            username.classList.remove("not-safe-value");
-            username.classList.add("safe-value");
-            safeUsername = true;
-        }
-
-        const saveButton = document.getElementById("save-account");
-        if (safeService && safeUsername)
-            saveButton.removeAttribute("disabled");
-        else
-            saveButton.setAttribute("disabled", "true");
-    }
+    const [passwordClass, setPasswordClass] = useState("");
 
     useEffect(() => {
-        const password = document.getElementById("edit-password");
-        if (!password) return;
-        const currentPassWarn = document.getElementById("edit-account-notification").classList;
+        if (!updatePassWarn) return;
+
+        const currentPassWarn = document.getElementById("add-edit-account-notification").classList;
 
         if (currentPassWarn.contains("safe")) {
-            password.classList.remove("not-safe-value", "not-safe-password", "no-value");
-            password.classList.add("safe-value");
+            setPasswordClass("safe-value");
         } else if (currentPassWarn.contains("alert")) {
-            password.classList.remove("not-safe-value", "safe-value", "no-value");
-            password.classList.add("not-safe-password");
+            setPasswordClass("not-safe-password");
         } else if (currentPassWarn.contains("warning")) {
-            password.classList.remove("not-safe-password", "safe-value", "no-value");
-            password.classList.add("not-safe-value");
+            setPasswordClass("not-safe-value");
         } else if (currentPassWarn.contains("no-notification")) {
-            password.classList.remove("not-safe-password", "safe-value", "not-safe-value");
-            password.classList.add("no-value");
+            setPasswordClass("no-value");
         }
 
         setUpdatePassWarn(false);
@@ -160,23 +126,20 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
         let acc;
         if (newAccount) {
-            acc = newAccount;
+            acc = {...newAccount};
         } else {
-            acc = account;
+            acc = {...account};
         }
-    
-        let allAccounts = accounts;
+
+        let allAccounts = {...accounts};
 
         let accountExists = checkId(acc.id);
         if (accountExists && !editAccount && addAccount) {
             apply.removeAttribute("disabled");
-            // console.log(`Account ID (${acc.id}) already registered.`);
             return false;
         }
 
-        if (addAccount) {
-            acc.created = await getDateTime();
-        }
+        acc.created = addAccount ? await getDateTime() : acc.created;
         acc.last_modified = await getDateTime();
 
         if (!allAccounts[acc.service]) {
@@ -187,10 +150,12 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
             acc.password_history = [];
         }
 
-        acc.password_history.unshift({
-            password: acc.password,
-            added: acc.last_modified
-        });
+        if (acc.password_history.length === 0 || acc.password_history[0].password !== acc.password) {
+            acc.password_history.unshift({
+                password: acc.password,
+                added: acc.last_modified
+            });
+        }
 
         if (accountIndex === -1) {
             allAccounts[acc.service].push(acc);
@@ -205,59 +170,31 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
         await saveAccounts(allAccounts);
         setAccounts(await loadAccounts());
-        setAddAccount(false);
+
         setDisplayRestoreTip(editAccount);
+
+        setAddAccount(false);
         setEditAccount(false);
     }
-
-    const automate = async () => {
-        console.log("Automating AddAccount process...");
-
-        let lastId = null;
-        let currentId = "";
-
-        let _account;
-        while (currentId !== lastId && currentId !== null) {
-            console.log("Inside loop...")
-
-            _account = await Automation(currentId);
-            if (_account === undefined) break;
-
-            console.log("Setting `account` to ", _account);
-
-            if (currentId) {
-                lastId = currentId;
-            }
-            console.log("Updating ID to ", _account.id);
-            currentId = _account.id;
-
-            console.log("Adding account with ID: ", currentId);
-            await applyAccount(_account);
-        }
-    }
-
-    useEffect(() => {
-        if (automation) {
-            automate();
-        };
-    }, []);
 
     useEffect(() => {
         const fullWindow = document.getElementById("add-edit-account");
         if (!fullWindow) return;
 
         const on = () => {
-            fullWindow.style = "display: flex;";
-            fullWindow.className = "zoom-in";
+            fullWindow.style.display = "flex";
             const editService = document.getElementById("add-edit-service-input");
             if (!editService) return;
-            editService.focus()
+            editService.focus();
         }
 
         const off = () => {
-            fullWindow.className = "zoom-out";
             setAddAccount(false);
             setEditAccount(false);
+            setAccount({});
+
+            setUsernameValue("");
+            setServiceValue("");
         }
 
         const updateValues = async () => {
@@ -265,11 +202,12 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         }
 
         let generatedId;
-        // generate an ID, check if the ID is unique, if True, save index as -1, else, save index as the index of the account in the service list
+        // generate an ID, check if the ID is unique, if True, save index as -1 (because the account does not exists), 
+        // else, save the index as the index of the account in the accounts list
         const getAccountIndex = () => {
             for (const service in accounts) {
                 for (let i = 0; i < accounts[service].length; i++) {
-                    const acc = accounts[service][i]
+                    const acc = accounts[service][i];
                     if (acc.id === generatedId) {
                         setAccountIndex(i);
                         return i;
@@ -281,15 +219,15 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
 
         if (editAccount) {
             let tmpAccount = getAccount(accounts, selectedId);
-            if (!tmpAccount || tmpAccount === undefined) {
-                return;
-            }
+            if (!tmpAccount) return;
 
             generatedId = selectedId;
             tmpAccount = checkKeys(tmpAccount);
             getAccountIndex();
 
             setAccount(tmpAccount);
+            setUsernameValue(tmpAccount.username);
+            setServiceValue(tmpAccount.service);
             setLoaded(true);
             on();
         } else if (addAccount) {
@@ -331,28 +269,25 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
     const [usernameTitle, setUsernameTitle] = useState("");
     const [passwordTitle, setPasswordTitle] = useState("");
     const [notesTitle, setNotesTitle] = useState("");
-    const [notificationPreviewTitle, setNotificationPreviewTitle] = useState(""); 
     const [passwordLengthDisplay, setPasswordLengthDisplay] = useState("");
     const [savingText, setSavingText] = useState("");
 
     const updateEditorValues = async () => {
-        if (!account || !account.password) return;
-
-        let decryptedPassword = await invoke("decrypt_password", { encryptedPassword: account.password });
+        let decryptedPassword = null;
+        if (account.password)
+            decryptedPassword = await invoke("decrypt_password", { encryptedPassword: account.password });
 
         const service = document.getElementById("add-edit-service-input");
         const username = document.getElementById("add-edit-username-input");
         const editPassword = document.getElementById("add-edit-password-input");
         if (!editPassword) return;
-        editPassword.value = decryptedPassword;
+        editPassword.value = decryptedPassword ?? "";
         const editNotes = document.getElementById("add-edit-notes-input");
         if (!editNotes) return;
-        editNotes.value = account.notes;
+        editNotes.value = account.notes ?? "";
 
-        service.value = account.service;
-        username.value = account.username;
-
-        updateWarnStyle(service, username);
+        service.value = account.service ?? "";
+        username.value = account.username ?? "";
     }
 
     useEffect(() => {
@@ -380,13 +315,12 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
         setUsernameTitle(langFile.titles.accountInfoUsername);
         setPasswordTitle(langFile.titles.accountInfoPassword);
         setNotesTitle(langFile.titles.accountInfoNotes);
-        setNotificationPreviewTitle(langFile.titles.notificationPreview);
         setPasswordLengthDisplay(langFile.messages.passwordLengthDisplay);
         setSavingText(langFile.buttons.save);
     }, [langFile, loaded]);
 
     return (
-        <div id="add-edit-account">
+        <div id="add-edit-account" className={(addAccount || editAccount) ? "zoom-in" : "zoom-out"}>
             <div id="add-edit-account-blur" onClick={() => {
                 setAddAccount(false);
                 setEditAccount(false);
@@ -412,7 +346,14 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
                                 <div id="add-edit-service">
                                     <h4 id="add-edit-service-title" className="add-edit-account-info add-edit-account-info-title">{serviceTitle}</h4>
 
-                                    <input type="text" id="add-edit-service-input" className="add-edit-account-input-info add-edit-account-info not-safe-value" placeholder="Website[.com]" autoComplete="off" onChange={ () => updateAccount() } />
+                                    { /* --------------- SERVICE --------------- */ }
+
+                                    <input type="text" id="add-edit-service-input" className={`add-edit-account-input-info add-edit-account-info ${serviceValue ? "safe-value" : "not-safe-value"}`} placeholder="Website[.com]" autoComplete="off" onChange={
+                                        e => {
+                                            setServiceValue(e.target.value.trim());
+                                            updateAccount();
+                                        }
+                                    } />
                                 </div>
                             </div>
 
@@ -420,7 +361,14 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
                                 <div id="add-edit-username">
                                     <h4 id="add-edit-username-title" className="add-edit-account-info add-edit-account-info-title">{usernameTitle}</h4>
 
-                                    <input type="text" id="add-edit-username-input" className="add-edit-account-input-info add-edit-account-info not-safe-value" placeholder={usernamePlaceHld} autoComplete="off" onChange={ () => updateAccount() } />
+                                    { /* --------------- USERNAME --------------- */ }
+
+                                    <input type="text" id="add-edit-username-input" className={`add-edit-account-input-info add-edit-account-info ${(usernameValue.trim() && !checkAccount(serviceValue, usernameValue)) ? "safe-value" : "not-safe-value"}`} placeholder={usernamePlaceHld} autoComplete="off" onChange={
+                                        e => {
+                                            setUsernameValue(e.target.value.trim());
+                                            updateAccount();
+                                        }
+                                    } />
                                 </div>
                             </div>
 
@@ -429,7 +377,7 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
                                     <div id="add-edit-password-sec">
                                         <h4 id="add-edit-password-title" className="add-edit-account-info add-edit-account-info-title">{passwordTitle}</h4>
 
-                                        <input type="text" id="add-edit-password-input" className="add-edit-account-input-info add-edit-account-info no-value" placeholder={randomPassword} autoComplete="off" onChange={ () => updateAccount() } />
+                                        <input type="text" id="add-edit-password-input" className={`add-edit-account-input-info add-edit-account-info ${passwordClass}`} placeholder={randomPassword} autoComplete="off" onChange={ () => updateAccount() } />
                                     </div>
                                 </div>
 
@@ -469,7 +417,8 @@ export function AddEditAccount({ langFile, accounts, setAccounts, editAccount, s
                             <button id="save-account" onClick={ () => {
                                 applyAccount();
                                 setShowAccountInfo(false);
-                            } } className="fit-content add-edit-account-utils">{saveButton}</button>
+                            } } className="fit-content add-edit-account-utils"
+                             disabled={(!usernameValue || !serviceValue || checkAccount(serviceValue, usernameValue))}>{saveButton}</button>
 
                             <button id="cancel-operation" onClick={ () => {
                                 setAddAccount(false);

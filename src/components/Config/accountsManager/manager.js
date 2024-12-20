@@ -51,7 +51,7 @@ export async function loadAccounts() {
         accounts = new TextDecoder("utf-8").decode(accounts);
     } catch (error) {
         console.log("[loadAccounts] Could not load accounts: ", error);
-        accounts = false;
+        accounts = "{}";
     }
     accounts = await invoke("decrypt_password", { encryptedPassword: accounts });
 
@@ -126,6 +126,8 @@ export async function editAccount(accounts, accountId, newAccount) {
 export async function editAccountKey(accounts, accountId, key, newValue, account=null) {
     if (account === null)
         account = getAccount(accounts, accountId);
+    if (!account) return;
+
     account[key] = newValue;
     return await editAccount(accounts, account.id, account);
 }
