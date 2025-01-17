@@ -89,6 +89,7 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, setLangFil
         });
 
         let fileData = await readTextFile(backupFilePath);
+        fileData = new TextDecoder("utf-8").decode(fileData);
 
         await saveAccounts(fileData, true);
         location.reload();
