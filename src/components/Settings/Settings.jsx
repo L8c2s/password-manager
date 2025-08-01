@@ -88,8 +88,12 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, setLangFil
             defaultPath: directory
         });
 
-        let fileData = await readTextFile(backupFilePath);
-        fileData = new TextDecoder("utf-8").decode(fileData);
+        try {
+            let fileData = await readTextFile(backupFilePath);
+            fileData = new TextDecoder("utf-8").decode(fileData);
+        } catch {
+            if (!fileData) fileData = "{}";
+        }
 
         await saveAccounts(fileData, true);
         location.reload();

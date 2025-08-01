@@ -51,7 +51,9 @@ export async function loadAccounts() {
         accounts = new TextDecoder("utf-8").decode(accounts);
     } catch (error) {
         console.log("[loadAccounts] Could not load accounts: ", error);
-        accounts = "{}";
+        if (!accounts) {
+            accounts = "{}";
+        }
     }
     accounts = await invoke("decrypt_password", { encryptedPassword: accounts });
 

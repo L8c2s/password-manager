@@ -32,7 +32,9 @@ export async function loadConfig() {
         config = new TextDecoder("utf-8").decode(config);
     } catch (error) {
         console.log("[loadConfig] Could not load the config file: ", error);
-        config = "{}";
+        if (!config) {
+            config = "{}";
+        }
     }
 
     if (!config) config = "{}";
