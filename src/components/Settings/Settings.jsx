@@ -74,7 +74,7 @@ export function Settings({ settingsPopup, setSettingsPopup, langFile, setLangFil
         const textFileContent = await generateTextFileContent();
 
         try {
-            await writeTextFile(encodeURI(filePath), textFileContent);
+            await writeTextFile(filePath, textFileContent);
             createdConfirmation.current.style.display = "block";
         } catch (error) {
             console.log("Could not create the file: ", error)

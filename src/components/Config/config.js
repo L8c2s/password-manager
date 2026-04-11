@@ -29,7 +29,10 @@ export async function loadConfig() {
 
     try {
         config = await readTextFile(CONFIGPATH, { baseDir: BaseDirectory.AppData });
-        config = new TextDecoder("utf-8").decode(config);
+
+        if (typeof config == ArrayBuffer) {
+            config = new TextDecoder("utf-8").decode(config);
+        }
     } catch (error) {
         console.log("[loadConfig] Could not load the config file: ", error);
         if (!config) {

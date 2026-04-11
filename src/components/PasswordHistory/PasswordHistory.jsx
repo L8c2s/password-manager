@@ -58,24 +58,20 @@ export function History({ langFile, accounts, displayHistory, setDisplayHistory,
     }
 
     const [passwordTimeout, setPasswordTimeout] = useState({});
+    const [visiblePasswords, setVisiblePasswords] = useState({});
 
     const turnVisibility = (inputId) => {
-        const input = document.getElementById(inputId);
-        input.type = "text";
+        console.log(inputId);
 
-        const vision = document.getElementById(`${inputId}vision`);
-        vision.classList.remove("password-visibility-off");
-        vision.classList.add("password-visibility-on");
+        setVisiblePasswords(prev => ({...prev, [inputId]: true}));
 
-        if (passwordTimeout) {
+        if (passwordTimeout[inputId]) {
             clearTimeout(passwordTimeout[inputId]);
         }
 
-        let addTimeout = {...passwordTimeout};
+        const addTimeout = {...passwordTimeout};
         addTimeout[inputId] = setTimeout(() => {
-            input.type = "password"
-            vision.classList.remove("password-visibility-on");
-            vision.classList.add("password-visibility-off");
+            setVisiblePasswords(prev => ({...prev, [inputId]: false}));
         }, 1000);
         setPasswordTimeout(addTimeout);
     }
@@ -124,13 +120,13 @@ export function History({ langFile, accounts, displayHistory, setDisplayHistory,
                                     <div className="password-history-item-info">
                                         <p className="history-password-title">{passwordTitle} {password.added} {index === 0 ? isCurrent : null}</p>
 
-                                        <input type="password" name="password-from-history" id={password.added} className="password-history-input" placeholder="Account Password" readOnly value={password.password} />
+                                        <input type={visiblePasswords[password.added.replace(" ", "-")] ? "text" : "password"} name="password-from-history" id={password.added.replace(" ", "-")} className="password-history-input" placeholder="Account Password" readOnly value={password.password} />
                                     </div>
 
                                     <div className="password-history-item-utils">
-                                        <button id={`${password.added}vision`} className="display-password password-visibility-off" onClick={ () => turnVisibility(password.added) }></button>
+                                        <button className={`display-password ${visiblePasswords[password.added.replace(" ", "-")] ? "password-visibility-on" : "password-visibility-off"}`} onClick={ () => turnVisibility(password.added.replace(" ", "-")) }></button>
 
-                                        <button className="copy-password-history" onClick={ () => copyPassword(password.added) }></button>
+                                        <button className="copy-password-history" onClick={ () => copyPassword(password.added.replace(" ", "-")) }></button>
                                     </div>
                                 </div>
                             ))}
